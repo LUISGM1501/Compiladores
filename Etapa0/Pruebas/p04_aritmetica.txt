@@ -1,0 +1,36 @@
+chest {
+    item_frame emerald a = 10;
+    item_frame emerald b = 5;
+    item_frame emerald resultado;
+    item_frame gold_nugget x = splash_potion(3.5);
+    item_frame gold_nugget y = splash_potion(2.0);
+    item_frame gold_nugget res_float;
+}
+
+spawn {
+    // Operaciones con enteros
+    resultado = sword(a + b);
+    villager_offer(sign("a + b = "));
+    villager_offer(resultado);
+    
+    resultado = sword(a - b);
+    villager_offer(sign("a - b = "));
+    villager_offer(resultado);
+    
+    resultado = sword(a * b);
+    villager_offer(sign("a * b = "));
+    villager_offer(resultado);
+    
+    resultado = sword(a / b);
+    villager_offer(sign("a / b = "));
+    villager_offer(resultado);
+    
+    // Operaciones con flotantes
+    res_float = cauldron(x + y);
+    villager_offer(sign("x + y = "));
+    villager_offer(res_float);
+    
+    res_float = cauldron(x * y);
+    villager_offer(sign("x * y = "));
+    villager_offer(res_float);
+} the_end

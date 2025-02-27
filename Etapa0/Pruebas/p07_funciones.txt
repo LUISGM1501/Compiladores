@@ -1,0 +1,44 @@
+redstone_circuit {
+    // Función para calcular el cuadrado
+    enchantment_table emerald cuadrado(tripwire_hook emerald n) {
+        emerald resultado = sword(n * n);
+        totem_undying(resultado);
+    }
+    
+    // Procedimiento para saludar
+    grindstone saludar(tripwire_hook book_and_quill nombre) {
+        villager_offer(sign("¡Hola, ") + nombre + sign("!"));
+    }
+    
+    // Función factorial recursiva
+    enchantment_table emerald factorial(tripwire_hook emerald n) {
+        target (n <= 1) hit {
+            totem_undying(diamond(1));
+        }
+        emerald resultado = sword(n * factorial(n - 1));
+        totem_undying(resultado);
+    }
+}
+
+spawn {
+    item_frame emerald num = 5;
+    item_frame emerald resultado;
+    item_frame book_and_quill nombre = sign("Enderdragon");
+    
+    // Llamada a función
+    resultado = cuadrado(num);
+    villager_offer(sign("El cuadrado de "));
+    villager_offer(num);
+    villager_offer(sign(" es "));
+    villager_offer(resultado);
+    
+    // Llamada a procedimiento
+    ender_pearl saludar(nombre);
+    
+    // Llamada a función recursiva
+    resultado = factorial(num);
+    villager_offer(sign("El factorial de "));
+    villager_offer(num);
+    villager_offer(sign(" es "));
+    villager_offer(resultado);
+} the_end

@@ -1,0 +1,49 @@
+// p20_conversion_tipos.txt
+shulker_box {
+    anvil gold_nugget -> emerald truncate;
+    anvil emerald -> gold_nugget;
+    anvil book -> emerald;  // ASCII a entero
+    anvil emerald -> book;  // Entero a ASCII
+}
+
+chest {
+    item_frame emerald entero = diamond(42);
+    item_frame gold_nugget flotante = splash_potion(3.75);
+    item_frame book letra = name_tag('A');
+    item_frame emerald codigo_ascii;
+    item_frame book caracter;
+}
+
+spawn {
+    // Conversión explícita con smithing_table
+    villager_offer(sign("Conversiones explícitas:"));
+    
+    // Entero a flotante
+    villager_offer(sign("Entero 42 a flotante: "));
+    villager_offer(smithing_table(entero));
+    
+    // Flotante a entero (trunca)
+    villager_offer(sign("Flotante 3.75 a entero: "));
+    villager_offer(smithing_table(flotante));
+    
+    // Caracter a código ASCII
+    codigo_ascii = smithing_table(letra);
+    villager_offer(sign("'A' a código ASCII: "));
+    villager_offer(codigo_ascii);
+    
+    // Código ASCII a caracter
+    caracter = smithing_table(codigo_ascii);
+    villager_offer(sign("65 a caracter: "));
+    villager_offer(caracter);
+    
+    // Conversión implícita con dispenser
+    villager_offer(sign("Conversiones con dispenser:"));
+    
+    flotante = dispenser(entero);
+    villager_offer(sign("Entero a flotante: "));
+    villager_offer(flotante);
+    
+    entero = dispenser(flotante);
+    villager_offer(sign("Flotante a entero: "));
+    villager_offer(entero);
+} the_end

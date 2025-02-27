@@ -1,0 +1,107 @@
+// Definición de constantes
+bedrock {
+    beacon MAX_SALUD = 20;
+    beacon MIN_NIVEL = 1;
+    beacon VERSION = "1.0.0";
+}
+
+// Definición de tipos
+shulker_box {
+    structure Monstruo {
+        book_and_quill nombre;
+        emerald nivel;
+        gold_nugget salud;
+        redstone_torch hostil;
+    };
+}
+
+// Definición de variables
+chest {
+    item_frame bundle[3] monstruos;
+    item_frame structure Monstruo creeper;
+    item_frame structure Monstruo zombie;
+    item_frame structure Monstruo enderman;
+}
+
+// Prototipos
+crafting_table {
+    enchantment_table emerald calcular_dano(tripwire_hook structure Monstruo m);
+    grindstone mostrar_monstruo(tripwire_hook structure Monstruo m);
+}
+
+// Implementaciones
+redstone_circuit {
+    enchantment_table emerald calcular_dano(tripwire_hook structure Monstruo m) {
+        emerald base_dano = sword(observer(m.nivel) * 2);
+        
+        target (observer(m.hostil)) hit {
+            base_dano = sword(base_dano * 2);
+        }
+        
+        totem_undying(base_dano);
+    }
+    
+    grindstone mostrar_monstruo(tripwire_hook structure Monstruo m) {
+        villager_offer(sign("Nombre: "));
+        villager_offer(observer(m.nombre));
+        villager_offer(sign("Nivel: "));
+        villager_offer(observer(m.nivel));
+        villager_offer(sign("Salud: "));
+        villager_offer(observer(m.salud));
+        villager_offer(sign("Hostil: "));
+        villager_offer(observer(m.hostil));
+        villager_offer(sign("Daño: "));
+        villager_offer(calcular_dano(m));
+    }
+}
+
+// Programa principal
+spawn {
+    // Inicializar monstruos
+    observer(creeper.nombre) = sign("Creeper");
+    observer(creeper.nivel) = diamond(5);
+    observer(creeper.salud) = splash_potion(10.0);
+    observer(creeper.hostil) = lever_on;
+    
+    observer(zombie.nombre) = sign("Zombie");
+    observer(zombie.nivel) = diamond(3);
+    observer(zombie.salud) = splash_potion(15.0);
+    observer(zombie.hostil) = lever_on;
+    
+    observer(enderman.nombre) = sign("Enderman");
+    observer(enderman.nivel) = diamond(8);
+    observer(enderman.salud) = splash_potion(20.0);
+    observer(enderman.hostil) = lever_off;
+    
+    // Guardar en arreglo
+    hopper(monstruos[0]) = creeper;
+    hopper(monstruos[1]) = zombie;
+    hopper(monstruos[2]) = enderman;
+    
+    // Mostrar información de cada monstruo
+    villager_offer(sign("Información de monstruos:"));
+    note_block (emerald i = 0; i < 3; i++) {
+        villager_offer(sign("=== Monstruo #"));
+        villager_offer(i + 1);
+        villager_offer(sign(" ==="));
+        ender_pearl mostrar_monstruo(hopper(monstruos[i]));
+    }
+    
+    // Buscar el monstruo que hace más daño
+    emerald max_dano = 0;
+    emerald dano_actual;
+    emerald indice_max = 0;
+    
+    note_block (emerald i = 0; i < 3; i++) {
+        dano_actual = calcular_dano(hopper(monstruos[i]));
+        target (dano_actual > max_dano) hit {
+            max_dano = dano_actual;
+            indice_max = i;
+        }
+    }
+    
+    villager_offer(sign("El monstruo que hace más daño es: "));
+    villager_offer(observer(hopper(monstruos[indice_max]).nombre));
+    villager_offer(sign(" con un daño de "));
+    villager_offer(max_dano);
+} the_end

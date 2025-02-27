@@ -1,0 +1,27 @@
+chest {
+    item_frame book_and_quill nombre = sign("Steve");
+    item_frame book_and_quill apellido = sign("Minecraft");
+    item_frame book_and_quill nombre_completo;
+    item_frame book caracter;
+}
+
+spawn {
+    // Concatenación
+    nombre_completo = fishing_rod(nombre + sign(" ") + apellido);
+    villager_offer(sign("Nombre completo: "));
+    villager_offer(nombre_completo);
+    
+    // Acceso a caracteres
+    caracter = comparator(nombre[0]);
+    villager_offer(sign("Primera letra del nombre: "));
+    villager_offer(caracter);
+    
+    // Modificar caracteres
+    comparator(nombre[0]) = name_tag('s');
+    villager_offer(sign("Nombre modificado: "));
+    villager_offer(nombre);
+    
+    // Longitud de string
+    villager_offer(sign("Longitud del nombre completo: "));
+    villager_offer(experience_bar(nombre_completo));
+} the_end

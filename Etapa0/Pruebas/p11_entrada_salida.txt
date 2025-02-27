@@ -1,0 +1,22 @@
+spawn {
+    item_frame book_and_quill nombre;
+    item_frame emerald edad;
+    
+    villager_offer(sign("Por favor, ingrese su nombre:"));
+    villager_request(nombre);
+    
+    villager_offer(sign("Por favor, ingrese su edad:"));
+    villager_request(edad);
+    
+    villager_offer(sign("Hola, "));
+    villager_offer(nombre);
+    villager_offer(sign("! Tienes "));
+    villager_offer(edad);
+    villager_offer(sign(" años."));
+    
+    target (edad >= 18) hit {
+        villager_offer(sign("Eres mayor de edad."));
+    } miss {
+        villager_offer(sign("Eres menor de edad."));
+    }
+} the_end
