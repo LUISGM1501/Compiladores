@@ -1,185 +1,201 @@
 ; ********************************************
 ; * Programa: EMERALD.ASM                   *
-; * Descripción: Manejo de números enteros  *
+; * Descripcion: Manejo de numeros enteros  *
 ; * Autores: Luis Urbina, Samir Cabrera     *
 ; * Fecha: Viernes 07 de Marzo de 2025      *
 ; ********************************************
 
+; El segmento DATOS contiene todas las variables y constantes que usara el programa
 DATOS SEGMENT
-    prompt_in  DB 'Ingrese un numero entero: $'
-    prompt_out DB 'El numero ingresado es: $'
-    buffer     DB 10, ?, 10 DUP(?)  ; Buffer para entrada (max 10 chars)
-    numero     DW ?                 ; Variable para almacenar el entero
-    es_negativo DB 0                ; Flag para números negativos
-    nueva_lin  DB 0Dh, 0Ah, '$'     ; Nueva línea
+    prompt_in  DB 'Ingrese un numero entero: $'  ; Mensaje para solicitar entrada al usuario
+    prompt_out DB 'El numero ingresado es: $'    ; Mensaje para mostrar antes del resultado
+    buffer     DB 10, ?, 10 DUP(?)  ; Buffer para entrada (maximo 10 caracteres):
+                                   ; - Primer byte (10): tamano maximo
+                                   ; - Segundo byte (?): aqui DOS guardara cuantos caracteres se leyeron
+                                   ; - Resto: espacio para los caracteres ingresados
+    numero     DW ?                 ; Variable para almacenar el numero convertido a binario (2 bytes)
+    es_negativo DB 0                ; Bandera (flag) para indicar si el numero es negativo (1) o positivo (0)
+    nueva_lin  DB 0Dh, 0Ah, '$'     ; Codigos para crear una nueva linea en pantalla
 DATOS ENDS
 
+; El segmento CODIGO contiene las instrucciones que ejecutara el programa
 CODIGO SEGMENT
+    ; Indicamos al ensamblador donde encontrar nuestros datos y codigo
     ASSUME CS:CODIGO, DS:DATOS
 INICIO:
+    ; Inicializacion: Preparamos el acceso al segmento de datos
     MOV AX, DATOS
     MOV DS, AX
     
-    ; Mostrar prompt de entrada
-    MOV AH, 09h
-    LEA DX, prompt_in
-    INT 21h
+    ; Mostramos el mensaje pidiendo al usuario que ingrese un numero
+    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena terminada en $
+    LEA DX, prompt_in ; Cargamos la direccion del mensaje en DX
+    INT 21h           ; Llamamos a la interrupcion 21h (servicios de DOS)
     
-    ; Leer entrada
-    MOV AH, 0Ah
-    LEA DX, buffer
-    INT 21h
+    ; Leemos la entrada del usuario como texto
+    MOV AH, 0Ah       ; Funcion 0Ah de DOS: leer una cadena (con buffer)
+    LEA DX, buffer    ; Cargamos la direccion del buffer en DX
+    INT 21h           ; Llamamos a la interrupcion 21h
     
-    ; Convertir string a número
-    CALL STR_A_NUM
+    ; Convertimos la cadena de texto a un numero binario
+    CALL STR_A_NUM    ; Llamamos al procedimiento que hace la conversion
     
-    ; Mostrar nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
+    ; Mostramos una nueva linea para separar la entrada de la salida
+    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena
+    LEA DX, nueva_lin ; Cargamos la direccion de la cadena de nueva linea
+    INT 21h           ; Llamamos a la interrupcion 21h
     
-    ; Mostrar prompt de salida
-    MOV AH, 09h
-    LEA DX, prompt_out
-    INT 21h
+    ; Mostramos el mensaje que precede al resultado
+    MOV AH, 09h        ; Funcion 9 de DOS: mostrar una cadena
+    LEA DX, prompt_out ; Cargamos la direccion del mensaje
+    INT 21h            ; Llamamos a la interrupcion 21h
     
-    ; Convertir número a string y mostrar
-    MOV AX, [numero]
-    CALL NUM_A_STR
+    ; Convertimos el numero binario a texto y lo mostramos
+    MOV AX, [numero]   ; Cargamos el numero en AX para la conversion
+    CALL NUM_A_STR     ; Llamamos al procedimiento que hace la conversion y muestra el resultado
     
-    ; Terminar programa
-    MOV AX, 4C00h
-    INT 21h
+    ; Terminamos el programa y regresamos al sistema operativo
+    MOV AX, 4C00h      ; Funcion 4Ch de DOS: terminar programa (con codigo de salida 0)
+    INT 21h            ; Llamamos a la interrupcion 21h
 
-; Convierte string (buffer) a número (numero)
+; Este procedimiento convierte una cadena de texto (en el buffer) a un numero binario
+; y lo guarda en la variable 'numero'
 STR_A_NUM PROC
-    PUSH AX
-    PUSH BX
-    PUSH CX
-    PUSH DX
-    PUSH SI
+    ; Guardamos los registros que vamos a modificar para restaurarlos al final
+    PUSH AX            ; Guardamos AX en la pila
+    PUSH BX            ; Guardamos BX en la pila
+    PUSH CX            ; Guardamos CX en la pila
+    PUSH DX            ; Guardamos DX en la pila
+    PUSH SI            ; Guardamos SI en la pila (indice de origen)
     
-    XOR AX, AX        ; Inicializar resultado a 0
-    MOV BL, [buffer+1] ; Longitud de la cadena en BL
-    XOR BH, BH        ; BH = 0
-    LEA SI, [buffer+2] ; Inicio de los caracteres en el buffer
+    XOR AX, AX         ; Inicializamos AX a 0 (aqui iremos acumulando el resultado)
+    MOV BL, [buffer+1] ; En buffer+1 esta la cantidad de caracteres leidos
+    XOR BH, BH         ; Limpiamos BH (para que BX solo contenga el valor de BL)
+    LEA SI, [buffer+2] ; SI apunta al primer caracter del texto ingresado
     
-    ; Resetear flag de negativo
+    ; Reseteamos la bandera de negativo
     MOV [es_negativo], 0
     
-    ; Verificar si empieza con signo negativo
+    ; Verificamos si el primer caracter es un signo negativo (-)
     CMP BX, 0
-    JE CONVERSION_FIN ; Si la cadena está vacía, terminar
+    JE CONVERSION_FIN  ; Si la cadena esta vacia, terminamos
     
-    MOV CL, [SI]      ; Obtener primer carácter
-    CMP CL, '-'       ; Verificar si es signo negativo
-    JNE CONVERSION    ; Si no es negativo, continuar normal
+    MOV CL, [SI]       ; Obtenemos el primer caracter
+    CMP CL, '-'        ; ¿Es un signo negativo?
+    JNE CONVERSION     ; Si no es negativo, continuamos con la conversion normal
     
-    ; Si es negativo, marcar flag y avanzar al siguiente carácter
+    ; Si es negativo, marcamos la bandera y avanzamos al siguiente caracter
     MOV [es_negativo], 1
-    INC SI
-    DEC BX
+    INC SI             ; Avanzamos al siguiente caracter
+    DEC BX             ; Reducimos el contador de caracteres
     
 CONVERSION:
-    CMP BX, 0         ; ¿Terminamos la conversión?
+    ; Recorremos cada caracter de la cadena
+    CMP BX, 0          ; ¿Terminamos de procesar todos los caracteres?
     JE CONVERSION_PROCESAR
     
-    MOV CL, [SI]      ; Obtener caracter
-    INC SI            ; Avanzar al siguiente caracter
+    MOV CL, [SI]       ; Obtenemos el caracter actual
+    INC SI             ; Avanzamos al siguiente caracter
     
-    CMP CL, '0'       ; Verificar si es un dígito
-    JL NO_DIGITO
+    ; Verificamos si el caracter es un digito (entre '0' y '9')
+    CMP CL, '0'
+    JL NO_DIGITO       ; Si es menor que '0', no es un digito
     CMP CL, '9'
-    JG NO_DIGITO
+    JG NO_DIGITO       ; Si es mayor que '9', no es un digito
     
-    SUB CL, '0'       ; Convertir ASCII a valor numérico
-    XOR CH, CH        ; CH = 0
+    SUB CL, '0'        ; Convertimos el caracter ASCII a su valor numerico (restando '0')
+    XOR CH, CH         ; Limpiamos CH (para que CX solo contenga el valor de CL)
     
-    ; Resultado = Resultado * 10 + Dígito
-    PUSH BX
+    ; Formula para construir el numero: resultado = resultado * 10 + digito
+    PUSH BX            ; Guardamos BX temporalmente
     MOV BX, 10
-    MUL BX            ; AX = AX * 10
-    POP BX
-    ADD AX, CX        ; AX = AX + Dígito
+    MUL BX             ; AX = AX * 10
+    POP BX             ; Recuperamos BX
+    ADD AX, CX         ; AX = AX + digito
     
 NO_DIGITO:
-    DEC BX
-    JMP CONVERSION
+    DEC BX             ; Reducimos el contador de caracteres
+    JMP CONVERSION     ; Procesamos el siguiente caracter
     
 CONVERSION_PROCESAR:
-    ; Si es negativo, negar el número
+    ; Si el numero es negativo, lo negamos
     CMP [es_negativo], 1
     JNE CONVERSION_FIN
     
-    NEG AX            ; Convertir a negativo (complemento a 2)
+    NEG AX             ; Negamos AX (complemento a 2 para obtener el valor negativo)
     
 CONVERSION_FIN:
-    MOV [numero], AX
+    MOV [numero], AX   ; Guardamos el resultado en la variable 'numero'
     
+    ; Restauramos los registros que modificamos
     POP SI
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                ; Retornamos al punto de llamada
 STR_A_NUM ENDP
 
-; Convierte número (AX) a string y lo muestra
+; Este procedimiento convierte un numero binario (en AX) a texto y lo muestra en pantalla
 NUM_A_STR PROC
+    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Verificar si es negativo
+    ; Verificamos si el numero es negativo
     CMP AX, 0
-    JGE NUM_POSITIVO
+    JGE NUM_POSITIVO   ; Si es >= 0, es positivo
     
-    ; Si es negativo, mostrar el signo "-" y negar el número
-    PUSH AX
+    ; Si es negativo, mostramos el signo "-" y negamos el numero
+    PUSH AX            ; Guardamos AX
     MOV DL, '-'
-    MOV AH, 02h
-    INT 21h
-    POP AX
-    NEG AX            ; Convertir a positivo para procesarlo
+    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
+    INT 21h            ; Mostramos el signo menos
+    POP AX             ; Recuperamos AX
+    NEG AX             ; Negamos AX para trabajar con el valor positivo
     
 NUM_POSITIVO:
-    MOV BX, 10        ; Divisor
-    XOR CX, CX        ; Contador de dígitos
+    MOV BX, 10         ; Divisor (10) para obtener los digitos
+    XOR CX, CX         ; Inicializamos contador de digitos a 0
     
-    ; Si es cero, tratar especialmente
+    ; Caso especial: si el numero es cero
     CMP AX, 0
     JNE DIVIDIR
     
-    MOV DL, '0'       ; Carácter '0'
-    MOV AH, 02h       ; Función para mostrar carácter
+    MOV DL, '0'        ; Caracter '0'
+    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
     INT 21h
     JMP NUM_A_STR_FIN
     
 DIVIDIR:
-    XOR DX, DX        ; DX:AX / BX, DX = resto
-    DIV BX            ; AX = cociente, DX = resto
+    ; Para cada digito: dividimos por 10, el resto es el digito actual, el cociente continua
+    XOR DX, DX         ; Limpiamos DX para la division extendida DX:AX / BX
+    DIV BX             ; AX = cociente, DX = resto (digito)
     
-    PUSH DX           ; Guardar el dígito
-    INC CX            ; Incrementar contador
+    PUSH DX            ; Guardamos el digito en la pila (para mostrarlo luego en orden inverso)
+    INC CX             ; Incrementamos contador de digitos
     
-    CMP AX, 0         ; ¿Terminamos?
-    JNE DIVIDIR
+    CMP AX, 0          ; ¿Terminamos? (cociente = 0)
+    JNE DIVIDIR        ; Si no, continuamos con el siguiente digito
     
 MOSTRAR_DIGITOS:
-    POP DX            ; Recuperar dígito
-    ADD DL, '0'       ; Convertir a ASCII
-    MOV AH, 02h       ; Función para mostrar carácter
-    INT 21h
-    LOOP MOSTRAR_DIGITOS
+    ; Mostramos los digitos en orden inverso (sacandolos de la pila)
+    POP DX             ; Recuperamos un digito
+    ADD DL, '0'        ; Convertimos el valor numerico a caracter ASCII
+    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
+    INT 21h            ; Mostramos el digito
+    LOOP MOSTRAR_DIGITOS ; Repetimos para cada digito (CX veces)
     
 NUM_A_STR_FIN:
+    ; Restauramos los registros que modificamos
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                ; Retornamos al punto de llamada
 NUM_A_STR ENDP
 
 CODIGO ENDS
-END INICIO
+END INICIO              ; Indicamos el punto de entrada del programa

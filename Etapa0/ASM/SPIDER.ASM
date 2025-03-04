@@ -1,429 +1,448 @@
 ; ********************************************
-; * Programa: GOLDNUGG.ASM                  *
-; * Descripción: Manejo de números flotantes*
+; * Programa: SPIDER.ASM                    *
+; * Descripcion: Manejo de probabilidades   *
+; * (valores entre 0 y 1)                   *
 ; * Autores: Luis Urbina, Samir Cabrera     *
 ; * Fecha: Viernes 07 de Marzo de 2025      *
 ; ********************************************
 
+; El segmento DATOS contiene todas las variables y constantes que usara el programa
 DATOS SEGMENT
-    prompt_in   DB 'Ingrese de probabilidad entre 0 y 1: $'
-    prompt_out  DB 'El numero de probabilidad es: $'
-    buffer      DB 15, ?, 15 DUP(?)  ; Buffer para entrada
-    entero      DW ?                  ; Parte entera
-    decimal     DW ?                  ; Parte decimal
-    dec_digitos DB ?                  ; Número de dígitos decimales
-    es_negativo DB 0                  ; Flag para números negativos
-    nueva_lin   DB 0Dh, 0Ah, '$'      ; Nueva línea
-    punto       DB '.$'               ; Punto decimal
-    constante_diez DW 10              ; Constante para cálculos
-    error_rango DB 'Error: El numero debe estar en el rango de 0 a 1$'  ; Mensaje de error para validación
+    prompt_in   DB 'Ingrese de probabilidad entre 0 y 1: $'  ; Mensaje para solicitar entrada al usuario
+    prompt_out  DB 'El numero de probabilidad es: $'         ; Mensaje para mostrar antes del resultado
+    buffer      DB 15, ?, 15 DUP(?)  ; Buffer para entrada (maximo 15 caracteres)
+    entero      DW ?                  ; Variable para almacenar la parte entera del numero
+    decimal     DW ?                  ; Variable para almacenar la parte decimal del numero
+    dec_digitos DB ?                  ; Contador de digitos en la parte decimal
+    es_negativo DB 0                  ; Bandera para indicar si el numero es negativo (1) o positivo (0)
+    nueva_lin   DB 0Dh, 0Ah, '$'      ; Codigos para crear una nueva linea en pantalla
+    punto       DB '.$'               ; Punto decimal seguido de terminador
+    constante_diez DW 10              ; Constante 10 para calculos y conversiones
+    error_rango DB 'Error: El numero debe estar en el rango de 0 a 1$'  ; Mensaje para cuando el numero esta fuera de rango
 DATOS ENDS
 
+; El segmento CODIGO contiene las instrucciones que ejecutara el programa
 CODIGO SEGMENT
+    ; Indicamos al ensamblador donde encontrar nuestros datos y codigo
     ASSUME CS:CODIGO, DS:DATOS
 INICIO:
+    ; Inicializacion: Preparamos el acceso al segmento de datos
     MOV AX, DATOS
     MOV DS, AX
     
-    ; Mostrar prompt de entrada
-    MOV AH, 09h
-    LEA DX, prompt_in
-    INT 21h
+    ; Mostramos el mensaje pidiendo al usuario que ingrese un numero entre 0 y 1
+    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena terminada en $
+    LEA DX, prompt_in ; Cargamos la direccion del mensaje en DX
+    INT 21h           ; Llamamos a la interrupcion 21h (servicios de DOS)
     
-    ; Leer entrada
-    MOV AH, 0Ah
-    LEA DX, buffer
-    INT 21h
+    ; Leemos la entrada del usuario como texto
+    MOV AH, 0Ah       ; Funcion 0Ah de DOS: leer una cadena (con buffer)
+    LEA DX, buffer    ; Cargamos la direccion del buffer en DX
+    INT 21h           ; Llamamos a la interrupcion 21h
     
-    ; Procesar número flotante
-    CALL PROCESAR_FLOTANTE
+    ; Procesamos el numero flotante (separando parte entera y decimal)
+    CALL PROCESAR_FLOTANTE  ; Llamamos al procedimiento que separa las partes
     
-    ; Validar rango 0 a 1
-    CALL VALIDAR_RANGO
-    JC MOSTRAR_ERROR_RANGO  ; Si hay error de rango, mostrar mensaje
+    ; Verificamos que el numero este entre 0 y 1 (incluidos)
+    CALL VALIDAR_RANGO       ; Validamos el rango del numero
+    JC MOSTRAR_ERROR_RANGO   ; Si CF=1 (Carry Flag), el numero esta fuera de rango
     
-    ; Mostrar nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
+    ; Si el numero es valido, mostramos una nueva linea
+    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena
+    LEA DX, nueva_lin ; Cargamos la direccion de la cadena de nueva linea
+    INT 21h           ; Llamamos a la interrupcion 21h
     
-    ; Mostrar prompt de salida
-    MOV AH, 09h
-    LEA DX, prompt_out
-    INT 21h
+    ; Mostramos el mensaje que precede al resultado
+    MOV AH, 09h        ; Funcion 9 de DOS: mostrar una cadena
+    LEA DX, prompt_out ; Cargamos la direccion del mensaje
+    INT 21h            ; Llamamos a la interrupcion 21h
     
-    ; Mostrar número flotante
-    CALL MOSTRAR_FLOTANTE
+    ; Mostramos el numero flotante (parte entera, punto decimal y parte decimal)
+    CALL MOSTRAR_FLOTANTE  ; Llamamos al procedimiento que muestra el numero
     
-    JMP FIN_PROGRAMA
+    JMP FIN_PROGRAMA       ; Saltamos al final del programa
     
 MOSTRAR_ERROR_RANGO:
-    ; Mostrar nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
+    ; Si el numero esta fuera de rango, mostramos un mensaje de error
+    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena
+    LEA DX, nueva_lin ; Primero mostramos una nueva linea
+    INT 21h           ; Llamamos a la interrupcion 21h
     
-    ; Mostrar mensaje de error
-    MOV AH, 09h
-    LEA DX, error_rango
-    INT 21h
+    MOV AH, 09h        ; Funcion 9 de DOS: mostrar una cadena
+    LEA DX, error_rango ; Cargamos la direccion del mensaje de error
+    INT 21h            ; Llamamos a la interrupcion 21h
     
 FIN_PROGRAMA:
-    ; Terminar programa
-    MOV AX, 4C00h
-    INT 21h
+    ; Terminamos el programa y regresamos al sistema operativo
+    MOV AX, 4C00h      ; Funcion 4Ch de DOS: terminar programa (con codigo de salida 0)
+    INT 21h            ; Llamamos a la interrupcion 21h
 
-; Valida que el número esté en el rango de 0 a 1
-; Si el número no es válido, CF=1, sino CF=0
+; Este procedimiento verifica si el numero esta en el rango de 0 a 1
+; Si el numero esta en rango, CF=0 (no hay error)
+; Si el numero esta fuera de rango, CF=1 (hay error)
 VALIDAR_RANGO PROC
-    PUSH AX
+    PUSH AX            ; Guardamos AX para restaurarlo despues
     
-    ; Verificar si es negativo (debe ser mayor o igual a 0)
+    ; Primero verificamos si es negativo (debe ser mayor o igual a 0)
     CMP [es_negativo], 1
-    JE FUERA_DE_RANGO
+    JE FUERA_DE_RANGO  ; Si es negativo, esta fuera de rango
     
-    ; Verificar que la parte entera sea 0 o 1
+    ; Verificamos que la parte entera sea 0 o 1
     MOV AX, [entero]
     CMP AX, 0
-    JE RANGO_VALIDO      ; Si es 0, es válido
+    JE RANGO_VALIDO    ; Si es 0, es valido independientemente de la parte decimal
     CMP AX, 1
-    JE VERIFICAR_DECIMAL ; Si es 1, hay que verificar que decimal sea 0
-    JMP FUERA_DE_RANGO   ; Si es > 1, no es válido
+    JE VERIFICAR_DECIMAL ; Si es 1, hay que verificar que la parte decimal sea 0
+    JMP FUERA_DE_RANGO   ; Si es > 1, no es valido
     
 VERIFICAR_DECIMAL:
-    ; Si entero es 1, decimal debe ser 0 para estar en rango
+    ; Si la parte entera es 1, la parte decimal debe ser 0 para estar en rango (exactamente 1.0)
     CMP WORD PTR [decimal], 0
-    JNE FUERA_DE_RANGO
+    JNE FUERA_DE_RANGO   ; Si la parte decimal no es 0, entonces es > 1
     
 RANGO_VALIDO:
-    CLC                  ; Limpiar carry flag (sin error)
-    JMP FIN_VALIDACION
+    CLC                  ; Limpiamos el Carry Flag (CF=0) para indicar que no hay error
+    JMP FIN_VALIDACION   ; Vamos al final del procedimiento
     
 FUERA_DE_RANGO:
-    STC                  ; Establecer carry flag (con error)
+    STC                  ; Establecemos el Carry Flag (CF=1) para indicar que hay error
     
 FIN_VALIDACION:
-    POP AX
-    RET
+    POP AX               ; Restauramos AX
+    RET                  ; Retornamos al punto de llamada
 VALIDAR_RANGO ENDP
 
-; Procesa la entrada y extrae parte entera y decimal
+; Este procedimiento analiza la entrada del usuario y extrae la parte entera y decimal del numero
 PROCESAR_FLOTANTE PROC
+    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     PUSH SI
     
-    XOR AX, AX            ; Inicializar resultado a 0
-    MOV BL, [buffer+1]    ; Longitud de la cadena en BL
-    XOR BH, BH
-    LEA SI, [buffer+2]    ; Inicio de los caracteres en el buffer
+    XOR AX, AX            ; Inicializamos AX a 0
+    MOV BL, [buffer+1]    ; En buffer+1 esta la cantidad de caracteres leidos
+    XOR BH, BH            ; Limpiamos BH (para que BX solo contenga el valor de BL)
+    LEA SI, [buffer+2]    ; SI apunta al primer caracter ingresado
     
-    ; Inicializar variables
-    MOV [entero], 0
-    MOV [decimal], 0
-    MOV [dec_digitos], 0
-    MOV [es_negativo], 0  ; Resetear flag de negativo
+    ; Inicializamos todas las variables relacionadas con el numero
+    MOV [entero], 0       ; Parte entera a 0
+    MOV [decimal], 0      ; Parte decimal a 0
+    MOV [dec_digitos], 0  ; Contador de digitos decimales a 0
+    MOV [es_negativo], 0  ; Bandera de negativo a 0 (positivo)
     
-    ; Verificar si empieza con signo negativo
+    ; Verificamos si la cadena esta vacia
     CMP BX, 0
-    JE PROC_FIN           ; Si la cadena está vacía, terminar
+    JE PROC_FIN           ; Si esta vacia, terminamos
     
-    MOV CL, [SI]          ; Obtener primer carácter
-    CMP CL, '-'           ; Verificar si es signo negativo
-    JNE PROC_ENTERO       ; Si no es negativo, procesar parte entera
+    ; Verificamos si comienza con signo negativo
+    MOV CL, [SI]          ; Obtenemos el primer caracter
+    CMP CL, '-'           ; ¿Es un signo negativo?
+    JNE PROC_ENTERO       ; Si no es negativo, procesamos parte entera
     
-    ; Si es negativo, marcar flag y avanzar al siguiente carácter
+    ; Si es negativo, marcamos la bandera y avanzamos al siguiente caracter
     MOV [es_negativo], 1
-    INC SI
-    DEC BX
+    INC SI                ; Avanzamos al siguiente caracter
+    DEC BX                ; Reducimos el contador de caracteres
     
-    ; Procesar parte entera hasta encontrar el punto
+    ; Procesamos la parte entera hasta encontrar el punto decimal
 PROC_ENTERO:
-    CMP BX, 0             ; ¿Terminamos?
+    CMP BX, 0             ; ¿Terminamos todos los caracteres?
     JE PROC_FIN
     
-    MOV CL, [SI]          ; Obtener caracter
-    INC SI
-    DEC BX
+    MOV CL, [SI]          ; Obtenemos el caracter actual
+    INC SI                ; Avanzamos al siguiente caracter
+    DEC BX                ; Reducimos el contador de caracteres
     
     CMP CL, '.'           ; ¿Es el punto decimal?
-    JE PROC_DECIMAL
+    JE PROC_DECIMAL       ; Si es el punto, pasamos a procesar la parte decimal
     
-    CMP CL, '0'           ; Verificar si es un dígito
-    JL PROC_ENTERO
+    ; Verificamos si es un digito valido
+    CMP CL, '0'
+    JL PROC_ENTERO        ; Si es menor que '0', no es un digito (lo ignoramos)
     CMP CL, '9'
-    JG PROC_ENTERO
+    JG PROC_ENTERO        ; Si es mayor que '9', no es un digito (lo ignoramos)
     
-    SUB CL, '0'           ; Convertir ASCII a valor numérico
-    XOR CH, CH
+    SUB CL, '0'           ; Convertimos el caracter ASCII a valor numerico
+    XOR CH, CH            ; Limpiamos CH (para que CX solo contenga el valor de CL)
     
-    ; Entero = Entero * 10 + Dígito
+    ; Formula para construir la parte entera: entero = entero * 10 + digito
     MOV AX, [entero]
     MOV DX, 10
-    MUL DX
-    ADD AX, CX
+    MUL DX                ; AX = AX * 10
+    ADD AX, CX            ; AX = AX + digito
     MOV [entero], AX
     
-    JMP PROC_ENTERO
+    JMP PROC_ENTERO       ; Continuamos con el siguiente caracter
     
-; Procesar parte decimal después del punto
+; Procesamos la parte decimal despues del punto
 PROC_DECIMAL:
-    CMP BX, 0             ; ¿Terminamos?
+    CMP BX, 0             ; ¿Terminamos todos los caracteres?
     JE PROC_FIN
     
-    MOV CL, [SI]          ; Obtener caracter
-    INC SI
-    DEC BX
+    MOV CL, [SI]          ; Obtenemos el caracter actual
+    INC SI                ; Avanzamos al siguiente caracter
+    DEC BX                ; Reducimos el contador de caracteres
     
-    CMP CL, '0'           ; Verificar si es un dígito
-    JL PROC_DECIMAL
+    ; Verificamos si es un digito valido
+    CMP CL, '0'
+    JL PROC_DECIMAL       ; Si es menor que '0', no es un digito (lo ignoramos)
     CMP CL, '9'
-    JG PROC_DECIMAL
+    JG PROC_DECIMAL       ; Si es mayor que '9', no es un digito (lo ignoramos)
     
-    SUB CL, '0'           ; Convertir ASCII a valor numérico
-    XOR CH, CH
+    SUB CL, '0'           ; Convertimos el caracter ASCII a valor numerico
+    XOR CH, CH            ; Limpiamos CH (para que CX solo contenga el valor de CL)
     
-    ; Decimal = Decimal * 10 + Dígito
+    ; Formula para construir la parte decimal: decimal = decimal * 10 + digito
     MOV AX, [decimal]
     MOV DX, 10
-    MUL DX
-    ADD AX, CX
+    MUL DX                ; AX = AX * 10
+    ADD AX, CX            ; AX = AX + digito
     MOV [decimal], AX
     
-    ; Incrementar contador de dígitos decimales
+    ; Incrementamos el contador de digitos decimales
     INC [dec_digitos]
     
-    JMP PROC_DECIMAL
+    JMP PROC_DECIMAL      ; Continuamos con el siguiente caracter
     
 PROC_FIN:
-    ; Si es negativo y la parte entera es diferente de cero, aplicar signo
+    ; Si el numero es negativo, aplicamos el signo solo a la parte entera
     CMP [es_negativo], 1
     JNE PROC_NORMAL
     
-    ; Sólo aplicamos el signo a la parte entera - la parte decimal siempre es positiva
+    ; La parte decimal siempre es positiva, solo negamos la parte entera
     MOV AX, [entero]
-    NEG AX
+    NEG AX                ; Negamos AX (complemento a 2)
     MOV [entero], AX
     
 PROC_NORMAL:
+    ; Restauramos los registros que modificamos
     POP SI
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                   ; Retornamos al punto de llamada
 PROCESAR_FLOTANTE ENDP
 
-; Muestra el número flotante
+; Este procedimiento muestra el numero flotante en pantalla
 MOSTRAR_FLOTANTE PROC
+    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Mostrar parte entera
+    ; Primero mostramos la parte entera
     MOV AX, [entero]
-    CALL MOSTRAR_ENTERO
+    CALL MOSTRAR_ENTERO   ; Mostramos la parte entera con su signo si es necesario
     
-    ; Mostrar punto decimal
+    ; Luego mostramos el punto decimal
     MOV AH, 09h
     LEA DX, punto
     INT 21h
     
-    ; Mostrar parte decimal
-    CALL MOSTRAR_DECIMAL
+    ; Finalmente mostramos la parte decimal
+    CALL MOSTRAR_DECIMAL  ; Mostramos la parte decimal
     
+    ; Restauramos los registros que modificamos
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                   ; Retornamos al punto de llamada
 MOSTRAR_FLOTANTE ENDP
 
-; Muestra la parte decimal
+; Este procedimiento muestra la parte decimal del numero
 MOSTRAR_DECIMAL PROC
+    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Verificar si hay dígitos decimales
+    ; Verificamos si hay digitos decimales
     CMP BYTE PTR [dec_digitos], 0
     JNE TIENE_DECIMALES
     
-    ; Si no hay decimales, mostrar 0
-    MOV DL, '0'
-    MOV AH, 02h
+    ; Si no hay decimales, mostramos un 0
+    MOV DL, '0'           ; Caracter '0'
+    MOV AH, 02h           ; Funcion 2 de DOS: mostrar un caracter
     INT 21h
     JMP FIN_DECIMAL
     
 TIENE_DECIMALES:
-    ; Inicializar contador para mantener dígitos originales
+    ; Guardamos el numero original de digitos decimales en BX
     MOV CL, [dec_digitos]
     XOR CH, CH
-    MOV BX, CX  ; Guardar en BX para usar después
+    MOV BX, CX            ; BX = numero de digitos decimales
     
-    ; Calcular potencia de 10
-    MOV AX, 1
+    ; Calculamos la potencia de 10 correspondiente al numero de digitos
+    ; (por ejemplo, si hay 3 digitos, necesitamos 10^3 = 1000)
+    MOV AX, 1             ; Comenzamos con 1
 CALCULAR_POTENCIA:
-    CMP CL, 0
+    CMP CL, 0             ; ¿Llegamos a 0?
     JE FIN_POTENCIA
     
-    MUL WORD PTR [constante_diez]
+    MUL WORD PTR [constante_diez]  ; AX = AX * 10
     
-    DEC CL
+    DEC CL                ; Reducimos el contador
     JMP CALCULAR_POTENCIA
     
 FIN_POTENCIA:
-    MOV CX, AX  ; CX = potencia de 10
+    MOV CX, AX            ; CX = potencia de 10
     
-    ; Si el decimal es menor que la potencia, necesitamos ceros a la izquierda
-    MOV AX, [decimal]
+    ; Verificamos si necesitamos mostrar ceros a la izquierda
+    MOV AX, DX            ; AX = valor decimal
     
-    ; Contar dígitos del decimal
-    MOV DX, AX  ; Guardar decimal en DX
-    XOR AX, AX  ; Contador de dígitos
-    
-    ; Si es 0, necesitamos todos los dígitos como ceros
+    ; Si el decimal es 0, mostramos todos los digitos como ceros
     CMP DX, 0
     JNE CONTAR_DIGITOS
     
-    ; Mostrar todos los ceros
-    MOV CX, BX  ; Número de dígitos decimales
+    ; Mostramos la cantidad correcta de ceros
+    MOV CX, BX            ; CX = numero de digitos decimales
 MOSTRAR_SOLO_CEROS:
     CMP CX, 0
     JE FIN_DECIMAL
     
-    MOV DL, '0'
-    MOV AH, 02h
+    MOV DL, '0'           ; Caracter '0'
+    MOV AH, 02h           ; Funcion 2 de DOS: mostrar un caracter
     INT 21h
     
-    DEC CX
+    DEC CX                ; Reducimos el contador
     JMP MOSTRAR_SOLO_CEROS
     
 CONTAR_DIGITOS:
-    MOV AX, DX
-    XOR CX, CX  ; Contador de dígitos
+    ; Contamos cuantos digitos tiene la parte decimal para saber
+    ; si necesitamos agregar ceros a la izquierda
+    MOV AX, DX            ; AX = valor decimal
+    XOR CX, CX            ; CX = contador de digitos
     
 BUCLE_CONTAR:
-    INC CX
+    INC CX                ; Incrementamos contador
     
     XOR DX, DX
-    DIV WORD PTR [constante_diez]
+    DIV WORD PTR [constante_diez]  ; AX = AX / 10, DX = resto
     
     CMP AX, 0
-    JNE BUCLE_CONTAR
+    JNE BUCLE_CONTAR      ; Si el cociente no es 0, continuamos contando
     
-    ; CX = número de dígitos del decimal
-    MOV AX, BX  ; BX tiene el número original de dígitos necesarios
-    SUB AX, CX  ; AX = ceros a agregar al inicio
+    ; Calculamos cuantos ceros necesitamos al inicio
+    MOV AX, BX            ; AX = numero total de digitos necesarios
+    SUB AX, CX            ; AX = ceros a agregar al inicio
     
-    ; Mostrar ceros iniciales
+    ; Mostramos los ceros iniciales si son necesarios
     CMP AX, 0
-    JLE MOSTRAR_DECIMAL_VALOR
+    JLE MOSTRAR_DECIMAL_VALOR  ; Si no necesitamos ceros, mostramos el valor
     
-    MOV CX, AX
+    MOV CX, AX            ; CX = numero de ceros a mostrar
 MOSTRAR_CEROS_INICIALES:
-    MOV DL, '0'
-    MOV AH, 02h
+    MOV DL, '0'           ; Caracter '0'
+    MOV AH, 02h           ; Funcion 2 de DOS: mostrar un caracter
     INT 21h
     
-    LOOP MOSTRAR_CEROS_INICIALES
+    LOOP MOSTRAR_CEROS_INICIALES  ; Repetimos CX veces
     
 MOSTRAR_DECIMAL_VALOR:
-    ; Mostrar el valor decimal
+    ; Ahora mostramos el valor decimal real
     MOV AX, [decimal]
     
-    ; Procesar dígitos en orden
+    ; Usamos la funcion que muestra numeros positivos
     CALL MOSTRAR_NUMERO_POSITIVO
     
 FIN_DECIMAL:
+    ; Restauramos los registros que modificamos
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                   ; Retornamos al punto de llamada
 MOSTRAR_DECIMAL ENDP
 
-; Muestra un número entero (con signo)
+; Este procedimiento muestra un numero entero con signo
 MOSTRAR_ENTERO PROC
+    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Verificar si es negativo
+    ; Verificamos si el numero es negativo
     CMP AX, 0
-    JGE ENTERO_POSITIVO
+    JGE ENTERO_POSITIVO   ; Si es >= 0, es positivo
     
-    ; Si es negativo, mostrar signo y negar
-    PUSH AX
-    MOV DL, '-'
-    MOV AH, 02h
-    INT 21h
-    POP AX
-    NEG AX
+    ; Si es negativo, mostramos el signo "-" y negamos el numero
+    PUSH AX            ; Guardamos AX
+    MOV DL, '-'        ; Caracter '-'
+    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
+    INT 21h            ; Mostramos el signo menos
+    POP AX             ; Recuperamos AX
+    NEG AX             ; Negamos AX para trabajar con el valor positivo
     
 ENTERO_POSITIVO:
+    ; Utilizamos la funcion para mostrar numeros positivos
     CALL MOSTRAR_NUMERO_POSITIVO
     
+    ; Restauramos los registros que modificamos
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                ; Retornamos al punto de llamada
 MOSTRAR_ENTERO ENDP
 
-; Muestra un número positivo
+; Este procedimiento muestra un numero positivo
 MOSTRAR_NUMERO_POSITIVO PROC
+    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Si es cero, tratar especial
+    ; Caso especial: si el numero es cero
     CMP AX, 0
     JNE CONVERTIR_DIGITOS
     
-    MOV DL, '0'
-    MOV AH, 02h
+    MOV DL, '0'        ; Caracter '0'
+    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
     INT 21h
     JMP FIN_POSITIVO
     
 CONVERTIR_DIGITOS:
-    ; Convertir número a dígitos en la pila
-    XOR CX, CX  ; Contador de dígitos
-    MOV BX, 10
+    ; Convertimos el numero a digitos individuales usando divisiones sucesivas por 10
+    ; Los digitos se obtienen de derecha a izquierda, asi que los guardamos en la pila
+    XOR CX, CX         ; Inicializamos contador de digitos a 0
+    MOV BX, 10         ; Divisor = 10
     
 BUCLE_DIVISION:
-    XOR DX, DX
-    DIV BX
+    XOR DX, DX         ; Limpiamos DX para la division
+    DIV BX             ; AX = AX / 10, DX = resto (digito actual)
     
-    PUSH DX  ; Guardar dígito en la pila
-    INC CX
+    PUSH DX            ; Guardamos el digito en la pila
+    INC CX             ; Incrementamos contador de digitos
     
-    CMP AX, 0
-    JNE BUCLE_DIVISION
+    CMP AX, 0          ; ¿El cociente es 0?
+    JNE BUCLE_DIVISION ; Si no, continuamos con el siguiente digito
     
-    ; Mostrar dígitos en orden correcto
+    ; Ahora mostramos los digitos en orden correcto (de la pila)
 BUCLE_MOSTRAR:
-    POP DX
-    ADD DL, '0'
+    POP DX             ; Recuperamos un digito
+    ADD DL, '0'        ; Convertimos el valor numerico a caracter ASCII
     
-    MOV AH, 02h
-    INT 21h
+    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
+    INT 21h            ; Mostramos el digito
     
-    LOOP BUCLE_MOSTRAR
+    LOOP BUCLE_MOSTRAR ; Repetimos para cada digito (CX veces)
     
 FIN_POSITIVO:
+    ; Restauramos los registros que modificamos
     POP DX
     POP CX
     POP BX
     POP AX
-    RET
+    RET                ; Retornamos al punto de llamada
 MOSTRAR_NUMERO_POSITIVO ENDP
 
 CODIGO ENDS
-END INICIO
+END INICIO              ; Indicamos el punto de entrada del programa
