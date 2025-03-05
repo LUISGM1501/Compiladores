@@ -1,0 +1,28 @@
+shulker_box {
+    anvil gold_nugget -> emerald truncate;
+    anvil emerald -> gold_nugget;
+}
+
+chest {
+    item_frame emerald entero = 42;
+    item_frame gold_nugget flotante;
+    item_frame emerald convertido;
+}
+
+spawn {
+    // Conversión de entero a flotante
+    flotante = smithing_table(entero);
+    villager_offer(sign("Entero convertido a flotante: "));
+    villager_offer(flotante);
+    
+    // Conversión de flotante a entero
+    flotante = splash_potion(3.75);
+    convertido = smithing_table(flotante);
+    villager_offer(sign("Flotante (3.75) convertido a entero: "));
+    villager_offer(convertido);
+    
+    // Usando dispenser para conversión
+    flotante = dispenser(entero);
+    villager_offer(sign("Dispenser (entero->flotante): "));
+    villager_offer(flotante);
+} the_end

@@ -1,0 +1,43 @@
+shulker_box {
+    structure Punto {
+        emerald x;
+        emerald y;
+        book_and_quill etiqueta;
+    }
+}
+
+chest {
+    item_frame structure Punto origen;
+    item_frame structure Punto destino;
+}
+
+spawn {
+    // Inicializar el punto origen usando with
+    painting (Punto) {
+        observer(origen.x) = diamond(0);
+        observer(origen.y) = diamond(0);
+        observer(origen.etiqueta) = sign("Origen");
+    }
+    
+    // Inicializar el punto destino usando with
+    painting (Punto) {
+        observer(destino.x) = diamond(10);
+        observer(destino.y) = diamond(5);
+        observer(destino.etiqueta) = sign("Destino");
+    }
+    
+    // Mostrar datos
+    villager_offer(sign("Punto Origen: (")));
+    villager_offer(observer(origen.x));
+    villager_offer(sign(", "));
+    villager_offer(observer(origen.y));
+    villager_offer(sign(") - "));
+    villager_offer(observer(origen.etiqueta));
+    
+    villager_offer(sign("Punto Destino: ("));
+    villager_offer(observer(destino.x));
+    villager_offer(sign(", "));
+    villager_offer(observer(destino.y));
+    villager_offer(sign(") - "));
+    villager_offer(observer(destino.etiqueta));
+} the_end

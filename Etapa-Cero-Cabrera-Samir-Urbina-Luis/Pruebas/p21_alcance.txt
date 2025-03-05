@@ -1,0 +1,33 @@
+// p21_alcance.txt
+redstone_circuit {
+    enchantment_table emerald prueba_alcance() {
+        emerald x = diamond(10);
+        
+        command_block {
+            emerald x = diamond(20);
+            emerald y = diamond(30);
+            
+            villager_offer(sign("x dentro del bloque interno: "));
+            villager_offer(x);
+            
+            villager_offer(sign("y dentro del bloque interno: "));
+            villager_offer(y);
+        }
+        
+        villager_offer(sign("x fuera del bloque interno: "));
+        villager_offer(x);
+        
+        // y no está disponible aquí
+        
+        totem_undying(x);
+    }
+}
+
+spawn {
+    item_frame emerald resultado;
+    
+    resultado = prueba_alcance();
+    
+    villager_offer(sign("Resultado final: "));
+    villager_offer(resultado);
+} the_end

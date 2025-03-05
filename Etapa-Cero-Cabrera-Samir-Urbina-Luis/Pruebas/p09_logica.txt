@@ -1,0 +1,38 @@
+chest {
+    item_frame emerald a = 10;
+    item_frame emerald b = 5;
+    item_frame emerald c = 10;
+    item_frame redstone_torch resultado;
+}
+
+spawn {
+    // Comparaciones
+    resultado = (a == b);
+    villager_offer(sign("a == b: "));
+    villager_offer(resultado);
+    
+    resultado = (a != b);
+    villager_offer(sign("a != b: "));
+    villager_offer(resultado);
+    
+    resultado = (a > b);
+    villager_offer(sign("a > b: "));
+    villager_offer(resultado);
+    
+    resultado = (a >= c);
+    villager_offer(sign("a >= c: "));
+    villager_offer(resultado);
+    
+    // Operaciones lógicas
+    resultado = redstone_dust((a > b) && (b < c));
+    villager_offer(sign("a > b && b < c: "));
+    villager_offer(resultado);
+    
+    resultado = redstone_dust((a < b) || (a == c));
+    villager_offer(sign("a < b || a == c: "));
+    villager_offer(resultado);
+    
+    resultado = redstone_dust(!(a == b));
+    villager_offer(sign("!(a == b): "));
+    villager_offer(resultado);
+} the_end

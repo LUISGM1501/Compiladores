@@ -1,0 +1,27 @@
+chest {
+    item_frame banner_pattern colores_primarios = firework_star{rojo, azul, amarillo};
+    item_frame banner_pattern colores_secundarios = firework_star{verde, naranja, morado};
+    item_frame banner_pattern colores_frios = firework_star{azul, verde, morado};
+    item_frame banner_pattern resultado;
+}
+
+spawn {
+    // Unión de conjuntos
+    resultado = campfire(colores_primarios + colores_secundarios);
+    villager_offer(sign("Unión de colores: "));
+    villager_offer(resultado);
+    
+    // Intersección de conjuntos
+    resultado = campfire(colores_frios * colores_primarios);
+    villager_offer(sign("Intersección de colores fríos y primarios: "));
+    villager_offer(resultado);
+    
+    // Diferencia de conjuntos
+    resultado = campfire(colores_primarios - colores_frios);
+    villager_offer(sign("Colores primarios que no son fríos: "));
+    villager_offer(resultado);
+    
+    // Tamaño de conjunto
+    villager_offer(sign("Número de colores primarios: "));
+    villager_offer(experience_bar(colores_primarios));
+} the_end

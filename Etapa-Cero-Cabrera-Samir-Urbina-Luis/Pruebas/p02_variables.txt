@@ -1,0 +1,20 @@
+chest {
+    item_frame emerald nivel = 10;
+    item_frame book_and_quill nombre = sign("Steve");
+    item_frame redstone_torch activo = lever_on;
+    item_frame gold_nugget salud = splash_potion(20.5);
+    item_frame book letra = name_tag('A');
+}
+
+spawn {
+    villager_offer(sign("Nivel: "));
+    villager_offer(nivel);
+    villager_offer(sign("Nombre: "));
+    villager_offer(nombre);
+    villager_offer(sign("Activo: "));
+    villager_offer(activo);
+    villager_offer(sign("Salud: "));
+    villager_offer(salud);
+    villager_offer(sign("Letra: "));
+    villager_offer(letra);
+} the_end

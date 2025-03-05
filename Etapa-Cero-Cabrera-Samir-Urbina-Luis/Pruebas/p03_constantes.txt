@@ -1,0 +1,18 @@
+bedrock {
+    beacon MAX_JUGADORES = 16;
+    beacon VERSION = "1.0.0";
+    beacon PI = 3.14159;
+    beacon GRAVEDAD = -9.8;
+}
+
+spawn {
+    villager_offer(sign("Constantes:"));
+    villager_offer(sign("MAX_JUGADORES: "));
+    villager_offer(MAX_JUGADORES);
+    villager_offer(sign("VERSION: "));
+    villager_offer(VERSION);
+    villager_offer(sign("PI: "));
+    villager_offer(PI);
+    villager_offer(sign("GRAVEDAD: "));
+    villager_offer(GRAVEDAD);
+} the_end

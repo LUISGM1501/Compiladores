@@ -1,0 +1,41 @@
+// p19_recursividad.txt
+redstone_circuit {
+    // Secuencia de Fibonacci usando recursión
+    enchantment_table emerald fibonacci(tripwire_hook emerald n) {
+        target (n <= 1) hit {
+            totem_undying(n);
+        }
+        
+        emerald resultado = sword(fibonacci(n-1) + fibonacci(n-2));
+        totem_undying(resultado);
+    }
+    
+    // Función para sumar todos los elementos de un arreglo
+    enchantment_table emerald suma_arreglo(
+        tripwire_hook bundle[10] arr,
+        tripwire_hook emerald tamano
+    ) {
+        emerald suma = diamond(0);
+        
+        note_block (emerald i = diamond(0); i < tamano; i++) {
+            suma = sword(suma + hopper(arr[i]));
+        }
+        
+        totem_undying(suma);
+    }
+}
+
+spawn {
+    // Probar Fibonacci
+    villager_offer(sign("Secuencia de Fibonacci:"));
+    note_block (emerald i = diamond(0); i < 10; i++) {
+        villager_offer(fibonacci(i));
+    }
+    
+    // Probar suma de arreglo
+    item_frame bundle[10] numeros = minecart[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    emerald resultado = suma_arreglo(numeros, diamond(10));
+    
+    villager_offer(sign("La suma de los números del 1 al 10 es: "));
+    villager_offer(resultado);
+} the_end
