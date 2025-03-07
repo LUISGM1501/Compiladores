@@ -1,5 +1,5 @@
 ; ********************************************
-; * Programa: SPIDER.ASM                    *
+; * Programa: CREATIV.ASM                   *
 ; * Descripcion: Manejo de probabilidades   *
 ; * (valores entre 0 y 1)                   *
 ; * Autores: Luis Urbina, Samir Cabrera     *

@@ -1,5 +1,5 @@
 ; ********************************************
-; * Programa: REDSTONE.ASM                  *
+; * Programa: BOOLEAN.ASM                   *
 ; * Descripcion: Manejo de booleanos        *
 ; * Autores: Luis Urbina, Samir Cabrera     *
 ; * Fecha: Viernes 07 de Marzo de 2025      *

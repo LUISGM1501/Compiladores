@@ -1,5 +1,5 @@
 ; ********************************************
-; * Programa: EMERALD.ASM                   *
+; * Programa: INTEGER.ASM                   *
 ; * Descripcion: Manejo de numeros enteros  *
 ; * Autores: Luis Urbina, Samir Cabrera     *
 ; * Fecha: Viernes 07 de Marzo de 2025      *

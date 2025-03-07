@@ -1,5 +1,5 @@
 ; ********************************************
-; * Programa: BOOKANDQ.ASM                  *
+; * Programa: STRING.ASM                    *
 ; * Descripcion: Manejo de strings          *
 ; * Autores: Luis Urbina, Samir Cabrera     *
 ; * Fecha: Viernes 07 de Marzo de 2025      *

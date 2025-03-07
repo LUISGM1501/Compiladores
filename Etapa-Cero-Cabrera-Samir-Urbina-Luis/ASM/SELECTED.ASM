@@ -1,8 +1,9 @@
 ; ********************************************
-; * Programa: GOLDNUGG.ASM                  *
-; * Descripcion: Manejo de numeros flotantes*
-; * Autores: Luis Urbina, Samir Cabrera     *
-; * Fecha: Viernes 07 de Marzo de 2025      *
+; * El tipo de dato seleccionado es flotante *
+; * Programa: SELECTED.ASM                   *
+; * Descripcion: Manejo de numeros flotantes *
+; * Autores: Luis Urbina, Samir Cabrera      *
+; * Fecha: Viernes 07 de Marzo de 2025       *
 ; ********************************************
 
 ; El segmento DATOS contiene todas las variables y constantes que usara el programa

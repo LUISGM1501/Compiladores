@@ -1,5 +1,5 @@
 ; ********************************************
-; * Programa: BOOK.ASM                      *
+; * Programa: CHAR.ASM                      *
 ; * Descripcion: Manejo de caracteres       *
 ; * Autores: Luis Urbina, Samir Cabrera     *
 ; * Fecha: Viernes 07 de Marzo de 2025      *
