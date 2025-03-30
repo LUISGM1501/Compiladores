@@ -35,6 +35,7 @@ DATOS SEGMENT
     char_valor   DB ?                  ; Valor carácter convertido
     string_valor DB 50 DUP (?)         ; Valor string convertido
     valor_mayor_05 DB 0                ; Bandera para indicar si la probabilidad es mayor a 0.5
+    primer_digito_decimal DB ?         ; Variable para almacenar el primer dígito decimal
     
     ; Auxiliares
     nueva_lin    DB 0Dh, 0Ah, '$'      ; Codigos para crear una nueva linea en pantalla
@@ -158,16 +159,51 @@ CONVERSION_ENTERO:
     MOV AX, [decimal]
     MOV [int_valor], AX
     
-    ; 3. Conversión a carácter (mapear a '0'-'9' según valor)
-    ; Para simplificar, si es mayor a 0.5 usamos '1', sino '0'
-    CMP [valor_mayor_05], 0
-    JE CHAR_CERO
+    ; 3. Conversión a carácter (extraer primer dígito decimal)
+    ; MODIFICACIÓN: Ahora extraemos el primer dígito decimal del valor de probabilidad
+    MOV AX, [decimal]
     
-    MOV [char_valor], '1'  ; Si es mayor a 0.5
-    JMP CONVERSION_STRING
+    ; Si decimal es 0, el dígito es 0
+    CMP AX, 0
+    JE PRIMER_DIGITO_CERO
     
-CHAR_CERO:
-    MOV [char_valor], '0'  ; Si es menor o igual a 0.5
+    ; Extraer el primer dígito de la parte decimal
+    ; Si tenemos más de un dígito decimal, necesitamos extraer el primero
+    MOV BX, 10              ; Divisor = 10
+    XOR CH, CH                ; Limpiar la parte alta (CH)
+    MOV CL, [dec_digitos]     ; Cargar el byte en la parte baja (CL)    CMP CX, 1
+    JE UN_DIGITO_DECIMAL_CHAR ; Si solo hay un dígito, ya lo tenemos en AX
+    
+    ; Si hay más de un dígito, dividimos repetidamente por 10 hasta obtener
+    ; el primer dígito (el más significativo)
+    DEC CX                  ; Decrementamos porque necesitamos hacer n-1 divisiones
+EXTRAER_DIGITO_LOOP:
+    CMP CX, 0
+    JE DIGITO_ENCONTRADO    ; Si CX = 0, ya tenemos el primer dígito en AX
+    
+    XOR DX, DX              ; Limpiar DX para división
+    DIV BX                  ; AX = AX / 10, DX = resto
+    
+    DEC CX                  ; Decrementar contador
+    JMP EXTRAER_DIGITO_LOOP ; Seguir dividiendo
+    
+UN_DIGITO_DECIMAL_CHAR:
+    ; Ya tenemos el dígito en AX
+    JMP DIGITO_ENCONTRADO
+    
+DIGITO_ENCONTRADO:
+    ; AX contiene el primer dígito decimal
+    MOV [primer_digito_decimal], AL
+    JMP CONVERSION_CHAR_FIN
+    
+PRIMER_DIGITO_CERO:
+    MOV [primer_digito_decimal], 0
+    
+CONVERSION_CHAR_FIN:
+    ; Convertir el dígito a carácter sumando '0'
+    MOV AL, [primer_digito_decimal]
+    ADD AL, '0'             ; Convertir a carácter ASCII
+    MOV [char_valor], AL
     
     ; 4. Conversión a string (mantener representación como string)
 CONVERSION_STRING:
@@ -181,7 +217,6 @@ CONVERSION_STRING:
     POP AX
     RET
 REALIZAR_CONVERSIONES ENDP
-
 ;------------------------------------------------------------
 ; Procedimiento: MOSTRAR_RESULTADOS
 ; Muestra todos los resultados de las conversiones
