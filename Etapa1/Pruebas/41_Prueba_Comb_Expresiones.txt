@@ -1,0 +1,185 @@
+$* 
+   Prueba: 41_Prueba_Comb_Expresiones
+   Descripción: Verificar expresiones aritméticas y lógicas complejas
+   Lenguaje: Notch Engine
+*$
+
+WorldName PruebaExpresionesComplejas:
+
+Bedrock {
+    Obsidian Stack BASE_DAMAGE 10;
+    Obsidian Stack ARMOR_FACTOR 2;
+    Obsidian Ghast CRIT_MULTIPLIER 1.5;
+    Obsidian Torch USE_ADVANCED_FORMULAS On;
+}
+
+Inventory {
+    $$ Variables para las pruebas
+    Stack a = 5;
+    Stack b = 10;
+    Stack c = 15;
+    Stack resultado_entero;
+    
+    Ghast x = 2.5;
+    Ghast y = 3.7;
+    Ghast z = 1.2;
+    Ghast resultado_flotante;
+    
+    Torch p = On;
+    Torch q = Off;
+    Torch r = On;
+    Torch resultado_logico;
+    
+    Spider str1 = "Notch";
+    Spider str2 = "Engine";
+    Spider resultado_string;
+    
+    Shelf[5] Stack valores = [10, 20, 30, 40, 50];
+    Entity Jugador {
+        Spider nombre;
+        Stack nivel;
+        Ghast salud;
+    };
+    Entity Jugador jugador;
+}
+
+SpawnPoint {
+    $$ 1. Expresiones aritméticas complejas con enteros
+    $$ Precedencia de operadores y paréntesis
+    resultado_entero = a + b * c;
+    dropperSpider("a + b * c = " bind resultado_entero);
+    
+    resultado_entero = (a + b) * c;
+    dropperSpider("(a + b) * c = " bind resultado_entero);
+    
+    $$ Combinación de múltiples operadores
+    resultado_entero = a + b - c * 2 // 3 % 4;
+    dropperSpider("a + b - c * 2 // 3 % 4 = " bind resultado_entero);
+    
+    $$ Expresiones anidadas
+    resultado_entero = (a + (b - (c * (2 // (3 % 4)))));
+    dropperSpider("Anidada enteros: " bind resultado_entero);
+    
+    $$ Expresiones con incremento/decremento
+    soulsand a;
+    resultado_entero = a + b;
+    magma b;
+    dropperSpider("Después de incremento/decremento: " bind resultado_entero);
+    
+    $$ 2. Expresiones aritméticas complejas con flotantes
+    $$ Precedencia de operadores y paréntesis
+    resultado_flotante = x :+ y :* z;
+    dropperSpider("x :+ y :* z = " bind resultado_flotante);
+    
+    resultado_flotante = (x :+ y) :* z;
+    dropperSpider("(x :+ y) :* z = " bind resultado_flotante);
+    
+    $$ Combinación de múltiples operadores
+    resultado_flotante = x :+ y :- z :* 2.0 :// 0.5 :% 1.0;
+    dropperSpider("x :+ y :- z :* 2.0 :// 0.5 :% 1.0 = " bind resultado_flotante);
+    
+    $$ Expresiones anidadas
+    resultado_flotante = (x :+ (y :- (z :* (2.0 :// (0.5 :% 1.0)))));
+    dropperSpider("Anidada flotantes: " bind resultado_flotante);
+    
+    $$ 3. Expresiones lógicas complejas
+    $$ Combinación de operadores lógicos
+    resultado_logico = p and q;
+    dropperSpider("p and q = " bind resultado_logico);
+    
+    resultado_logico = p or q;
+    dropperSpider("p or q = " bind resultado_logico);
+    
+    resultado_logico = not p;
+    dropperSpider("not p = " bind resultado_logico);
+    
+    resultado_logico = p xor q;
+    dropperSpider("p xor q = " bind resultado_logico);
+    
+    $$ Expresiones lógicas complejas con varios operadores
+    resultado_logico = p and q or r;
+    dropperSpider("p and q or r = " bind resultado_logico);
+    
+    resultado_logico = p and (q or r);
+    dropperSpider("p and (q or r) = " bind resultado_logico);
+    
+    resultado_logico = not (p and q) or (not r and p);
+    dropperSpider("not (p and q) or (not r and p) = " bind resultado_logico);
+    
+    $$ 4. Expresiones de comparación
+    resultado_logico = a < b;
+    dropperSpider("a < b = " bind resultado_logico);
+    
+    resultado_logico = a > c;
+    dropperSpider("a > c = " bind resultado_logico);
+    
+    resultado_logico = a <= b and b >= c;
+    dropperSpider("a <= b and b >= c = " bind resultado_logico);
+    
+    resultado_logico = (a is b) or (b is c);
+    dropperSpider("(a is b) or (b is c) = " bind resultado_logico);
+    
+    resultado_logico = a isNot b and b isNot c and a isNot c;
+    dropperSpider("a isNot b and b isNot c and a isNot c = " bind resultado_logico);
+    
+    $$ 5. Expresiones mixtas (combinando tipos)
+    resultado_logico = (a + b > c) and (x :+ y :> z);
+    dropperSpider("(a + b > c) and (x :+ y :> z) = " bind resultado_logico);
+    
+    resultado_logico = (a < b) or (not p) and (x :< y);
+    dropperSpider("(a < b) or (not p) and (x :< y) = " bind resultado_logico);
+    
+    $$ 6. Expresiones con operaciones de cadenas
+    resultado_string = bind(str1, " " bind str2);
+    dropperSpider("bind result: " bind resultado_string);
+    
+    Stack longitud = #(resultado_string);
+    dropperSpider("Length: " bind longitud);
+    
+    resultado_string = from resultado_string ## 0 ## 5;
+    dropperSpider("Substring: " bind resultado_string);
+    
+    Stack pos = seek(resultado_string, "tch");
+    dropperSpider("Position of 'tch': " bind pos);
+    
+    $$ 7. Expresiones con accesos a estructuras
+    stack valor_arreglo = valores[2] + valores[3] * valores[4];
+    dropperSpider("Array expression: " bind valor_arreglo);
+    
+    $$ Inicialización de estructura para pruebas
+    jugador@nombre = "Steve";
+    jugador@nivel = 20;
+    jugador@salud = 18.5;
+    
+    $$ Expresiones con campos de registros
+    Stack nivel_con_bonus = jugador@nivel + 5;
+    dropperSpider("Nivel con bonus: " bind nivel_con_bonus);
+    
+    Torch nivel_alto = jugador@nivel > 15 and jugador@salud :> 15.0;
+    dropperSpider("¿Nivel alto?: " bind nivel_alto);
+    
+    $$ 8. Expresiones con conversiones de tipo
+    Stack entero_desde_float = x >> Stack;
+    dropperSpider("Entero desde float: " bind entero_desde_float);
+    
+    Torch bool_desde_entero = a >> Torch;
+    dropperSpider("Booleano desde entero: " bind bool_desde_entero);
+    
+    $$ 9. Expresiones extremadamente complejas que combinan múltiples elementos
+    Stack damage = BASE_DAMAGE + ((jugador@nivel // 2) * (valores[1] + valores[3] // 3));
+    dropperSpider("Daño calculado: " bind damage);
+    
+    $$ Fórmula compleja con mezcla de tipos y operaciones
+    target USE_ADVANCED_FORMULAS craft hit
+    PolloCrudo
+        Ghast damage_final = ((damage >> Ghast) :* CRIT_MULTIPLIER) :// (1.0 :+ ((valores[4] // 10) >> Ghast));
+        dropperSpider("Daño final (fórmula avanzada): " bind damage_final);
+    PolloAsado
+    miss
+    PolloCrudo
+        Stack damage_simple = damage * 2 // (ARMOR_FACTOR + (p and q >> Stack));
+        dropperSpider("Daño final (fórmula simple): " bind damage_simple);
+    PolloAsado
+}
+
+worldSave

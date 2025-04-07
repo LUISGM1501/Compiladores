@@ -1,0 +1,281 @@
+$* 
+   Prueba: 44_Prueba_Rend_TokensRepetidos
+   Descripción: Verificar rendimiento con patrones repetitivos
+   Lenguaje: Notch Engine
+*$
+
+WorldName PruebaTokensRepetidos:
+
+Bedrock {
+    Obsidian Stack MAX_ITERATIONS 500;
+    Obsidian Stack PATTERN_LENGTH 20;
+}
+
+Inventory {
+    $$ Variables para la prueba
+    Stack counter = 0;
+    Stack total = 0;
+    Stack temp = 0;
+    Torch flag = On;
+}
+
+SpawnPoint {
+    dropperSpider("Iniciando prueba de rendimiento con tokens repetitivos");
+    
+    $$ =================================================================
+    $$ Patrón 1: Repetición masiva de operaciones aritméticas
+    $$ =================================================================
+    
+    counter = 0;
+    total = 0;
+    
+    $$ Repetir 500 veces el mismo patrón de operaciones
+    repeater counter < MAX_ITERATIONS craft
+    PolloCrudo
+        $$ Patrón de operaciones aritméticas que se repite
+        total = total + 1;
+        total = total - 1;
+        total = total + 2;
+        total = total - 1;
+        total = total + 3;
+        total = total - 2;
+        total = total * 2;
+        total = total // 2;
+        total = total + 5;
+        total = total % 10;
+        
+        $$ Repetimos el mismo patrón para generar más tokens
+        total = total + 1;
+        total = total - 1;
+        total = total + 2;
+        total = total - 1;
+        total = total + 3;
+        total = total - 2;
+        total = total * 2;
+        total = total // 2;
+        total = total + 5;
+        total = total % 10;
+        
+        soulsand counter;
+    PolloAsado
+    
+    dropperSpider("Patrón 1 completado. Total: " bind total);
+    
+    $$ =================================================================
+    $$ Patrón 2: Repetición masiva de operaciones lógicas
+    $$ =================================================================
+    
+    counter = 0;
+    flag = On;
+    
+    $$ Repetir 500 veces el mismo patrón de operaciones lógicas
+    repeater counter < MAX_ITERATIONS craft
+    PolloCrudo
+        $$ Patrón de operaciones lógicas que se repite
+        flag = flag and On;
+        flag = flag or Off;
+        flag = not flag;
+        flag = flag and On;
+        flag = flag or Off;
+        flag = not flag;
+        flag = flag xor On;
+        flag = flag xor Off;
+        flag = flag and On;
+        flag = not flag;
+        
+        $$ Repetimos el mismo patrón para generar más tokens
+        flag = flag and On;
+        flag = flag or Off;
+        flag = not flag;
+        flag = flag and On;
+        flag = flag or Off;
+        flag = not flag;
+        flag = flag xor On;
+        flag = flag xor Off;
+        flag = flag and On;
+        flag = not flag;
+        
+        soulsand counter;
+    PolloAsado
+    
+    dropperSpider("Patrón 2 completado. Estado final: " bind flag);
+    
+    $$ =================================================================
+    $$ Patrón 3: Repetición masiva de evaluaciones condicionales
+    $$ =================================================================
+    
+    counter = 0;
+    total = 0;
+    
+    $$ Repetir 500 veces el mismo patrón de condicionales
+    repeater counter < MAX_ITERATIONS craft
+    PolloCrudo
+        $$ Patrón de condicionales que se repite
+        target counter % 2 is 0 craft hit
+        PolloCrudo
+            total += 1;
+        PolloAsado
+        miss
+        PolloCrudo
+            total += 2;
+        PolloAsado
+        
+        target counter % 3 is 0 craft hit
+        PolloCrudo
+            total += 3;
+        PolloAsado
+        miss
+        PolloCrudo
+            total += 1;
+        PolloAsado
+        
+        target counter % 5 is 0 craft hit
+        PolloCrudo
+            total += 5;
+        PolloAsado
+        miss
+        PolloCrudo
+            total += 2;
+        PolloAsado
+        
+        target counter % 7 is 0 craft hit
+        PolloCrudo
+            total += 7;
+        PolloAsado
+        miss
+        PolloCrudo
+            total += 3;
+        PolloAsado
+        
+        target total > 1000 craft hit
+        PolloCrudo
+            total = total % 1000;
+        PolloAsado
+        
+        soulsand counter;
+    PolloAsado
+    
+    dropperSpider("Patrón 3 completado. Total: " bind total);
+    
+    $$ =================================================================
+    $$ Patrón 4: Repetición masiva de incremento/decremento
+    $$ =================================================================
+    
+    counter = 0;
+    total = 500;
+    
+    $$ Repetir un patrón de incremento/decremento
+    repeater counter < MAX_ITERATIONS craft
+    PolloCrudo
+        $$ Patrón de incremento/decremento que se repite
+        soulsand total;
+        soulsand total;
+        soulsand total;
+        magma total;
+        magma total;
+        soulsand total;
+        soulsand total;
+        magma total;
+        soulsand total;
+        magma total;
+        
+        $$ Repetimos el mismo patrón
+        soulsand total;
+        soulsand total;
+        soulsand total;
+        magma total;
+        magma total;
+        soulsand total;
+        soulsand total;
+        magma total;
+        soulsand total;
+        magma total;
+        
+        soulsand counter;
+    PolloAsado
+    
+    dropperSpider("Patrón 4 completado. Total: " bind total);
+    
+    $$ =================================================================
+    $$ Patrón 5: Repetición masiva de operaciones de asignación compuesta
+    $$ =================================================================
+    
+    counter = 0;
+    total = 5;
+    
+    $$ Repetir un patrón de operaciones de asignación compuesta
+    repeater counter < MAX_ITERATIONS craft
+    PolloCrudo
+        $$ Patrón de asignaciones compuestas que se repite
+        total += 5;
+        total -= 2;
+        total *= 2;
+        total /= 2;
+        total %= 10;
+        total += 1;
+        total -= 1;
+        total *= 3;
+        total /= 3;
+        total %= 5;
+        
+        $$ Repetimos el mismo patrón
+        total += 5;
+        total -= 2;
+        total *= 2;
+        total /= 2;
+        total %= 10;
+        total += 1;
+        total -= 1;
+        total *= 3;
+        total /= 3;
+        total %= 5;
+        
+        soulsand counter;
+    PolloAsado
+    
+    dropperSpider("Patrón 5 completado. Total: " bind total);
+    
+    $$ =================================================================
+    $$ Patrón 6: Repetición masiva de operadores de comparación
+    $$ =================================================================
+    
+    counter = 0;
+    total = 0;
+    temp = 50;
+    
+    $$ Repetir un patrón de comparaciones
+    repeater counter < MAX_ITERATIONS craft
+    PolloCrudo
+        $$ Patrón de comparaciones que se repite
+        target counter < temp craft hit total += 1; PolloAsado
+        target counter > temp craft hit total += 1; PolloAsado
+        target counter <= temp craft hit total += 1; PolloAsado
+        target counter >= temp craft hit total += 1; PolloAsado
+        target counter is temp craft hit total += 1; PolloAsado
+        target counter isNot temp craft hit total += 1; PolloAsado
+        target counter < 100 craft hit total += 1; PolloAsado
+        target counter > 0 craft hit total += 1; PolloAsado
+        target counter <= 100 craft hit total += 1; PolloAsado
+        target counter >= 0 craft hit total += 1; PolloAsado
+        
+        $$ Repetimos el mismo patrón
+        target counter < temp craft hit total += 1; PolloAsado
+        target counter > temp craft hit total += 1; PolloAsado
+        target counter <= temp craft hit total += 1; PolloAsado
+        target counter >= temp craft hit total += 1; PolloAsado
+        target counter is temp craft hit total += 1; PolloAsado
+        target counter isNot temp craft hit total += 1; PolloAsado
+        target counter < 100 craft hit total += 1; PolloAsado
+        target counter > 0 craft hit total += 1; PolloAsado
+        target counter <= 100 craft hit total += 1; PolloAsado
+        target counter >= 0 craft hit total += 1; PolloAsado
+        
+        soulsand counter;
+    PolloAsado
+    
+    dropperSpider("Patrón 6 completado. Total: " bind total);
+    
+    dropperSpider("Prueba de rendimiento con tokens repetitivos completada");
+}
+
+worldSave

@@ -1,0 +1,111 @@
+$* 
+  Prueba_Lim_PrecisionFlotante.ne
+  Propósito: Verificar flotantes con muchos decimales para probar los límites de precisión del analizador léxico
+  Fecha: Abril 10, 2025
+*$
+
+WorldName PruebaPrecisionFlotante:
+
+Bedrock {
+  $$ Constantes con números flotantes de diferentes precisiones
+  Obsidian Ghast PI_SIMPLE 3.14;
+  Obsidian Ghast PI_PRECISO 3.14159265358979323846;
+  Obsidian Ghast EULER 2.71828182845904523536;
+  Obsidian Ghast RAIZ_DOS 1.41421356237309504880;
+  Obsidian Ghast PHI 1.61803398874989484820;
+  
+  $$ Notaciones científicas
+  Obsidian Ghast SPEED_OF_LIGHT 2.99792458e8;
+  Obsidian Ghast PLANCK_CONSTANT 6.62607015e-34;
+  Obsidian Ghast AVOGADRO 6.02214076e23;
+  
+  $$ Valores extremos
+  Obsidian Ghast EXTREMO_PEQUENO 0.0000000000000000000000001;
+  Obsidian Ghast EXTREMO_GRANDE 123456789012345678901234.5678901234567890;
+  
+  $$ Valores negativos
+  Obsidian Ghast NEG_PI -3.14159265358979;
+  Obsidian Ghast NEG_EXTREMO -0.0000000000000000000000001;
+  
+  $$ Casos especiales
+  Obsidian Ghast CERO_DECIMAL 0.0;
+  Obsidian Ghast SOLO_ENTERO 42.0;
+  Obsidian Ghast SOLO_DECIMAL 0.42;
+  Obsidian Ghast PUNTO_INICIAL .5;  $$ Sin dígito antes del punto
+}
+
+Inventory {
+  $$ Flotantes de diferentes tamaños
+  Ghast normal = 3.14;
+  Ghast preciso = 3.141592653589793;
+  Ghast pequeno = 0.000000000123;
+  Ghast grande = 1234567890.123456789;
+  
+  $$ Diferentes notaciones
+  Ghast punto_inicial = .25;
+  Ghast sin_decimal = 42.;
+  
+  $$ Notación científica
+  Ghast cientifico1 = 1.23e5;    $$ 123000
+  Ghast cientifico2 = 4.56e-7;   $$ 0.000000456
+  Ghast cientifico3 = 7.89e+12;  $$ 7890000000000
+  
+  $$ Valores extremos
+  Ghast muy_pequeno = 0.000000000000000000000000000000000001;
+  Ghast muy_grande = 999999999999999999999999999999999999999.9;
+  
+  $$ Flotantes con muchos dígitos en parte entera y decimal
+  Ghast muchos_digitos = 123456789012345.678901234567890;
+  
+  $$ Flotantes negativos
+  Ghast neg_normal = -3.14;
+  Ghast neg_preciso = -3.141592653589793;
+  Ghast neg_pequeno = -0.000000000123;
+  Ghast neg_cientifico = -2.998e8;
+  
+  $$ Variables para operaciones
+  Ghast resultado1;
+  Ghast resultado2;
+  Ghast resultado3;
+}
+
+SpawnPoint {
+  $$ Operaciones básicas con flotantes
+  resultado1 = normal :+ preciso;
+  resultado2 = preciso :- normal;
+  resultado3 = normal :* 2.0;
+  
+  $$ Operaciones con valores extremos
+  Ghast res_extremo1 = muy_pequeno :* 1000000.0;
+  Ghast res_extremo2 = muy_grande :// 1000000.0;
+  
+  $$ Operaciones de división con diferentes precisiones
+  Ghast division1 = 1.0 :// 3.0;                     $$ Debería ser aproximadamente 0.333333
+  Ghast division2 = 2.0 :// 3.0;                     $$ Debería ser aproximadamente 0.666667
+  Ghast division_extrema = 1.0 :// 9999999999.0;     $$ División que genera un número muy pequeño
+  
+  $$ Operaciones científicas
+  Ghast res_cientifico = cientifico1 :* cientifico2; $$ 1.23e5 * 4.56e-7 = 5.6088e-2
+  
+  $$ Mostrar algunos resultados
+  dropperGhast(resultado1);
+  dropperGhast(resultado2);
+  dropperGhast(division1);
+  dropperGhast(division2);
+  
+  $$ Usando flotantes en estructuras de control
+  target division1 :< 0.34 craft hit
+  PolloCrudo
+    dropperSpider("La división 1/3 es menor que 0.34");
+  PolloAsado
+  
+  $$ Ciclo con incremento flotante
+  Ghast i = 0.0;
+  repeater i :< 1.0 craft
+  PolloCrudo
+    dropperGhast(i);
+    i = i :+ 0.2;  $$ Incremento de 0.2 en cada iteración
+  PolloAsado
+}
+
+worldSave

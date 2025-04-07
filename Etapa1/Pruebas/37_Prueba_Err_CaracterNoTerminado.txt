@@ -1,0 +1,36 @@
+$* 
+   Prueba: 37_Prueba_Err_CaracterNoTerminado
+   Descripción: Verificar detección de literales de carácter sin cierre
+   Lenguaje: Notch Engine
+*$
+
+WorldName PruebaCaracterNoTerminado:
+
+Inventory {
+    $$ Casos de caracteres correctamente formados (para comparación)
+    Rune letraCorrecta = 'A';
+    Rune digitoCorrecto = '5';
+    Rune simboloCorrecto = '@';
+    Rune escapeCorrecto = '\n';
+    
+    $$ Casos de caracteres sin cierre (errores léxicos)
+    Rune errorSimple = 'B;    $$ Falta comilla de cierre
+    Rune errorEscape = '\n;   $$ Falta comilla de cierre después de secuencia de escape
+    
+    $$ Caso con apertura pero sin contenido ni cierre
+    Rune errorVacio = ';      $$ Solo comilla de apertura
+    
+    $$ Caso con múltiples caracteres (error léxico)
+    Rune errorMultiple = 'ABC;  $$ Múltiples caracteres y falta comilla de cierre
+    
+    $$ Error dentro de una expresión
+    Stack valor = 5 + (3 * 'x);  $$ Falta comilla de cierre en la expresión
+}
+
+SpawnPoint {
+    $$ Este carácter inválido debería ser detectado
+    Rune pruebaError = 'Z;
+    dropperSpider("Este texto no debería ser alcanzado debido al error léxico");
+}
+
+worldSave

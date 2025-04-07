@@ -1,0 +1,103 @@
+$* 
+  Prueba_Lim_TokensConsecutivos.ne
+  Propósito: Verificar tokens sin separación (ej: 5+3) para probar la capacidad de reconocimiento del analizador léxico
+  Fecha: Abril 10, 2025
+*$
+
+WorldName PruebaTokensConsecutivos:
+
+Bedrock {
+  $$ Constantes con valores que implican tokens consecutivos
+  Obsidian Stack MAX_LEVEL5 100;     $$ Identificador con número pegado
+  Obsidian Stack LEVEL+SKILL 200;    $$ Identificador con operador pegado (debería ser error)
+  Obsidian Stack OFFSET-5 50;        $$ Identificador con operador y número pegados (debería ser error)
+}
+
+Inventory {
+  $$ Declaraciones con tokens consecutivos
+  Stack a=5;              $$ Sin espacios alrededor del operador de asignación
+  Stack b=10;             $$ Sin espacios alrededor del operador de asignación
+  Stack c=a+b;            $$ Expresión sin espacios
+  
+  $$ Operadores aritméticos sin espacios
+  Stack suma=5+3;         $$ Suma sin espacios
+  Stack resta=10-7;       $$ Resta sin espacios
+  Stack multiplicacion=4*3; $$ Multiplicación sin espacios
+  Stack division=20//4;   $$ División sin espacios
+  Stack modulo=7%2;       $$ Módulo sin espacios
+  
+  $$ Operadores de comparación sin espacios
+  Torch comparacion1=5<10;     $$ Menor que sin espacios
+  Torch comparacion2=5>3;      $$ Mayor que sin espacios
+  Torch comparacion3=5<=5;     $$ Menor o igual sin espacios
+  Torch comparacion4=5>=5;     $$ Mayor o igual sin espacios
+  Torch comparacion5=5is5;     $$ Igual sin espacios (debería ser error)
+  Torch comparacion6=5isNot6;  $$ Distinto sin espacios (debería ser error)
+  
+  $$ Expresiones complejas sin espacios
+  Stack expr1=5+3*2;      $$ Expresión sin espacios
+  Stack expr2=(5+3)*2;    $$ Paréntesis sin espacios
+  Stack expr3=5+(3*2);    $$ Paréntesis mezclados sin espacios
+  
+  $$ Flotantes sin espacios en expresiones
+  Ghast f1=3.14;          $$ Asignación sin espacios
+  Ghast f2=f1:+2.5;       $$ Suma flotante sin espacios
+  Ghast f3=f1:-1.5;       $$ Resta flotante sin espacios
+  Ghast f4=f1:*2.0;       $$ Multiplicación flotante sin espacios
+  Ghast f5=f1://1.5;      $$ División flotante sin espacios
+  
+  $$ Acceso a estructuras sin espacios
+  Shelf[5]Stack arreglo;           $$ Declaración de arreglo sin espacios
+  Entity Jugador{                  $$ Declaración de registro sin espacios
+    Spider nombre;
+    Stack nivel;
+  };
+  
+  $$ Inicialización de variables con literales sin espacios
+  Spider texto="Hola";             $$ String sin espacios
+  Rune caracter='A';               $$ Caracter sin espacios
+  Torch booleano=On;               $$ Booleano sin espacios
+  Stack arr[0]=10;                 $$ Acceso a arreglo sin espacios
+  
+  $$ Múltiples variables en una línea sin separación adecuada
+  Stack x=1,y=2,z=3;              $$ Múltiples declaraciones sin espacios
+  
+  $$ Variables normales para pruebas
+  Stack normal1 = 10;
+  Stack normal2 = 20;
+  Spider mensaje = "Tokens consecutivos";
+}
+
+SpawnPoint {
+  $$ Operaciones con tokens consecutivos
+  suma=normal1+normal2;           $$ Asignación y suma sin espacios
+  Stack valor=(normal1+5)*(normal2-5);  $$ Expresión compleja sin espacios
+  
+  $$ Estructuras de control con tokens consecutivos
+  repeater suma>0craft            $$ Sin espacios después de la condición y antes de craft
+  PolloCrudo
+    suma=suma-1;                  $$ Asignación sin espacios dentro del bucle
+    dropperStack(suma);
+  PolloAsado
+  
+  target valor>=100craft hit      $$ Sin espacios después de la condición y antes de craft
+  PolloCrudo
+    dropperSpider("Valor grande");
+  PolloAsado
+  miss
+  PolloCrudo
+    dropperSpider("Valor pequeño");
+  PolloAsado
+  
+  $$ Llamadas a funciones sin espacios
+  dropperSpider(mensaje);         $$ Sin espacios entre nombre de función y paréntesis
+  dropperStack(valor);
+  
+  $$ Operaciones consecutivas
+  normal1+=5;                     $$ Sin espacios en operador compuesto
+  normal2-=3;                     $$ Sin espacios en operador compuesto
+  dropperStack(normal1);
+  dropperStack(normal2);
+}
+
+worldSave

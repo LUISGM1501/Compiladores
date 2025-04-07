@@ -1,0 +1,90 @@
+$* 
+  Prueba_Err_CaracterInvalido.ne
+  Propósito: Verificar detección de caracteres no permitidos en el lenguaje Notch Engine
+  Fecha: Abril 10, 2025
+*$
+
+WorldName PruebaCaracteresInvalidos:
+
+Bedrock {
+  Obsidian Stack NORMAL 100;
+  
+  $$ Caracteres Unicode que no deberían ser permitidos en identificadores
+  Obsidian Stack ÑANDU 200; $$ Contiene 'Ñ', que no está en el conjunto ASCII básico
+  Obsidian Stack AÇÚCAR 300; $$ Contiene 'Ç' y 'Ú', que no están en el conjunto ASCII básico
+  Obsidian Stack CAFÉ 400; $$ Contiene 'É', que no está en el conjunto ASCII básico
+}
+
+Inventory {
+  $$ Variables normales para contraste
+  Stack contador = 0;
+  Spider mensaje = "Normal";
+  
+  $$ Variables con caracteres inválidos en identificadores
+  Stack año = 2025; $$ Contiene 'ñ', que no está en el conjunto ASCII básico
+  Stack piña = 10; $$ Contiene 'ñ', que no está en el conjunto ASCII básico
+  Spider münzen = "Monedas"; $$ Contiene 'ü', que no está en el conjunto ASCII básico
+  Spider öffentlich = "Público"; $$ Contiene 'ö', que no está en el conjunto ASCII básico
+  
+  $$ Caracteres invisibles o de control en identificadores
+  Stack cont␇ador = 5; $$ Contiene un carácter de control (BEL, ASCII 7)
+  Spider mens␣aje = "Texto"; $$ Contiene un espacio no detectable
+  
+  $$ Emojis y otros símbolos Unicode en identificadores
+  Stack contador😀 = 10; $$ Contiene un emoji
+  Spider mensaje📱 = "Texto"; $$ Contiene un emoji
+  Stack 💰monedas = 100; $$ Comienza con un emoji
+  
+  $$ Caracteres ASCII extendidos en identificadores
+  Stack valor¢ = 50; $$ Contiene ¢, que está fuera del ASCII básico
+  Spider texto© = "Copyright"; $$ Contiene ©, que está fuera del ASCII básico
+  
+  $$ Literales string con caracteres Unicode
+  Spider texto_unicode = "Caracteres especiales: áéíóúñÁÉÍÓÚÑ";
+  Spider texto_emoji = "Emojis: 😀🎮🌍💻";
+  
+  $$ Símbolos inválidos que no son operadores válidos en el lenguaje
+  Stack a ∆ b; $$ Delta (∆) no es un operador válido
+  Stack c ± d; $$ Plus-minus (±) no es un operador válido
+  
+  $$ Caracteres inválidos fuera de contexto
+  Stack e § f; $$ Section (§) no es un símbolo del lenguaje
+  Stack g ¶ h; $$ Paragraph (¶) no es un símbolo del lenguaje
+  
+  $$ Backslash inválido fuera de string o char
+  Stack valor \ otro; $$ Backslash independiente
+  
+  $$ Caracteres ASCII de control visibles
+  Stack valor␀contador = 5; $$ Contiene NUL (ASCII 0)
+  Stack otro␊valor = 10; $$ Contiene LF (ASCII 10)
+  
+  $$ Literales carácter con caracteres inválidos
+  Rune char_1 = '€'; $$ Euro no está en ASCII básico
+  Rune char_2 = '✓'; $$ Checkmark no está en ASCII básico
+}
+
+SpawnPoint {
+  $$ Código normal para referencia
+  contador = 1;
+  
+  $$ Operadores inválidos en expresiones
+  contador = contador × 2; $$ Multiplication sign (×) no es válido, debería usar *
+  contador = contador ÷ 2; $$ Division sign (÷) no es válido, debería usar //
+  
+  $$ Uso de variables con nombres inválidos
+  dropperStack(año);
+  dropperSpider(texto_unicode);
+  
+  $$ Caracteres inválidos en líneas de código
+  contador = 5 → 10; $$ Arrow (→) no es un operador válido
+  contador = 5 ∧ 10; $$ Logical and (∧) no es operador válido, debería usar 'and'
+  
+  $$ Caracteres de tabulación vertical o formfeed
+  contador = 5;
+  contador = contador + 5;
+  
+  $$ Instrucción normal para finalizar
+  dropperSpider("Fin de prueba");
+}
+
+worldSave

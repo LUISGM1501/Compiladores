@@ -1,0 +1,108 @@
+$* 
+  Prueba_Lim_NumeroGrande.ne
+  Propósito: Verificar números enteros muy grandes para probar los límites del analizador léxico
+  Fecha: Abril 10, 2025
+*$
+
+WorldName PruebaNumeroGrande:
+
+Bedrock {
+  $$ Constantes con números enteros de diferentes tamaños
+  Obsidian Stack NUM_PEQUENO 42;
+  Obsidian Stack NUM_MEDIANO 12345;
+  Obsidian Stack NUM_GRANDE 9876543210;
+  Obsidian Stack NUM_MUY_GRANDE 1234567890123456789;
+  
+  $$ Constantes con números negativos
+  Obsidian Stack NEG_PEQUENO -42;
+  Obsidian Stack NEG_MEDIANO -12345;
+  Obsidian Stack NEG_GRANDE -9876543210;
+  Obsidian Stack NEG_MUY_GRANDE -1234567890123456789;
+  
+  $$ Números al límite de capacidad típica de representación
+  Obsidian Stack INT_16BIT_MAX 32767;        $$ 2^15 - 1
+  Obsidian Stack INT_16BIT_MIN -32768;       $$ -2^15
+  Obsidian Stack INT_32BIT_MAX 2147483647;   $$ 2^31 - 1
+  Obsidian Stack INT_32BIT_MIN -2147483648;  $$ -2^31
+  Obsidian Stack INT_64BIT_MAX 9223372036854775807;   $$ 2^63 - 1
+  Obsidian Stack INT_64BIT_MIN -9223372036854775808;  $$ -2^63
+  
+  $$ Números extremadamente grandes (posiblemente fuera del rango de representación numérica típica)
+  Obsidian Stack NUM_EXTREMO 123456789012345678901234567890;
+  Obsidian Stack NEG_EXTREMO -123456789012345678901234567890;
+}
+
+Inventory {
+  $$ Variables con valores iniciales grandes
+  Stack num1 = 1234567890;
+  Stack num2 = 9876543210;
+  
+  $$ Variables con valores enormes
+  Stack grande1 = 123456789012345678;
+  Stack grande2 = 987654321098765432;
+  
+  $$ Variables con números al límite
+  Stack max16 = 32767;
+  Stack min16 = -32768;
+  Stack max32 = 2147483647;
+  Stack min32 = -2147483648;
+  Stack max64 = 9223372036854775807;
+  Stack min64 = -9223372036854775808;
+  
+  $$ Variable con número extremadamente grande
+  Stack extremo = 123456789012345678901234567890;
+  
+  $$ Arreglo con índice grande
+  Shelf[2147483647] Stack arregloGrande;
+  
+  $$ Variables para almacenar resultados de operaciones
+  Stack suma;
+  Stack resta;
+  Stack multiplicacion;
+  Stack division;
+  Stack modulo;
+}
+
+SpawnPoint {
+  $$ Operaciones aritméticas con números grandes
+  suma = num1 + num2;  $$ 1234567890 + 9876543210 = 11111111100
+  resta = num2 - num1;  $$ 9876543210 - 1234567890 = 8641975320
+  multiplicacion = num1 * 10;  $$ 1234567890 * 10 = 12345678900
+  division = num2 // 10;  $$ 9876543210 // 10 = 987654321
+  modulo = num2 % 10;  $$ 9876543210 % 10 = 0
+  
+  $$ Operaciones con números extremadamente grandes
+  Stack resultado1 = grande1 + grande2;
+  Stack resultado2 = extremo // 1000;
+  
+  $$ Operaciones que podrían causar desbordamiento
+  Stack posible_overflow = max32 + 1;
+  Stack posible_underflow = min32 - 1;
+  
+  $$ Probando operaciones potencialmente problemáticas
+  Stack producto_grande = grande1 * grande2;
+  Stack division_extrema = extremo // 3;
+  
+  $$ Mostrando algunos resultados
+  dropperStack(suma);
+  dropperStack(resta);
+  dropperStack(multiplicacion);
+  dropperStack(division);
+  
+  $$ Usando números grandes en estructuras de control
+  target producto_grande > 0 craft hit
+  PolloCrudo
+    dropperSpider("El resultado es positivo");
+  PolloAsado
+  
+  $$ Ciclo con un número grande
+  Stack i = 0;
+  repeater i < 5 craft
+  PolloCrudo
+    dropperStack(i);
+    dropperStack(grande1);
+    soulsand i;
+  PolloAsado
+}
+
+worldSave
