@@ -1,0 +1,146 @@
+$* 
+  20_Prueba_Op_Asignacion.txt
+  Prueba para verificar el reconocimiento de operadores de asignación en Notch Engine
+  Operadores: =, +=, -=, *=, /=, %=
+*$
+
+WorldName PruebaOpAsignacion:
+
+Inventory {
+    Stack contador = 10;
+    Stack acumulador = 0;
+    
+    Ghast decimal = 5.5;
+    
+    Spider texto = "Notch";
+    
+    Shelf[5] Stack arreglo;
+    
+    Entity Punto {
+        Stack x;
+        Stack y;
+    };
+    Entity Punto punto;
+}
+
+SpawnPoint {
+    $$ Prueba operador de asignación simple (=)
+    contador = 5;
+    dropperSpider("Asignación simple: " bind contador);
+    
+    decimal = 3.14;
+    texto = "Engine";
+    
+    $$ Prueba operador de asignación con suma (+=)
+    contador += 3;
+    dropperSpider("Asignación con suma: " bind contador);
+    
+    acumulador = 0;
+    acumulador += contador;
+    acumulador += 2;
+    dropperSpider("Acumulador después de += : " bind acumulador);
+    
+    $$ Prueba operador de asignación con resta (-=)
+    contador -= 2;
+    dropperSpider("Asignación con resta: " bind contador);
+    
+    acumulador = 20;
+    acumulador -= 5;
+    acumulador -= contador;
+    dropperSpider("Acumulador después de -= : " bind acumulador);
+    
+    $$ Prueba operador de asignación con multiplicación (*=)
+    contador *= 3;
+    dropperSpider("Asignación con multiplicación: " bind contador);
+    
+    acumulador = 2;
+    acumulador *= contador;
+    dropperSpider("Acumulador después de *= : " bind acumulador);
+    
+    $$ Prueba operador de asignación con división (/=)
+    contador /= 2;
+    dropperSpider("Asignación con división: " bind contador);
+    
+    acumulador = 50;
+    acumulador /= 5;
+    dropperSpider("Acumulador después de /= : " bind acumulador);
+    
+    $$ Prueba operador de asignación con módulo (%=)
+    contador %= 3;
+    dropperSpider("Asignación con módulo: " bind contador);
+    
+    acumulador = 17;
+    acumulador %= 5;
+    dropperSpider("Acumulador después de %= : " bind acumulador);
+    
+    $$ Prueba de asignaciones a elementos de arreglos
+    arreglo[0] = 10;
+    arreglo[1] = 20;
+    arreglo[2] = 30;
+    
+    arreglo[0] += 5;
+    dropperSpider("arreglo[0] después de += : " bind arreglo[0]);
+    
+    arreglo[1] -= 5;
+    dropperSpider("arreglo[1] después de -= : " bind arreglo[1]);
+    
+    arreglo[2] *= 2;
+    dropperSpider("arreglo[2] después de *= : " bind arreglo[2]);
+    
+    $$ Prueba de asignaciones a campos de registros
+    punto@x = 10;
+    punto@y = 20;
+    
+    punto@x += 5;
+    dropperSpider("punto@x después de += : " bind punto@x);
+    
+    punto@y -= 8;
+    dropperSpider("punto@y después de -= : " bind punto@y);
+    
+    $$ Casos especiales para probar el scanner
+    
+    $$ Operadores sin espacios
+    contador=5;
+    contador+=3;
+    contador-=2;
+    contador*=4;
+    contador/=2;
+    contador%=3;
+    
+    $$ Operadores con espacios variados
+    contador =  5;
+    contador +=  3;
+    contador  -= 2;
+    contador *= 4;
+    contador  /=  2;
+    contador  %=   3;
+    
+    $$ Operaciones con comentarios
+    contador = 10; $$ Asignación con comentario
+    contador += $$ Comentario en medio
+                5;
+    
+    $$ Asignaciones múltiples
+    Stack a = 1, b = 2, c = 3;
+    
+    $$ Asignaciones con expresiones
+    contador = (a + b) * c;
+    contador += a * b;
+    contador -= a + b;
+    contador *= (a * 2) + (b * 3);
+    contador /= a + 1;
+    contador %= b * 2;
+    
+    $$ Asignaciones múltiples en una sola línea
+    a = 10; b = 20; c = 30;
+    
+    $$ Casos con posibles confusiones para el scanner
+    Spider igual_texto = "Este texto tiene un signo = dentro";
+    Spider mas_texto = "Este texto tiene un signo + dentro";
+    Spider menos_texto = "Este texto tiene un signo - dentro";
+    Spider por_texto = "Este texto tiene un signo * dentro";
+    Spider div_texto = "Este texto tiene un signo / dentro";
+    Spider mod_texto = "Este texto tiene un signo % dentro";
+}
+
+worldSave

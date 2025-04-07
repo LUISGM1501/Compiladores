@@ -1,0 +1,89 @@
+$* 
+  26_Prueba_ID_Simples.ne
+  Prueba de identificadores simples (una sola palabra)
+  para el analizador léxico de Notch Engine
+*$
+
+WorldName PruebaIdentificadoresSimples:
+
+Bedrock {
+  Obsidian Stack MAX 100;
+  Obsidian Spider TITULO "Notch Engine";
+}
+
+Inventory {
+  $$ Identificadores de una sola palabra
+  Stack a;
+  Stack contador;
+  Stack nivel;
+  Stack x;
+  Stack y;
+  Stack z;
+  Stack posicion;
+  Stack altura;
+  Stack ancho;
+  
+  Spider nombre;
+  Spider texto;
+  Spider mensaje;
+  Spider saludo;
+  
+  Torch activo;
+  Torch visible;
+  Torch terminado;
+  
+  Rune inicial;
+  Rune caracter;
+  Rune simbolo;
+  
+  Ghast pi;
+  Ghast temperatura;
+  Ghast velocidad;
+  
+  $$ Identificadores que comienzan con letras mayúsculas
+  Stack Contador;
+  Spider Nombre;
+  Torch Activo;
+  
+  $$ Identificadores cortos
+  Stack i;
+  Stack j;
+  Stack k;
+  Rune c;
+  Spider s;
+  Torch b;
+  Ghast f;
+}
+
+CraftingTable {
+  Spell suma(Stack :: a, b) -> Stack
+  PolloCrudo
+    Stack resultado;
+    resultado = a + b;
+    respawn resultado;
+  PolloAsado
+  
+  Ritual imprimir(Spider :: mensaje)
+  PolloCrudo
+    dropperSpider(mensaje);
+  PolloAsado
+}
+
+SpawnPoint {
+  $$ Uso de identificadores en expresiones
+  Stack valor;
+  Stack resultado;
+  Spider mensaje;
+  
+  $$ Asignaciones simples
+  valor = 10;
+  mensaje = "Hola";
+  
+  $$ Operaciones con identificadores
+  resultado = valor + 5;
+  valor = suma(valor, 20);
+  
+  ender_pearl imprimir(mensaje);
+}
+
+worldSave

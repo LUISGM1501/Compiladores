@@ -1,0 +1,152 @@
+$* 
+  Prueba_ID_Similares.ne
+  Propósito: Verificar identificadores similares a palabras reservadas
+  Fecha: Abril 10, 2025
+*$
+
+WorldName PruebaIdentificadoresSimilares:
+
+Bedrock {
+  Obsidian Stack WorldNameTest 100;
+  Obsidian Spider BedrockType "Hard Stone";
+  Obsidian Torch InventoryFull On;
+}
+
+Inventory {
+  $$ Identificadores que son similares a palabras reservadas
+  Stack worldname;
+  Stack WorldName2;
+  Stack bedrock;
+  Stack Bedrock_Type;
+  Stack inventory;
+  Stack InventorySlot;
+  Stack recipe;
+  Stack RecipeBook;
+  Stack craftingtable;
+  Stack CraftingTable2;
+  Stack spawnpoint;
+  Stack SpawnPoint_Main;
+  
+  $$ Tipo de datos
+  Stack stack;
+  Spider spider;
+  Torch torch;
+  Rune rune;
+  Ghast ghast;
+  Chest chest;
+  Book book;
+  
+  $$ Palabras reservadas para bloques
+  Stack pollocrudo;
+  Stack PolloAsado;
+  Stack polloAsadoExtra;
+  
+  $$ Palabras reservadas para estructuras de control
+  Stack repeater;
+  Stack target;
+  Stack hit;
+  Stack miss;
+  Stack craft;
+  Stack jukebox;
+  Stack disc;
+  Stack silence;
+  Stack spawner;
+  Stack exhausted;
+  Stack walk;
+  Stack set;
+  Stack to;
+  Stack step;
+  Stack wither;
+  
+  $$ Palabras reservadas para saltos
+  Stack creeper;
+  Stack enderPearl;
+  Stack enderpearlitem;
+  Stack ragequit;
+  
+  $$ Palabras reservadas para funciones
+  Stack spell;
+  Stack Spell_Cast;
+  Stack ritual;
+  Stack RitualCeremony;
+  Stack respawn;
+  Stack respawnPoint;
+  Stack ender_pearl;
+  Stack enderpearlTeleport;
+  
+  $$ Palabras reservadas para operadores
+  Stack soulsand;
+  Stack SoulSandBlock;
+  Stack magma;
+  Stack MagmaBlock;
+  Stack and;
+  Stack andOperator;
+  Stack or;
+  Stack orGate;
+  Stack not;
+  Stack notOperator;
+  Stack xor;
+  Stack xorCalculation;
+  Stack is;
+  Stack isNot;
+  Stack isEqual;
+  
+  $$ Similares a constantes
+  Torch on;
+  Torch onSwitch;
+  Torch off;
+  Torch offState;
+  
+  $$ Similares a palabras de E/S
+  Stack hopper;
+  Stack hopperMinecart;
+  Stack dropper;
+  Stack dropperFunction;
+}
+
+CraftingTable {
+  Spell worldNameGenerator() -> Spider
+  PolloCrudo
+    Spider spawnpoint = "DefaultSpawn";
+    Stack craft = 10;
+    Spider ritual = "Magic";
+    
+    respawn "Generated";
+  PolloAsado
+  
+  Ritual craftingTableMaker(Spider :: recipe; Stack inventory)
+  PolloCrudo
+    Stack spell = 20;
+    Stack worldname = 30;
+    Torch on = Off; $$ Variable con nombre 'on' inicializada a Off
+    
+    dropperSpider("Crafting table ready");
+  PolloAsado
+}
+
+SpawnPoint {
+  $$ Usando identificadores similares a palabras reservadas
+  Stack worldname = 1;
+  Stack bedrock = 2;
+  Stack inventory = 3;
+  Stack recipe = 4;
+  Stack craftingtable = 5;
+  Stack spawnpoint = 6;
+  
+  $$ Operaciones mezclando palabras reservadas e identificadores
+  worldname = worldname + bedrock;
+  inventory = craftingtable * spawnpoint;
+  
+  $$ Uso en estructuras de control
+  target worldname > recipe craft hit
+  PolloCrudo
+    Spider spell = "Magic";
+    dropperSpider(spell);
+  PolloAsado
+  
+  $$ Llamadas a rutinas
+  Spider generatedName = worldNameGenerator();
+  ender_pearl craftingTableMaker("New Recipe", inventory);
+}
+
+worldSave

@@ -1,0 +1,100 @@
+$* 
+  Prueba_PR_Bloques.ne
+  Propósito: Verificar reconocimiento de delimitadores de bloques (PolloCrudo, PolloAsado)
+  Fecha: Abril 10, 2025
+*$
+
+$$ Prueba de delimitadores de bloques en NotchEngine
+$$ Verificando: PolloCrudo, PolloAsado
+
+WorldName PruebaBloques:
+
+Inventory {
+    $$ Variables para las pruebas
+    Stack contador = 0;
+    Stack acumulador = 0;
+    Stack resultado = 0;
+    Spider mensaje = "Prueba de bloques PolloCrudo y PolloAsado";
+}
+
+CraftingTable {
+    $$ Función con bloques de código
+    Spell sumarPares(Stack :: limite) -> Stack
+    PolloCrudo
+        Stack suma = 0;
+        
+        $$ Bloque anidado dentro de una estructura de control
+        walk i set 1 to limite craft
+        PolloCrudo
+            target i % 2 is 0 craft hit
+            PolloCrudo
+                suma += i;
+            PolloAsado
+        PolloAsado
+        
+        respawn suma;
+    PolloAsado
+    
+    $$ Función con diferentes niveles de anidamiento de bloques
+    Spell calcularFactorial(Stack :: n) -> Stack
+    PolloCrudo
+        target n <= 1 craft hit
+        PolloCrudo
+            respawn 1;
+        PolloAsado
+        
+        $$ Bloque dentro de una expresión
+        Stack resultado = n * calcularFactorial(n - 1);
+        respawn resultado;
+    PolloAsado
+}
+
+SpawnPoint {
+    $$ Bloque principal
+    PolloCrudo
+        $$ Bloque simple
+        PolloCrudo
+            contador = 5;
+            dropperSpider(mensaje);
+        PolloAsado
+        
+        $$ Bloque dentro de una estructura repeater
+        repeater contador > 0 craft
+        PolloCrudo
+            acumulador += contador;
+            magma contador;
+            
+            $$ Bloque anidado dentro de un condicional dentro de un bucle
+            target contador is 2 craft hit
+            PolloCrudo
+                dropperSpider("Contador es igual a 2");
+                $$ Otro bloque más anidado
+                PolloCrudo
+                    dropperSpider("Este es un bloque muy anidado");
+                PolloAsado
+            PolloAsado
+        PolloAsado
+        
+        $$ Uso de bloques en estructura condicional
+        target acumulador > 10 craft hit
+        PolloCrudo
+            dropperSpider("Acumulador es mayor que 10");
+        PolloAsado
+        miss
+        PolloCrudo
+            dropperSpider("Acumulador es menor o igual a 10");
+        PolloAsado
+        
+        $$ Bloque en estructura spawner-exhausted
+        spawner
+        PolloCrudo
+            soulsand resultado;
+            target resultado > 5 craft hit creeper;
+        PolloAsado
+        exhausted resultado > 10;
+        
+        dropperSpider("Valor final del resultado: " bind resultado);
+    PolloAsado
+}
+
+worldSave

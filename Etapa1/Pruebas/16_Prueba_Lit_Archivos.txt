@@ -1,0 +1,85 @@
+$* 
+  16_Prueba_Lit_Archivos.txt
+  Prueba para verificar el reconocimiento de literales de archivos en Notch Engine
+  Sintaxis: {/ "nombre archivo", 'modo' /}
+  Modos: 'L' (lectura), 'E' (escritura), 'A' (actualización)
+*$
+
+WorldName PruebaLitArchivos:
+
+Inventory {
+    $$ Archivos en modo lectura
+    Book archivoConfiguracion = {/ "config.txt", 'L' /};
+    Book archivoJugadores = {/ "jugadores.dat", 'L' /};
+    Book archivoNiveles = {/ "niveles/nivel1.map", 'L' /};
+    
+    $$ Archivos en modo escritura
+    Book archivoLog = {/ "sistema.log", 'E' /};
+    Book archivoResultados = {/ "resultados.txt", 'E' /};
+    Book archivoExportacion = {/ "export/datos.csv", 'E' /};
+    
+    $$ Archivos en modo actualización
+    Book archivoPuntajes = {/ "puntajes.dat", 'A' /};
+    Book archivoInventario = {/ "inventario.sav", 'A' /};
+    
+    $$ Nombres de archivo con espacios y caracteres especiales
+    Book archivoEspecial = {/ "archivo con espacios.txt", 'L' /};
+    Book archivoEspecial2 = {/ "datos_especiales-2023.dat", 'E' /};
+    
+    $$ Rutas relativas y absolutas
+    Book archivoRutaRelativa = {/ "../datos/config.ini", 'L' /};
+    Book archivoRutaAbsoluta = {/ "C:/Notch/Engine/data.bin", 'E' /};
+    
+    $$ Nombres de archivo con extensiones varias
+    Book archivoTexto = {/ "readme.txt", 'L' /};
+    Book archivoImagen = {/ "textura.png", 'L' /};
+    Book archivoJSON = {/ "settings.json", 'A' /};
+    Book archivoXML = {/ "estructura.xml", 'A' /};
+    
+    $$ Casos para probar el scanner
+    Book conBarras = {/ "dir/subdir/archivo.ext", 'L' /};
+    Book conPuntos = {/ "../../archivo.ext", 'E' /};
+    
+    $$ Casos con espaciado variado
+    Book espaciado1 = {/"compacto.txt",'L'/};
+    Book espaciado2 = {/   "espacios.txt"  ,  'E'   /};
+    
+    $$ Con comentarios cerca
+    Book comentado = {/ "log.txt", 'L' /}; $$ Archivo de log
+}
+
+SpawnPoint {
+    $$ Operaciones con archivos
+    
+    $$ Abrir archivo
+    unlock(archivoLog);
+    
+    $$ Escribir en archivo
+    forge(archivoLog, "Entrada de log: Inicio de programa");
+    
+    $$ Cerrar archivo
+    lock(archivoLog);
+    
+    $$ Crear nuevo archivo
+    Book nuevoArchivo = craft({/ "nuevo.txt", 'E' /});
+    
+    $$ Leer archivo
+    unlock(archivoConfiguracion);
+    Spider contenido = gather(archivoConfiguracion);
+    lock(archivoConfiguracion);
+    
+    $$ Concatenar archivos
+    expand(archivoLog, archivoResultados);
+    
+    $$ Casos adicionales para probar el scanner
+    Book {/ "sinVariable.txt", 'A' /};
+    
+    $$ Con sintaxis de literales seguidos
+    Book arch1 = {/ "uno.txt", 'L' /};Book arch2 = {/ "dos.txt", 'E' /};
+    
+    $$ Con comentarios dentro
+    Book conComentarioMedio = {/ $$ Este comentario no debería ser válido
+        "comentado.txt", 'A' /};
+}
+
+worldSave

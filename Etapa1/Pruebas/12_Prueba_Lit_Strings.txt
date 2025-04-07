@@ -1,0 +1,112 @@
+$* 
+  Prueba_Lit_Strings.ne
+  Propósito: Verificar reconocimiento de cadenas (vacías, con espacios, con escape sequences)
+  Fecha: Abril 10, 2025
+*$
+
+$$ Prueba de literales de cadenas en NotchEngine
+$$ Verificando: cadenas vacías, con espacios, con secuencias de escape
+
+WorldName PruebaLitStrings:
+
+Bedrock {
+    $$ Constantes de cadenas
+    Obsidian Spider VACIO "";
+    Obsidian Spider ESPACIO " ";
+    Obsidian Spider SALUDO "Hola Mundo";
+    Obsidian Spider CON_COMILLAS "Este string tiene \"comillas\"";
+    Obsidian Spider MULTILINEA "Primera línea\nSegunda línea";
+}
+
+Inventory {
+    $$ Cadenas vacías y simples
+    Spider cadenaVacia = "";
+    Spider espacioSimple = " ";
+    Spider cadenaSimple = "Texto simple";
+    
+    $$ Cadenas con diferentes tipos de caracteres
+    Spider conNumeros = "Notch Engine v1.0";
+    Spider conSimbolos = "¡Hola, mundo! ¿Cómo estás?";
+    Spider conCaracteresEspeciales = "#$%&/()=?¡";
+    
+    $$ Cadenas con secuencias de escape
+    Spider conNuevaLinea = "Primera línea\nSegunda línea";
+    Spider conTabulacion = "Columna1\tColumna2\tColumna3";
+    Spider conRetornoCarro = "Texto con\rretorno de carro";
+    Spider conBarraInversa = "Ruta de archivo: C:\\Archivos\\datos.txt";
+    Spider conComillasSimples = "Texto con 'comillas simples'";
+    Spider conComillasDobles = "Texto con \"comillas dobles\"";
+    
+    $$ Cadenas con caracteres mixtos
+    Spider mixto = "Abc123!@#\n\t\"'";
+    
+    $$ Cadenas largas
+    Spider cadenaLarga = "Esta es una cadena de texto más larga que contiene múltiples palabras, números como 12345, y símbolos como $%&. Es útil para probar el manejo de cadenas extensas en el analizador léxico y asegurarse de que no hay limitaciones inesperadas en la longitud de las cadenas.";
+    
+    $$ Cadenas para operaciones
+    Spider prefijo = "Notch";
+    Spider sufijo = "Engine";
+    Spider resultado;
+}
+
+SpawnPoint {
+    PolloCrudo
+        $$ Mostrar algunas cadenas
+        dropperSpider("Cadena simple: " bind cadenaSimple);
+        dropperSpider("Cadena con números: " bind conNumeros);
+        dropperSpider("Cadena con símbolos: " bind conSimbolos);
+        
+        $$ Operaciones con strings
+        resultado = bind(prefijo, " " bind sufijo);  $$ "Notch Engine"
+        dropperSpider("Concatenación: " bind resultado);
+        
+        Stack longitud = #(resultado);              $$ 12
+        dropperSpider("Longitud de '" bind resultado bind "': " bind longitud);
+        
+        Spider subcadena = from resultado ## 0 ## 5;  $$ "Notch"
+        dropperSpider("Subcadena (0, 5): " bind subcadena);
+        
+        Spider sinNotch = except resultado ## 0 ## 6;  $$ "Engine"
+        dropperSpider("Sin los primeros 6 caracteres: " bind sinNotch);
+        
+        Stack posicion = seek(resultado, "Engine");  $$ 6
+        dropperSpider("Posición de 'Engine': " bind posicion);
+        
+        $$ Acceso a caracteres individuales
+        Rune primerCaracter = resultado[0];    $$ 'N'
+        dropperSpider("Primer carácter: ");
+        dropperRune(primerCaracter);
+        
+        Rune ultimoCaracter = resultado[11];   $$ 'e'
+        dropperSpider("Último carácter: ");
+        dropperRune(ultimoCaracter);
+        
+        $$ Mostrar cadenas con secuencias de escape
+        dropperSpider("Cadena con nueva línea:");
+        dropperSpider(conNuevaLinea);
+        
+        dropperSpider("Cadena con tabulaciones:");
+        dropperSpider(conTabulacion);
+        
+        dropperSpider("Cadena con comillas dobles:");
+        dropperSpider(conComillasDobles);
+        
+        $$ Mostrar cadena larga
+        dropperSpider("Cadena larga:");
+        dropperSpider(cadenaLarga);
+        
+        $$ Verificar cadena vacía
+        target cadenaVacia is "" craft hit
+        PolloCrudo
+            dropperSpider("La cadena está vacía");
+        PolloAsado
+        
+        $$ Comparación de cadenas
+        target SALUDO is "Hola Mundo" craft hit
+        PolloCrudo
+            dropperSpider("Las cadenas son iguales");
+        PolloAsado
+    PolloAsado
+}
+
+worldSave

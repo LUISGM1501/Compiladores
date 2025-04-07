@@ -1,0 +1,168 @@
+$* 
+  21_Prueba_Op_Acceso.txt
+  Prueba para verificar el reconocimiento de operadores de acceso a estructuras de datos en Notch Engine
+  Operadores: [i][j], string[i], registro@campo
+*$
+
+WorldName PruebaOpAcceso:
+
+Inventory {
+    $$ Declaración de arreglos
+    Shelf[5] Stack numeros;
+    Shelf[3] Shelf[3] matriz;
+    Shelf[2] Shelf[2] Shelf[2] cubo;
+    
+    $$ Declaración de strings
+    Spider texto = "Notch Engine";
+    
+    $$ Declaración de registros
+    Entity Punto {
+        Stack x;
+        Stack y;
+        Stack z;
+    };
+    Entity Punto punto;
+    
+    Entity Persona {
+        Spider nombre;
+        Stack edad;
+        Torch activo;
+        Shelf[3] Stack notas;
+    };
+    Entity Persona estudiante;
+    
+    $$ Arreglo de registros
+    Shelf[3] Entity Punto puntos;
+    
+    $$ Registro con arreglos
+    Entity Contenedor {
+        Shelf[5] Stack valores;
+        Spider etiqueta;
+    };
+    Entity Contenedor caja;
+}
+
+SpawnPoint {
+    $$ Pruebas de acceso a arreglos unidimensionales
+    numeros[0] = 10;
+    numeros[1] = 20;
+    numeros[2] = 30;
+    
+    Stack valor = numeros[0];
+    dropperSpider("Valor en numeros[0]: " bind valor);
+    
+    $$ Acceso con expresiones como índices
+    Stack indice = 2;
+    valor = numeros[indice];
+    dropperSpider("Valor en numeros[indice]: " bind valor);
+    
+    valor = numeros[1 + 1];
+    dropperSpider("Valor en numeros[1 + 1]: " bind valor);
+    
+    $$ Pruebas de acceso a arreglos multidimensionales
+    matriz[0][0] = 11;
+    matriz[0][1] = 12;
+    matriz[1][0] = 21;
+    matriz[1][1] = 22;
+    
+    valor = matriz[1][1];
+    dropperSpider("Valor en matriz[1][1]: " bind valor);
+    
+    $$ Acceso con expresiones como índices
+    valor = matriz[indice - 1][indice - 1];
+    dropperSpider("Valor en matriz[indice - 1][indice - 1]: " bind valor);
+    
+    $$ Pruebas de acceso a arreglos tridimensionales
+    cubo[0][0][0] = 111;
+    cubo[1][1][1] = 222;
+    
+    valor = cubo[1][1][1];
+    dropperSpider("Valor en cubo[1][1][1]: " bind valor);
+    
+    $$ Pruebas de acceso a caracteres en strings
+    Rune caracter = texto[0];
+    dropperSpider("Carácter en texto[0]: " bind caracter);
+    
+    caracter = texto[6];
+    dropperSpider("Carácter en texto[6]: " bind caracter);
+    
+    $$ Acceso con expresiones como índices
+    caracter = texto[indice * 2];
+    dropperSpider("Carácter en texto[indice * 2]: " bind caracter);
+    
+    $$ Modificación de caracteres en strings
+    texto[0] = 'n';
+    dropperSpider("Texto modificado: " bind texto);
+    
+    $$ Pruebas de acceso a campos de registros
+    punto@x = 10;
+    punto@y = 20;
+    punto@z = 30;
+    
+    valor = punto@x;
+    dropperSpider("Valor en punto@x: " bind valor);
+    
+    punto@y = punto@x * 2;
+    dropperSpider("Valor en punto@y después de asignación: " bind punto@y);
+    
+    $$ Acceso a campos de registros más complejos
+    estudiante@nombre = "Steve";
+    estudiante@edad = 25;
+    estudiante@activo = On;
+    estudiante@notas[0] = 85;
+    estudiante@notas[1] = 90;
+    estudiante@notas[2] = 95;
+    
+    Spider nombre = estudiante@nombre;
+    dropperSpider("Nombre del estudiante: " bind nombre);
+    
+    Stack nota = estudiante@notas[1];
+    dropperSpider("Segunda nota del estudiante: " bind nota);
+    
+    $$ Pruebas de acceso a arreglos de registros
+    puntos[0]@x = 1;
+    puntos[0]@y = 2;
+    puntos[0]@z = 3;
+    
+    puntos[1]@x = 4;
+    puntos[1]@y = 5;
+    puntos[1]@z = 6;
+    
+    valor = puntos[1]@y;
+    dropperSpider("Valor en puntos[1]@y: " bind valor);
+    
+    $$ Pruebas de acceso a registros con arreglos
+    caja@etiqueta = "Items";
+    caja@valores[0] = 100;
+    caja@valores[1] = 200;
+    
+    valor = caja@valores[1];
+    dropperSpider("Valor en caja@valores[1]: " bind valor);
+    
+    $$ Casos especiales para probar el scanner
+    
+    $$ Operadores sin espacios entre operando y operador
+    valor =numeros[0];
+    nombre =estudiante@nombre;
+    
+    $$ Operadores con espacios variados
+    valor = numeros [0];
+    valor = matriz [1] [1];
+    nombre = estudiante @ nombre;
+    
+    $$ Accesos encadenados complejos
+    valor = cubo[0][matriz[0][0] % 3][numeros[0] // 10];
+    
+    $$ Accesos con comentarios intercalados
+    valor = numeros $$ Comentario en medio
+           [0];
+    
+    nombre = estudiante $$ Comentario en medio
+             @nombre;
+    
+    $$ Casos con posibles confusiones para el scanner
+    Spider textoCuadrado = "Esto no es un [acceso]";
+    Spider textoArroba = "Email: usuario@dominio.com";
+}
+
+worldSave

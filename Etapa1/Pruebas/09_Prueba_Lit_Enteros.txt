@@ -1,0 +1,111 @@
+$* 
+  Prueba_Lit_Enteros.ne
+  Propósito: Verificar reconocimiento de literales enteros (positivos, negativos, cero)
+  Fecha: Abril 10, 2025
+*$
+
+$$ Prueba de literales enteros en NotchEngine
+$$ Verificando: enteros positivos, negativos y cero
+
+WorldName PruebaLitEnteros:
+
+Bedrock {
+    $$ Constantes enteras
+    Obsidian Stack CERO 0;
+    Obsidian Stack POSITIVO 42;
+    Obsidian Stack NEGATIVO -42;
+    Obsidian Stack MAX_VALOR 2147483647;  $$ Valor máximo de 32 bits
+    Obsidian Stack MIN_VALOR -2147483648; $$ Valor mínimo de 32 bits
+}
+
+Inventory {
+    $$ Variables con literales enteros
+    Stack cero = 0;
+    Stack uno = 1;
+    Stack diez = 10;
+    Stack cien = 100;
+    Stack mil = 1000;
+    Stack millon = 1000000;
+    
+    $$ Enteros negativos
+    Stack negUno = -1;
+    Stack negDiez = -10;
+    Stack negCien = -100;
+    Stack negMil = -1000;
+    Stack negMillon = -1000000;
+    
+    $$ Valor entero máximo y mínimo (aproximadamente)
+    Stack maxInt = 2147483647;
+    Stack minInt = -2147483648;
+    
+    $$ Variables para resultados
+    Stack resultado = 0;
+}
+
+SpawnPoint {
+    PolloCrudo
+        $$ Operaciones aritméticas con literales enteros directos
+        resultado = 5 + 3;      $$ 8
+        dropperSpider("5 + 3 = " bind resultado);
+        
+        resultado = 10 - 7;     $$ 3
+        dropperSpider("10 - 7 = " bind resultado);
+        
+        resultado = 6 * 4;      $$ 24
+        dropperSpider("6 * 4 = " bind resultado);
+        
+        resultado = 20 // 4;    $$ 5
+        dropperSpider("20 // 4 = " bind resultado);
+        
+        resultado = 17 % 5;     $$ 2
+        dropperSpider("17 % 5 = " bind resultado);
+        
+        $$ Uso de literales enteros en expresiones complejas
+        resultado = (5 + 3) * 2 - 4 // 2;    $$ 16 - 2 = 14
+        dropperSpider("(5 + 3) * 2 - 4 // 2 = " bind resultado);
+        
+        $$ Operaciones con literales enteros negativos
+        resultado = -5 + 10;    $$ 5
+        dropperSpider("-5 + 10 = " bind resultado);
+        
+        resultado = 5 + -10;    $$ -5
+        dropperSpider("5 + -10 = " bind resultado);
+        
+        resultado = -5 * -4;    $$ 20
+        dropperSpider("-5 * -4 = " bind resultado);
+        
+        $$ Uso de literales enteros en estructuras de control
+        walk i set 1 to 5 craft
+        PolloCrudo
+            dropperSpider("Iteración: " bind i);
+        PolloAsado
+        
+        $$ Comparaciones con literales enteros
+        target 10 > 5 craft hit
+        PolloCrudo
+            dropperSpider("10 es mayor que 5");
+        PolloAsado
+        
+        target 0 is 0 craft hit
+        PolloCrudo
+            dropperSpider("0 es igual a 0");
+        PolloAsado
+        
+        target -10 < -5 craft hit
+        PolloCrudo
+            dropperSpider("-10 es menor que -5");
+        PolloAsado
+        
+        $$ Operaciones con valores extremos (cuidado con overflow)
+        dropperSpider("Valor máximo de entero: " bind maxInt);
+        dropperSpider("Valor mínimo de entero: " bind minInt);
+        
+        $$ Verificación del cero
+        target 0 is cero craft hit
+        PolloCrudo
+            dropperSpider("Ambas representaciones de cero son iguales");
+        PolloAsado
+    PolloAsado
+}
+
+worldSave

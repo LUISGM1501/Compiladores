@@ -1,0 +1,128 @@
+$* 
+  Prueba_Lit_Flotantes.ne
+  Propósito: Verificar reconocimiento de números flotantes (con parte decimal, sin parte decimal, negativos)
+  Fecha: Abril 10, 2025
+*$
+
+$$ Prueba de literales flotantes en NotchEngine
+$$ Verificando: flotantes con parte decimal, sin parte decimal, y negativos
+
+WorldName PruebaLitFlotantes:
+
+Bedrock {
+    $$ Constantes flotantes
+    Obsidian Ghast CERO_PUNTO_CERO 0.0;
+    Obsidian Ghast PI 3.14159;
+    Obsidian Ghast E 2.71828;
+    Obsidian Ghast NEG_PI -3.14159;
+    Obsidian Ghast GRAVEDAD -9.8;
+}
+
+Inventory {
+    $$ Flotantes positivos con parte decimal
+    Ghast decimal1 = 0.5;
+    Ghast decimal2 = 1.25;
+    Ghast decimal3 = 3.14159;
+    Ghast decimal4 = 2.71828;
+    Ghast decimal5 = 123.456;
+    
+    $$ Flotantes negativos con parte decimal
+    Ghast negDecimal1 = -0.5;
+    Ghast negDecimal2 = -1.25;
+    Ghast negDecimal3 = -3.14159;
+    Ghast negDecimal4 = -2.71828;
+    Ghast negDecimal5 = -123.456;
+    
+    $$ Formas alternativas (punto al principio, sin parte decimal)
+    Ghast decimal6 = .5;       $$ Sin cero al principio, comienza con punto
+    Ghast decimal7 = 5.;       $$ Sin decimales, termina con punto
+    
+    $$ Números con muchos decimales
+    Ghast precisionAlta = 1.123456789012345;
+    
+    $$ Números muy pequeños y muy grandes
+    Ghast muyPequeno = 0.0000001;
+    Ghast muyGrande = 1000000.0;
+    
+    $$ Variables para resultados
+    Ghast resultado = 0.0;
+}
+
+SpawnPoint {
+    PolloCrudo
+        $$ Operaciones aritméticas con literales flotantes directos
+        resultado = 5.5 :+ 3.5;      $$ 9.0
+        dropperSpider("5.5 :+ 3.5 = ");
+        dropperGhast(resultado);
+        
+        resultado = 10.75 :- 7.25;   $$ 3.5
+        dropperSpider("10.75 :- 7.25 = ");
+        dropperGhast(resultado);
+        
+        resultado = 6.5 :* 2.0;      $$ 13.0
+        dropperSpider("6.5 :* 2.0 = ");
+        dropperGhast(resultado);
+        
+        resultado = 20.0 :// 4.0;    $$ 5.0
+        dropperSpider("20.0 :// 4.0 = ");
+        dropperGhast(resultado);
+        
+        resultado = 7.5 :% 2.0;      $$ 1.5
+        dropperSpider("7.5 :% 2.0 = ");
+        dropperGhast(resultado);
+        
+        $$ Uso de notaciones decimales alternativas
+        resultado = .5 :+ 2.;        $$ 0.5 + 2.0 = 2.5
+        dropperSpider(".5 :+ 2. = ");
+        dropperGhast(resultado);
+        
+        $$ Operaciones con literales flotantes negativos
+        resultado = -5.5 :+ 10.0;    $$ 4.5
+        dropperSpider("-5.5 :+ 10.0 = ");
+        dropperGhast(resultado);
+        
+        resultado = 5.0 :+ -10.0;    $$ -5.0
+        dropperSpider("5.0 :+ -10.0 = ");
+        dropperGhast(resultado);
+        
+        resultado = -5.0 :* -4.0;    $$ 20.0
+        dropperSpider("-5.0 :* -4.0 = ");
+        dropperGhast(resultado);
+        
+        $$ Expresiones complejas con flotantes
+        resultado = (2.5 :+ 1.5) :* 3.0 :- 5.0 :// 2.0;    $$ 12.0 - 2.5 = 9.5
+        dropperSpider("(2.5 :+ 1.5) :* 3.0 :- 5.0 :// 2.0 = ");
+        dropperGhast(resultado);
+        
+        $$ Comparaciones con flotantes
+        target 3.14 > 3.0 craft hit
+        PolloCrudo
+            dropperSpider("3.14 es mayor que 3.0");
+        PolloAsado
+        
+        target 0.1 :+ 0.2 isNot 0.3 craft hit  $$ Debido a errores de precisión en flotantes
+        PolloCrudo
+            dropperSpider("0.1 + 0.2 no es exactamente igual a 0.3 (error de precisión)");
+            dropperGhast(0.1 :+ 0.2);
+        PolloAsado
+        
+        $$ Conversión y coherción de tipos
+        Stack entero = 3.14159 >> Stack;  $$ Cohersión a entero (trunca a 3)
+        dropperSpider("PI truncado a entero: " bind entero);
+        
+        $$ Mostrar valores con diferentes precisiones
+        dropperSpider("Valor de PI: ");
+        dropperGhast(PI);
+        
+        dropperSpider("Número con alta precisión: ");
+        dropperGhast(precisionAlta);
+        
+        dropperSpider("Número muy pequeño: ");
+        dropperGhast(muyPequeno);
+        
+        dropperSpider("Número muy grande: ");
+        dropperGhast(muyGrande);
+    PolloAsado
+}
+
+worldSave
