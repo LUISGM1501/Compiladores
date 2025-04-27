@@ -1,0 +1,24 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_plus: '+'
+    q_plus --> q_plus_eq: '='
+    q_plus_eq --> [*]
+    q_plus --> q_plus_plus: '+'
+    q_plus_plus --> [*]
+    
+    q0 --> q_colon: "Dos puntos"
+    q_colon --> q_colon_plus: '+'
+    q_colon_plus --> [*]
+    
+    q0 --> q_soulsand: 'soulsand'
+    q_soulsand --> [*]
+    
+    note left of q0
+        Reconoce operadores como:
+        - +, +=, ++
+        - :+ (flotante)
+        - soulsand (incremento)
+        - magma (decremento)
+        - otros operadores especiales
+        - por la manera en la que compila mermaid, al colocar ":" me da error, por lo que se le asigna "Dos puntos"
+    end note

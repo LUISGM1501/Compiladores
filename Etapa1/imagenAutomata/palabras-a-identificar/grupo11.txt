@@ -1,0 +1,107 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_s: "s" / "S"
+    q0 --> q_error: Σ-(s, S)
+
+    %% Ramas que comienzan con s/S
+    q_s --> q_sh: "h"
+    q_s --> q_si: "i"
+    q_s --> q_so: "o"
+    q_s --> q_sp: "p"
+    q_s --> q_error: Σ-(h, i, o, p)
+
+    q_sh --> q_she: "e"
+    q_sh --> q_error: Σ-(e)
+
+    q_she --> q_shel: "l"
+    q_she --> q_error: Σ-(l)
+
+    q_shel --> q_shelf: "f"
+    q_shel --> q_error: Σ-(f)
+
+    q_shelf --> [*]: Espaciador/símbolo
+
+    q_si --> q_sil: "l"
+    q_si --> q_error: Σ-(l)
+
+    q_sil --> q_sile: "e"
+    q_sil --> q_error: Σ-(e)
+
+    q_sile --> q_silen: "n"
+    q_sile --> q_error: Σ-(n)
+
+    q_silen --> q_silenc: "c"
+    q_silen --> q_error: Σ-(c)
+
+    q_silenc --> q_silence: "e"
+    q_silenc --> q_error: Σ-(e)
+
+    q_silence --> [*]: Espaciador/símbolo
+
+    q_so --> q_sou: "u"
+    q_so --> q_error: Σ-(u)
+
+    q_sou --> q_soul: "l"
+    q_sou --> q_error: Σ-(l)
+
+    q_soul --> q_souls: "s"
+    q_soul --> q_error: Σ-(s)
+
+    q_souls --> q_soula: "a"
+    q_souls --> q_error: Σ-(a)
+
+    q_soula --> q_soulan: "n"
+    q_soula --> q_error: Σ-(n)
+
+    q_soulan --> q_souland: "d"
+    q_soulan --> q_error: Σ-(d)
+
+    q_souland --> [*]: Espaciador/símbolo
+
+    q_sp --> q_spa: "a"
+    q_sp --> q_spe: "e"
+    q_sp --> q_error: Σ-(a, e)
+
+    q_spa --> q_spaw: "w"
+    q_spa --> q_error: Σ-(w)
+
+    q_spaw --> q_spawn: "n"
+    q_spaw --> q_error: Σ-(n)
+
+    q_spawn --> q_spawnP: "P"
+    q_spawn --> q_error: Σ-(P)
+
+    q_spawnP --> q_spawnPo: "o"
+    q_spawnP --> q_error: Σ-(o)
+
+    q_spawnPo --> q_spawnPoi: "i"
+    q_spawnPo --> q_error: Σ-(i)
+
+    q_spawnPoi --> q_spawnPoin: "n"
+    q_spawnPoi --> q_error: Σ-(n)
+
+    q_spawnPoin --> q_spawnPoint: "t"
+    q_spawnPoin --> q_error: Σ-(t)
+
+    q_spawnPoint --> [*]: Espaciador/símbolo
+
+    q_spe --> q_spel: "l"
+    q_spe --> q_error: Σ-(l)
+
+    q_spel --> q_spell: "l"
+    q_spel --> q_error: Σ-(l)
+
+    q_spell --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Solo implementadas las 5 palabras clave
+        para demostración:
+        - Shelf
+        - silence
+        - soulsand
+        - SpawnPoint
+        - Spell
+    end note

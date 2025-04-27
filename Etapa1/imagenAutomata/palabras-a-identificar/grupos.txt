@@ -1,0 +1,27 @@
+1. add, and, Anvil, Bedrock, biom
+
+2. bind, Book, Chest, chunk, continue
+
+3. CraftingTable, creeper, disc, drop, dropper
+
+4. enderPearl, Entity, etchDown, etchUp, except
+
+5. expand, feed, forge, from, gather
+
+6. Ghast, hopper, Inventory, is, isEngraved
+
+7. isInscribed, isNot, jukebox, lock, magma
+
+8. make, map, miss, not, Obsidian
+
+9. Off, On, or, Ragequit, Recipe
+
+10. respawn, ResourcePack, Ritual, Rune, seek
+
+11. Shelf, silence, soulsand, SpawnPoint, Spell
+
+12. Spider, spawner, Stack, target, Torch
+
+13. unlock, void, walk, wither, WorldName
+
+14. worldSave, xor

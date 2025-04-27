@@ -1,0 +1,389 @@
+stateDiagram-v2
+    [*] --> q0
+    
+    %% Transiciones desde q0
+    q0 --> q_e: "e"
+    q0 --> q_f: "f"
+    q0 --> q_g: "g"
+    q0 --> q_h: "h"
+    q0 --> q_i: "i"
+    q0 --> q_j: "j"
+    q0 --> q_l: "l"
+    q0 --> q_m: "m"
+    q0 --> q_n: "n"
+    q0 --> q_o: "o"
+    
+    %% --- Continuación de palabras que empiezan con 'e' ---
+    %% Entity
+    q_e --> q_en: "n"
+    q_e --> q_et: "t"
+    q_e --> q_ex: "x"
+    q_e --> q_error: Σ-(n,t,x)
+    
+    q_en --> q_ent: "t"
+    q_en --> q_error: Σ-(t)
+    
+    q_ent --> q_enti: "i"
+    q_ent --> q_error: Σ-(i)
+    
+    q_enti --> q_entit: "t"
+    q_enti --> q_error: Σ-(t)
+    
+    q_entit --> q_entity: "y"
+    q_entit --> q_error: Σ-(y)
+    
+    q_entity --> [*]: Espaciador/símbolo
+    
+    %% etchDown, etchUp
+    q_et --> q_etc: "c"
+    q_et --> q_error: Σ-(c)
+    
+    q_etc --> q_etch: "h"
+    q_etc --> q_error: Σ-(h)
+    
+    q_etch --> q_etchd: "D"
+    q_etch --> q_etchu: "U"
+    q_etch --> q_error: Σ-(D,U)
+    
+    q_etchd --> q_etchdo: "o"
+    q_etchd --> q_error: Σ-(o)
+    
+    q_etchdo --> q_etchdow: "w"
+    q_etchdo --> q_error: Σ-(w)
+    
+    q_etchdow --> q_etchdown: "n"
+    q_etchdow --> q_error: Σ-(n)
+    
+    q_etchdown --> [*]: Espaciador/símbolo
+    
+    q_etchu --> q_etchup: "p"
+    q_etchu --> q_error: Σ-(p)
+    
+    q_etchup --> [*]: Espaciador/símbolo
+    
+    %% except, expand
+    q_ex --> q_exc: "c"
+    q_ex --> q_exp: "p"
+    q_ex --> q_error: Σ-(c,p)
+    
+    q_exc --> q_exce: "e"
+    q_exc --> q_error: Σ-(e)
+    
+    q_exce --> q_excep: "p"
+    q_exce --> q_error: Σ-(p)
+    
+    q_excep --> q_except: "t"
+    q_excep --> q_error: Σ-(t)
+    
+    q_except --> [*]: Espaciador/símbolo
+    
+    q_exp --> q_expa: "a"
+    q_exp --> q_error: Σ-(a)
+    
+    q_expa --> q_expan: "n"
+    q_expa --> q_error: Σ-(n)
+    
+    q_expan --> q_expand: "d"
+    q_expan --> q_error: Σ-(d)
+    
+    q_expand --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'f' ---
+    q_f --> q_fe: "e"
+    q_f --> q_fo: "o"
+    q_f --> q_fr: "r"
+    q_f --> q_error: Σ-(e,o,r)
+    
+    %% feed
+    q_fe --> q_fee: "e"
+    q_fe --> q_error: Σ-(e)
+    
+    q_fee --> q_feed: "d"
+    q_fee --> q_error: Σ-(d)
+    
+    q_feed --> [*]: Espaciador/símbolo
+    
+    %% forge
+    q_fo --> q_for: "r"
+    q_fo --> q_error: Σ-(r)
+    
+    q_for --> q_forg: "g"
+    q_for --> q_error: Σ-(g)
+    
+    q_forg --> q_forge: "e"
+    q_forg --> q_error: Σ-(e)
+    
+    q_forge --> [*]: Espaciador/símbolo
+    
+    %% from
+    q_fr --> q_fro: "o"
+    q_fr --> q_error: Σ-(o)
+    
+    q_fro --> q_from: "m"
+    q_fro --> q_error: Σ-(m)
+    
+    q_from --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'g' ---
+    q_g --> q_ga: "a"
+    q_g --> q_gh: "h"
+    q_g --> q_error: Σ-(a,h)
+    
+    %% gather
+    q_ga --> q_gat: "t"
+    q_ga --> q_error: Σ-(t)
+    
+    q_gat --> q_gath: "h"
+    q_gat --> q_error: Σ-(h)
+    
+    q_gath --> q_gathe: "e"
+    q_gath --> q_error: Σ-(e)
+    
+    q_gathe --> q_gather: "r"
+    q_gathe --> q_error: Σ-(r)
+    
+    q_gather --> [*]: Espaciador/símbolo
+    
+    %% Ghast
+    q_gh --> q_gha: "a"
+    q_gh --> q_error: Σ-(a)
+    
+    q_gha --> q_ghas: "s"
+    q_gha --> q_error: Σ-(s)
+    
+    q_ghas --> q_ghast: "t"
+    q_ghas --> q_error: Σ-(t)
+    
+    q_ghast --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'h' ---
+    %% hopper
+    q_h --> q_ho: "o"
+    q_h --> q_error: Σ-(o)
+    
+    q_ho --> q_hop: "p"
+    q_ho --> q_error: Σ-(p)
+    
+    q_hop --> q_hopp: "p"
+    q_hop --> q_error: Σ-(p)
+    
+    q_hopp --> q_hoppe: "e"
+    q_hopp --> q_error: Σ-(e)
+    
+    q_hoppe --> q_hopper: "r"
+    q_hoppe --> q_error: Σ-(r)
+    
+    q_hopper --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'i' ---
+    q_i --> q_in: "n"
+    q_i --> q_is: "s"
+    q_i --> q_error: Σ-(n,s)
+    
+    %% Inventory
+    q_in --> q_inv: "v"
+    q_in --> q_error: Σ-(v)
+    
+    q_inv --> q_inve: "e"
+    q_inv --> q_error: Σ-(e)
+    
+    q_inve --> q_inven: "n"
+    q_inve --> q_error: Σ-(n)
+    
+    q_inven --> q_invent: "t"
+    q_inven --> q_error: Σ-(t)
+    
+    q_invent --> q_invento: "o"
+    q_invent --> q_error: Σ-(o)
+    
+    q_invento --> q_inventor: "r"
+    q_invento --> q_error: Σ-(r)
+    
+    q_inventor --> q_inventory: "y"
+    q_inventor --> q_error: Σ-(y)
+    
+    q_inventory --> [*]: Espaciador/símbolo
+    
+    %% is, isEngraved, isInscribed, isNot
+    q_is --> [*]: Espaciador/símbolo
+    q_is --> q_ise: "E"
+    q_is --> q_isi: "I"
+    q_is --> q_isn: "N"
+    q_is --> q_error: Σ-(E,I,N) / No espacio
+    
+    q_ise --> q_isen: "n"
+    q_ise --> q_error: Σ-(n)
+    
+    q_isen --> q_iseng: "g"
+    q_isen --> q_error: Σ-(g)
+    
+    q_iseng --> q_isengr: "r"
+    q_iseng --> q_error: Σ-(r)
+    
+    q_isengr --> q_isengra: "a"
+    q_isengr --> q_error: Σ-(a)
+    
+    q_isengra --> q_isengrav: "v"
+    q_isengra --> q_error: Σ-(v)
+    
+    q_isengrav --> q_isengrave: "e"
+    q_isengrav --> q_error: Σ-(e)
+    
+    q_isengrave --> q_isengraved: "d"
+    q_isengrave --> q_error: Σ-(d)
+    
+    q_isengraved --> [*]: Espaciador/símbolo
+    
+    q_isi --> q_isin: "n"
+    q_isi --> q_error: Σ-(n)
+    
+    q_isin --> q_isins: "s"
+    q_isin --> q_error: Σ-(s)
+    
+    q_isins --> q_isinsc: "c"
+    q_isins --> q_error: Σ-(c)
+    
+    q_isinsc --> q_isincr: "r"
+    q_isinsc --> q_error: Σ-(r)
+    
+    q_isincr --> q_isincri: "i"
+    q_isincr --> q_error: Σ-(i)
+    
+    q_isincri --> q_isincrib: "b"
+    q_isincri --> q_error: Σ-(b)
+    
+    q_isincrib --> q_isincribe: "e"
+    q_isincrib --> q_error: Σ-(e)
+    
+    q_isincribe --> q_isincribed: "d"
+    q_isincribe --> q_error: Σ-(d)
+    
+    q_isincribed --> [*]: Espaciador/símbolo
+    
+    q_isn --> q_isno: "o"
+    q_isn --> q_error: Σ-(o)
+    
+    q_isno --> q_isnot: "t"
+    q_isno --> q_error: Σ-(t)
+    
+    q_isnot --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'j' ---
+    %% jukebox
+    q_j --> q_ju: "u"
+    q_j --> q_error: Σ-(u)
+    
+    q_ju --> q_juk: "k"
+    q_ju --> q_error: Σ-(k)
+    
+    q_juk --> q_juke: "e"
+    q_juk --> q_error: Σ-(e)
+    
+    q_juke --> q_jukeb: "b"
+    q_juke --> q_error: Σ-(b)
+    
+    q_jukeb --> q_jukebo: "o"
+    q_jukeb --> q_error: Σ-(o)
+    
+    q_jukebo --> q_jukebox: "x"
+    q_jukebo --> q_error: Σ-(x)
+    
+    q_jukebox --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'l' ---
+    %% lock
+    q_l --> q_lo: "o"
+    q_l --> q_error: Σ-(o)
+    
+    q_lo --> q_loc: "c"
+    q_lo --> q_error: Σ-(c)
+    
+    q_loc --> q_lock: "k"
+    q_loc --> q_error: Σ-(k)
+    
+    q_lock --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'm' ---
+    q_m --> q_ma: "a"
+    q_m --> q_mi: "i"
+    q_m --> q_error: Σ-(a,i)
+    
+    %% magma, make, map
+    q_ma --> q_mag: "g"
+    q_ma --> q_mak: "k"
+    q_ma --> q_map: "p"
+    q_ma --> q_error: Σ-(g,k,p)
+    
+    q_mag --> q_magm: "m"
+    q_mag --> q_error: Σ-(m)
+    
+    q_magm --> q_magma: "a"
+    q_magm --> q_error: Σ-(a)
+    
+    q_magma --> [*]: Espaciador/símbolo
+    
+    q_mak --> q_make: "e"
+    q_mak --> q_error: Σ-(e)
+    
+    q_make --> [*]: Espaciador/símbolo
+    
+    q_map --> [*]: Espaciador/símbolo
+    
+    %% miss
+    q_mi --> q_mis: "s"
+    q_mi --> q_error: Σ-(s)
+    
+    q_mis --> q_miss: "s"
+    q_mis --> q_error: Σ-(s)
+    
+    q_miss --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'n' ---
+    %% not
+    q_n --> q_no: "o"
+    q_n --> q_error: Σ-(o)
+    
+    q_no --> q_not: "t"
+    q_no --> q_error: Σ-(t)
+    
+    q_not --> [*]: Espaciador/símbolo
+    
+    %% --- Palabras que empiezan con 'o' ---
+    %% Obsidian, Off, On, or
+    q_o --> q_ob: "b"
+    q_o --> q_of: "f"
+    q_o --> q_on: "n"
+    q_o --> q_or: "r"
+    q_o --> q_error: Σ-(b,f,n,r)
+    
+    q_ob --> q_obs: "s"
+    q_ob --> q_error: Σ-(s)
+    
+    q_obs --> q_obsi: "i"
+    q_obs --> q_error: Σ-(i)
+    
+    q_obsi --> q_obsid: "d"
+    q_obsi --> q_error: Σ-(d)
+    
+    q_obsid --> q_obsidi: "i"
+    q_obsid --> q_error: Σ-(i)
+    
+    q_obsidi --> q_obsidia: "a"
+    q_obsidi --> q_error: Σ-(a)
+    
+    q_obsidia --> q_obsidian: "n"
+    q_obsidia --> q_error: Σ-(n)
+    
+    q_obsidian --> [*]: Espaciador/símbolo
+    
+    q_of --> q_off: "f"
+    q_of --> q_error: Σ-(f)
+    
+    q_off --> [*]: Espaciador/símbolo
+    
+    q_on --> [*]: Espaciador/símbolo
+    
+    q_or --> [*]: Espaciador/símbolo
+    
+    %% Estado de error
+    q_error --> q_error: Σ

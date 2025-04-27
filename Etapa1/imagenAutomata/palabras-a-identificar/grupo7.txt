@@ -1,0 +1,109 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_i: "i" / "I"
+    q0 --> q_j: "j" / "J"
+    q0 --> q_l: "l" / "L"
+    q0 --> q_m: "m" / "M"
+    q0 --> q_error: Σ-(i, I, j, J, l, L, m, M)
+
+    %% Ramas que comienzan con i/I
+    q_i --> q_is: "s"
+    q_i --> q_error: Σ-(s)
+
+    q_is --> q_isi: "i"
+    q_is --> q_isn: "n"
+    q_is --> q_error: Σ-(i, n)
+
+    q_isi --> q_isin: "n"
+    q_isi --> q_error: Σ-(n)
+
+    q_isin --> q_isins: "s"
+    q_isin --> q_error: Σ-(s)
+
+    q_isins --> q_isinsc: "c"
+    q_isins --> q_error: Σ-(c)
+
+    q_isinsc --> q_isincr: "r"
+    q_isinsc --> q_error: Σ-(r)
+
+    q_isincr --> q_isincri: "i"
+    q_isincr --> q_error: Σ-(i)
+
+    q_isincri --> q_isincrib: "b"
+    q_isincri --> q_error: Σ-(b)
+
+    q_isincrib --> q_isincribe: "e"
+    q_isincrib --> q_error: Σ-(e)
+
+    q_isincribe --> q_isincribed: "d"
+    q_isincribe --> q_error: Σ-(d)
+
+    q_isincribed --> [*]: Espaciador/símbolo
+
+    q_isn --> q_isno: "o"
+    q_isn --> q_error: Σ-(o)
+
+    q_isno --> q_isnot: "t"
+    q_isno --> q_error: Σ-(t)
+
+    q_isnot --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con j/J
+    q_j --> q_ju: "u"
+    q_j --> q_error: Σ-(u)
+
+    q_ju --> q_juk: "k"
+    q_ju --> q_error: Σ-(k)
+
+    q_juk --> q_juke: "e"
+    q_juk --> q_error: Σ-(e)
+
+    q_juke --> q_jukeb: "b"
+    q_juke --> q_error: Σ-(b)
+
+    q_jukeb --> q_jukebo: "o"
+    q_jukeb --> q_error: Σ-(o)
+
+    q_jukebo --> q_jukebox: "x"
+    q_jukebo --> q_error: Σ-(x)
+
+    q_jukebox --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con l/L
+    q_l --> q_lo: "o"
+    q_l --> q_error: Σ-(o)
+
+    q_lo --> q_loc: "c"
+    q_lo --> q_error: Σ-(c)
+
+    q_loc --> q_lock: "k"
+    q_loc --> q_error: Σ-(k)
+
+    q_lock --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con m/M
+    q_m --> q_ma: "a"
+    q_m --> q_error: Σ-(a)
+
+    q_ma --> q_mag: "g"
+    q_ma --> q_error: Σ-(g)
+
+    q_mag --> q_magm: "m"
+    q_mag --> q_error: Σ-(m)
+
+    q_magm --> q_magma: "a"
+    q_magm --> q_error: Σ-(a)
+
+    q_magma --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Palabras clave implementadas:
+        - isInscribed
+        - isNot
+        - jukebox
+        - lock
+        - magma
+    end note

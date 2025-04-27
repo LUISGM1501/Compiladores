@@ -1,0 +1,51 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_w: "w" / "W"
+    q0 --> q_x: "x" / "X"
+    q0 --> q_error: Σ-(w, W, x, X)
+
+    %% Ramas que comienzan con w/W
+    q_w --> q_wo: "o"
+    q_w --> q_error: Σ-(o)
+
+    q_wo --> q_wor: "r"
+    q_wo --> q_error: Σ-(r)
+
+    q_wor --> q_worl: "l"
+    q_wor --> q_error: Σ-(l)
+
+    q_worl --> q_world: "d"
+    q_worl --> q_error: Σ-(d)
+
+    q_world --> q_worldS: "S"
+    q_world --> q_error: Σ-(S)
+
+    q_worldS --> q_worldSa: "a"
+    q_worldS --> q_error: Σ-(a)
+
+    q_worldSa --> q_worldSav: "v"
+    q_worldSa --> q_error: Σ-(v)
+
+    q_worldSav --> q_worldSave: "e"
+    q_worldSav --> q_error: Σ-(e)
+
+    q_worldSave --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con x/X
+    q_x --> q_xo: "o"
+    q_x --> q_error: Σ-(o)
+
+    q_xo --> q_xor: "r"
+    q_xo --> q_error: Σ-(r)
+
+    q_xor --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Solo implementadas las 2 palabras clave
+        para demostración:
+        - worldSave
+        - xor
+    end note

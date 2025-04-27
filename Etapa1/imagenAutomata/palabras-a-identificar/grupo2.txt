@@ -1,0 +1,83 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_b: "b" / "B"
+    q0 --> q_c: "c" / "C"
+    q0 --> q_error: Σ-(b, B, c, C)
+
+    %% Ramas que comienzan con b/B
+    q_b --> q_bi: "i"
+    q_b --> q_bo: "o"
+    q_b --> q_error: Σ-(i, o)
+
+    q_bi --> q_bin: "n"
+    q_bi --> q_error: Σ-(n)
+
+    q_bin --> q_bind: "d"
+    q_bin --> q_error: Σ-(d)
+
+    q_bind --> [*]: Espaciador/símbolo
+
+    q_bo --> q_boo: "o"
+    q_bo --> q_error: Σ-(o)
+
+    q_boo --> q_book: "k"
+    q_boo --> q_error: Σ-(k)
+
+    q_book --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con c/C
+    q_c --> q_ch: "h"
+    q_c --> q_co: "o"
+    q_c --> q_error: Σ-(h, o)
+
+    q_ch --> q_che: "e"
+    q_ch --> q_chu: "u"
+    q_ch --> q_error: Σ-(e, u)
+
+    q_che --> q_ches: "s"
+    q_che --> q_error: Σ-(s)
+
+    q_ches --> q_chest: "t"
+    q_ches --> q_error: Σ-(t)
+
+    q_chest --> [*]: Espaciador/símbolo
+
+    q_chu --> q_chun: "n"
+    q_chu --> q_error: Σ-(n)
+
+    q_chun --> q_chunk: "k"
+    q_chun --> q_error: Σ-(k)
+
+    q_chunk --> [*]: Espaciador/símbolo
+
+    q_co --> q_con: "n"
+    q_co --> q_error: Σ-(n)
+
+    q_con --> q_cont: "t"
+    q_con --> q_error: Σ-(t)
+
+    q_cont --> q_conti: "i"
+    q_cont --> q_error: Σ-(i)
+
+    q_conti --> q_contin: "n"
+    q_conti --> q_error: Σ-(n)
+
+    q_contin --> q_continu: "u"
+    q_contin --> q_error: Σ-(u)
+
+    q_continu --> q_continue: "e"
+    q_continu --> q_error: Σ-(e)
+
+    q_continue --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Palabras clave implementadas:
+        - bind
+        - Book
+        - Chest
+        - chunk
+        - continue
+    end note

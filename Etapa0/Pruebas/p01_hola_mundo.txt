@@ -1,3 +1,0 @@
-spawn {
-    villager_offer(sign("Hola Mundo desde EnderLang!"));
-} the_end

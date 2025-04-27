@@ -1,0 +1,100 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_u: "u" / "U"
+    q0 --> q_v: "v" / "V"
+    q0 --> q_w: "w" / "W"
+    q0 --> q_error: Σ-(u, U, v, V, w, W)
+
+    %% Ramas que comienzan con u/U
+    q_u --> q_un: "n"
+    q_u --> q_error: Σ-(n)
+
+    q_un --> q_unl: "l"
+    q_un --> q_error: Σ-(l)
+
+    q_unl --> q_unlo: "o"
+    q_unl --> q_error: Σ-(o)
+
+    q_unlo --> q_unloc: "c"
+    q_unlo --> q_error: Σ-(c)
+
+    q_unloc --> q_unlock: "k"
+    q_unloc --> q_error: Σ-(k)
+
+    q_unlock --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con v/V
+    q_v --> q_vo: "o"
+    q_v --> q_error: Σ-(o)
+
+    q_vo --> q_voi: "i"
+    q_vo --> q_error: Σ-(i)
+
+    q_voi --> q_void: "d"
+    q_voi --> q_error: Σ-(d)
+
+    q_void --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con w/W
+    q_w --> q_wa: "a"
+    q_w --> q_wi: "i"
+    q_w --> q_wo: "o"
+    q_w --> q_error: Σ-(a, i, o)
+
+    q_wa --> q_wal: "l"
+    q_wa --> q_error: Σ-(l)
+
+    q_wal --> q_walk: "k"
+    q_wal --> q_error: Σ-(k)
+
+    q_walk --> [*]: Espaciador/símbolo
+
+    q_wi --> q_wit: "t"
+    q_wi --> q_error: Σ-(t)
+
+    q_wit --> q_with: "h"
+    q_wit --> q_error: Σ-(h)
+
+    q_with --> q_withe: "e"
+    q_with --> q_error: Σ-(e)
+
+    q_withe --> q_wither: "r"
+    q_withe --> q_error: Σ-(r)
+
+    q_wither --> [*]: Espaciador/símbolo
+
+    q_wo --> q_wor: "r"
+    q_wo --> q_error: Σ-(r)
+
+    q_wor --> q_worl: "l"
+    q_wor --> q_error: Σ-(l)
+
+    q_worl --> q_world: "d"
+    q_worl --> q_error: Σ-(d)
+
+    q_world --> q_worldN: "N"
+    q_world --> q_error: Σ-(N)
+
+    q_worldN --> q_worldNa: "a"
+    q_worldN --> q_error: Σ-(a)
+
+    q_worldNa --> q_worldNam: "m"
+    q_worldNa --> q_error: Σ-(m)
+
+    q_worldNam --> q_worldName: "e"
+    q_worldNam --> q_error: Σ-(e)
+
+    q_worldName --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Solo implementadas las 5 palabras clave
+        para demostración:
+        - unlock
+        - void
+        - walk
+        - wither
+        - WorldName
+    end note

@@ -1,0 +1,101 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_c: "c" / "C"
+    q0 --> q_d: "d" / "D"
+    q0 --> q_error: Σ-(c, C, d, D)
+
+    %% Ramas que comienzan con c/C
+    q_c --> q_cr: "r"
+    q_c --> q_error: Σ-(r)
+
+    q_cr --> q_cra: "a"
+    q_cr --> q_cre: "e"
+    q_cr --> q_error: Σ-(a, e)
+
+    q_cra --> q_craf: "f"
+    q_cra --> q_error: Σ-(f)
+
+    q_craf --> q_craft: "t"
+    q_craf --> q_error: Σ-(t)
+
+    q_craft --> q_crafti: "i"
+    q_craft --> q_error: Σ-(i)
+
+    q_crafti --> q_craftin: "n"
+    q_crafti --> q_error: Σ-(n)
+
+    q_craftin --> q_crafting: "g"
+    q_craftin --> q_error: Σ-(g)
+
+    q_crafting --> q_craftingt: "t"
+    q_crafting --> q_error: Σ-(t)
+
+    q_craftingt --> q_craftingta: "a"
+    q_craftingt --> q_error: Σ-(a)
+
+    q_craftingta --> q_craftingtab: "b"
+    q_craftingta --> q_error: Σ-(b)
+
+    q_craftingtab --> q_craftingtabl: "l"
+    q_craftingtab --> q_error: Σ-(l)
+
+    q_craftingtabl --> q_craftingtable: "e"
+    q_craftingtabl --> q_error: Σ-(e)
+
+    q_craftingtable --> [*]: Espaciador/símbolo
+
+    q_cre --> q_cree: "e"
+    q_cre --> q_error: Σ-(e)
+
+    q_cree --> q_creep: "p"
+    q_cree --> q_error: Σ-(p)
+
+    q_creep --> q_creepe: "e"
+    q_creep --> q_error: Σ-(e)
+
+    q_creepe --> q_creeper: "r"
+    q_creepe --> q_error: Σ-(r)
+
+    q_creeper --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con d/D
+    q_d --> q_di: "i"
+    q_d --> q_dr: "r"
+    q_d --> q_error: Σ-(i, r)
+
+    q_di --> q_dis: "s"
+    q_di --> q_error: Σ-(s)
+
+    q_dis --> q_disc: "c"
+    q_dis --> q_error: Σ-(c)
+
+    q_disc --> [*]: Espaciador/símbolo
+
+    q_dr --> q_dro: "o"
+    q_dr --> q_error: Σ-(o)
+
+    q_dro --> q_drop: "p"
+    q_dro --> q_error: Σ-(p)
+
+    q_drop --> [*]: Espaciador/símbolo
+    q_drop --> q_dropp: "p"
+
+    q_dropp --> q_droppe: "e"
+    q_dropp --> q_error: Σ-(e)
+
+    q_droppe --> q_dropper: "r"
+    q_droppe --> q_error: Σ-(r)
+
+    q_dropper --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Palabras clave implementadas:
+        - CraftingTable
+        - creeper
+        - disc
+        - drop
+        - dropper
+    end note

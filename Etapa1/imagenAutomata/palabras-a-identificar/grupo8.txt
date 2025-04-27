@@ -1,0 +1,75 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_m: "m" / "M"
+    q0 --> q_n: "n" / "N"
+    q0 --> q_o: "o" / "O"
+    q0 --> q_error: Σ-(m, M, n, N, o, O)
+
+    %% Ramas que comienzan con m/M
+    q_m --> q_ma: "a"
+    q_m --> q_mi: "i"
+    q_m --> q_error: Σ-(a, i)
+
+    q_ma --> q_mak: "k"
+    q_ma --> q_map: "p"
+    q_ma --> q_error: Σ-(k, p)
+
+    q_mak --> q_make: "e"
+    q_mak --> q_error: Σ-(e)
+
+    q_make --> [*]: Espaciador/símbolo
+    q_map --> [*]: Espaciador/símbolo
+
+    q_mi --> q_mis: "s"
+    q_mi --> q_error: Σ-(s)
+
+    q_mis --> q_miss: "s"
+    q_mis --> q_error: Σ-(s)
+
+    q_miss --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con n/N
+    q_n --> q_no: "o"
+    q_n --> q_error: Σ-(o)
+
+    q_no --> q_not: "t"
+    q_no --> q_error: Σ-(t)
+
+    q_not --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con o/O
+    q_o --> q_ob: "b"
+    q_o --> q_error: Σ-(b)
+
+    q_ob --> q_obs: "s"
+    q_ob --> q_error: Σ-(s)
+
+    q_obs --> q_obsi: "i"
+    q_obs --> q_error: Σ-(i)
+
+    q_obsi --> q_obsid: "d"
+    q_obsi --> q_error: Σ-(d)
+
+    q_obsid --> q_obsidi: "i"
+    q_obsid --> q_error: Σ-(i)
+
+    q_obsidi --> q_obsidia: "a"
+    q_obsidi --> q_error: Σ-(a)
+
+    q_obsidia --> q_obsidian: "n"
+    q_obsidia --> q_error: Σ-(n)
+
+    q_obsidian --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Solo implementadas las 5 palabras clave
+        para demostración:
+        - make
+        - map
+        - miss
+        - not
+        - Obsidian
+    end note

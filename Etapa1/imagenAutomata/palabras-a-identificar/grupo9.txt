@@ -1,0 +1,70 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_o: "o" / "O"
+    q0 --> q_r: "r" / "R"
+    q0 --> q_error: Σ-(o, O, r, R)
+
+    %% Ramas que comienzan con o/O
+    q_o --> q_of: "f"
+    q_o --> q_on: "n"
+    q_o --> q_or: "r"
+    q_o --> q_error: Σ-(f, n, r)
+
+    q_of --> q_off: "f"
+    q_of --> q_error: Σ-(f)
+
+    q_off --> [*]: Espaciador/símbolo
+    q_on --> [*]: Espaciador/símbolo
+    q_or --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con r/R
+    q_r --> q_ra: "a"
+    q_r --> q_re: "e"
+    q_r --> q_error: Σ-(a, e)
+
+    q_ra --> q_rag: "g"
+    q_ra --> q_error: Σ-(g)
+
+    q_rag --> q_rage: "e"
+    q_rag --> q_error: Σ-(e)
+
+    q_rage --> q_rageq: "q"
+    q_rage --> q_error: Σ-(q)
+
+    q_rageq --> q_ragequ: "u"
+    q_rageq --> q_error: Σ-(u)
+
+    q_ragequ --> q_ragequi: "i"
+    q_ragequ --> q_error: Σ-(i)
+
+    q_ragequi --> q_ragequit: "t"
+    q_ragequi --> q_error: Σ-(t)
+
+    q_ragequit --> [*]: Espaciador/símbolo
+
+    q_re --> q_rec: "c"
+    q_re --> q_error: Σ-(c)
+
+    q_rec --> q_reci: "i"
+    q_rec --> q_error: Σ-(i)
+
+    q_reci --> q_recip: "p"
+    q_reci --> q_error: Σ-(p)
+
+    q_recip --> q_recipe: "e"
+    q_recip --> q_error: Σ-(e)
+
+    q_recipe --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Solo implementadas las 5 palabras clave
+        para demostración:
+        - Off
+        - On
+        - or
+        - Ragequit
+        - Recipe
+    end note

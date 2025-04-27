@@ -1,0 +1,87 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_e: "e" / "E"
+    q0 --> q_f: "f" / "F"
+    q0 --> q_g: "g" / "G"
+    q0 --> q_error: Σ-(e, E, f, F, g, G)
+
+    %% Ramas que comienzan con e/E
+    q_e --> q_ex: "x"
+    q_e --> q_error: Σ-(x)
+
+    q_ex --> q_exp: "p"
+    q_ex --> q_error: Σ-(p)
+
+    q_exp --> q_expa: "a"
+    q_exp --> q_error: Σ-(a)
+
+    q_expa --> q_expan: "n"
+    q_expa --> q_error: Σ-(n)
+
+    q_expan --> q_expand: "d"
+    q_expan --> q_error: Σ-(d)
+
+    q_expand --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con f/F
+    q_f --> q_fe: "e"
+    q_f --> q_fo: "o"
+    q_f --> q_fr: "r"
+    q_f --> q_error: Σ-(e, o, r)
+
+    q_fe --> q_fee: "e"
+    q_fe --> q_error: Σ-(e)
+
+    q_fee --> q_feed: "d"
+    q_fee --> q_error: Σ-(d)
+
+    q_feed --> [*]: Espaciador/símbolo
+
+    q_fo --> q_for: "r"
+    q_fo --> q_error: Σ-(r)
+
+    q_for --> q_forg: "g"
+    q_for --> q_error: Σ-(g)
+
+    q_forg --> q_forge: "e"
+    q_forg --> q_error: Σ-(e)
+
+    q_forge --> [*]: Espaciador/símbolo
+
+    q_fr --> q_fro: "o"
+    q_fr --> q_error: Σ-(o)
+
+    q_fro --> q_from: "m"
+    q_fro --> q_error: Σ-(m)
+
+    q_from --> [*]: Espaciador/símbolo
+
+    %% Ramas que comienzan con g/G
+    q_g --> q_ga: "a"
+    q_g --> q_error: Σ-(a)
+
+    q_ga --> q_gat: "t"
+    q_ga --> q_error: Σ-(t)
+
+    q_gat --> q_gath: "h"
+    q_gat --> q_error: Σ-(h)
+
+    q_gath --> q_gathe: "e"
+    q_gath --> q_error: Σ-(e)
+
+    q_gathe --> q_gather: "r"
+    q_gathe --> q_error: Σ-(r)
+
+    q_gather --> [*]: Espaciador/símbolo
+
+    %% Estado de error
+    q_error --> q_error: Σ
+
+    note left of q0
+        Palabras clave implementadas:
+        - expand
+        - feed
+        - forge
+        - from
+        - gather
+    end note

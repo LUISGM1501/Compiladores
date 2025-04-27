@@ -1,0 +1,22 @@
+stateDiagram-v2
+    [*] --> q0
+    q0 --> q_comment_line_start: '$'
+    q_comment_line_start --> q_comment_line: '$'
+    q_comment_line --> q_comment_line: Σ - (\n)
+    q_comment_line --> q_comment_line_end: \n
+    q_comment_line_end --> [*]
+    
+    q0 --> q_comment_block_start: '$'
+    q_comment_block_start --> q_comment_block: '*'
+    q_comment_block --> q_comment_block: Σ - (*)
+    q_comment_block --> q_comment_block_aster: '*'
+    q_comment_block_aster --> q_comment_block_end: '$'
+    q_comment_block_end --> [*]
+    
+    note right of q0
+        Reconoce:
+        - Comentarios de línea: $$ ...
+        - Comentarios de bloque: $* ... *$
+        Los comentarios no generan tokens,
+        solo son ignorados por el lexer
+    end note
