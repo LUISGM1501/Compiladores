@@ -24,6 +24,7 @@ def generarLadrillos(contenido, estadisticaToken, lineasPrograma, numeroCaracter
     # Generar los ladrillos con colores cíclicos
     ladrillos_html = []
     for i, lexema in enumerate(contenido):
+        print("CONTENIDO DEL LADRILLO: ",lexema)
         color = colores[i % len(colores)]
         # Escapar caracteres especiales para HTML
         lexema_escaped = lexema.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -74,7 +75,10 @@ def generarLadrillos(contenido, estadisticaToken, lineasPrograma, numeroCaracter
             margin-bottom: 30px;
         }}
         .ladrillo {{
+            white-space: nowrap;  /* Evita que el texto se divida */
+            word-break: keep-all; /* Mantiene las palabras completas */
             padding: 8px 12px;
+            margin: 2px;
             border-radius: 4px;
             color: white;
             font-weight: bold;

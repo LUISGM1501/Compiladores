@@ -50,11 +50,11 @@ class Scanner:
             
             # Inicializar autómatas
             self.automatas = [
-                IdentifierAutomaton(),
-                NumberAutomaton(),
-                StringAutomaton(),
-                OperatorAutomaton(),
-                CommentAutomaton()
+                CommentAutomaton(),  # Primero comentarios
+                StringAutomaton(),   # Luego strings
+                NumberAutomaton(),   # Después números
+                OperatorAutomaton(), # Operadores
+                IdentifierAutomaton() # Finalmente identificadores
             ]
             
             # Cargar el primer token
@@ -92,88 +92,78 @@ class Scanner:
         return self.token_actual
     
     def _siguiente_token(self):
-        """
-        Encuentra el siguiente token en el archivo
-        
-        Retorna:
-            Token: El siguiente token
-        """
-        # Ignorar espacios en blanco, tabulaciones y saltos de línea
         self._ignorar_espacios()
         
-        # Si llegamos al final del archivo, devolver EOF
         if self.posicion >= len(self.contenido):
             return Token("EOF", "", self.linea, self.columna)
         
-        # Obtener el carácter actual
-        caracter = self.contenido[self.posicion]
+        # Guardar posición inicial
+        inicio_linea = self.linea
+        inicio_col = self.columna
         
-        # Inicializar el buffer y posición inicial
-        self.buffer = caracter
-        linea_inicial = self.linea
-        columna_inicial = self.columna
-        
-        # Intentar reconocer con cada autómata
-        posicion_inicial = self.posicion
-        
+        # Probar cada autómata en orden
         for automata in self.automatas:
-            # Reiniciar posición para cada intento de autómata
-            self.posicion = posicion_inicial
-            self.buffer = caracter
-            self.columna = columna_inicial
+            # Configurar estado temporal
+            temp_pos = self.posicion
+            temp_linea = self.linea
+            temp_col = self.columna
+            lexema = ""
             
-            if automata.iniciar(caracter):
+            if automata.iniciar(self.contenido[temp_pos]):
                 estado = automata.estado_actual
-                posicion_avanzada = self.posicion + 1  # Avanzamos después de verificar
+                lexema += self.contenido[temp_pos]
+                temp_pos += 1
+                if self.contenido[temp_pos-1] == '\n':
+                    temp_linea += 1
+                    temp_col = 1
+                else:
+                    temp_col += 1
                 
-                # Procesar caracteres según el autómata
-                while posicion_avanzada < len(self.contenido) and estado != "error" and not automata.es_estado_final(estado):
-                    siguiente_caracter = self.contenido[posicion_avanzada]
-                    nuevo_estado = automata.transicion(estado, siguiente_caracter)
-                    
-                    # Si la transición es válida, actualizamos el estado y seguimos
-                    if nuevo_estado != "error":
-                        estado = nuevo_estado
-                        self.buffer += siguiente_caracter
-                        posicion_avanzada += 1
-                        
-                        # Manejo especial para saltos de línea
-                        if siguiente_caracter == '\n':
-                            self.linea += 1
-                            self.columna = 1
-                        else:
-                            self.columna += 1
-                    else:
+                while temp_pos < len(self.contenido):
+                    next_char = self.contenido[temp_pos]
+                    new_state = automata.transicion(estado, next_char)
+
+                    if new_state == "error":
                         break
-                
-                # Si terminamos en estado de aceptación
-                if automata.es_estado_final(estado):
-                    lexema = self.buffer
-                    tipo = automata.obtener_tipo_token(estado, lexema)
                     
-                    # Verificar si es una palabra reservada
+                    estado = new_state
+                    lexema += next_char
+                    temp_pos += 1
+                    
+                    if next_char == '\n':
+                        temp_linea += 1
+                        temp_col = 1
+                    else:
+                        temp_col += 1
+
+                # Después del while, fuera del bucle:
+                if automata.es_estado_final(estado):
+                    # Actualizar posición real
+                    self.posicion = temp_pos
+                    self.linea = temp_linea
+                    self.columna = temp_col
+                    
+                    tipo = automata.obtener_tipo_token(estado, lexema)
                     if tipo == "IDENTIFICADOR" and lexema in PALABRAS_RESERVADAS:
                         tipo = PALABRAS_RESERVADAS[lexema]
                     
-                    # Actualizar posición final
-                    self.posicion = posicion_avanzada
-                    
-                    # Crear y devolver el token
                     valor = automata.obtener_valor(estado, lexema)
-                    return Token(tipo, lexema, linea_inicial, columna_inicial, valor)
+                    return Token(tipo, lexema, inicio_linea, inicio_col, valor)
+
         
-        # Si ningún autómata reconoció el token, es un error
-        caracter = self.contenido[self.posicion]
+        # Manejo de error
+        error_char = self.contenido[self.posicion]
         self.posicion += 1
         self.columna += 1
         
-        # Registrar error y continuar con recuperación
-        mensaje = f"Carácter no reconocido: '{caracter}'"
-        self.manejador_errores.registrar_error("LEXICO", mensaje, self.linea, self.columna)
-        
-        # Recuperación de error: devolver un token de error
-        return Token("ERROR", caracter, linea_inicial, columna_inicial)
-    
+        self.manejador_errores.registrar_error(
+            "LEXICO", 
+            f"Carácter no reconocido: '{error_char}'", 
+            inicio_linea, 
+            inicio_col
+        )
+        return Token("ERROR", error_char, inicio_linea, inicio_col)
+
     def _ignorar_espacios(self):
         """
         Avanza la posición ignorando espacios en blanco y saltos de línea

@@ -10,6 +10,7 @@ from scanner.core import Scanner
 from scanner.error_handling import ErrorHandler
 from scanner.utils.cantidadComentarios import contar_comentarios_bloque, contar_comentarios_linea
 from muroLadrillos.generarMuroLadrillos import generarLadrillos
+from scanner.tokens import PALABRAS_RESERVADAS
 
 def main():
     """Función principal original (se mantiene intacta)"""
@@ -83,14 +84,46 @@ def ejecucion():
     
     scanner.finalizar_scanner()
     
-    # Preparar datos para el HTML
-    lexemas = [t.lexema for t in tokens if t.tipo != 'EOF']
+    # Preparar datos para el HTML - Solución corregida
+    lexemas = []
+    for t in tokens:
+        if t.tipo not in ['EOF', 'COMENTARIO']:
+            # Añadir el lexema completo directamente
+            lexemas.append(t.lexema)
+    
+    # Filtrar espacios y elementos vacíos, asegurándose de no descomponer los lexemas
+    lexemas = [lex for lex in lexemas if lex.strip() and len(lex) > 0]
+    
+    # Después de recolectar todos los tokens
+    print("\nDebug - Tokens recolectados:")
+    for i, token in enumerate(tokens[:20]):  # Mostrar primeros 20 tokens para debug
+        print(f"Token {i+1}: Tipo='{token.tipo}' | Lexema='{token.lexema}' | Pos={token.linea}:{token.columna}")
+
+    # Verificar si los lexemas ya vienen divididos del scanner
+    print("\nLexemas antes de cualquier procesamiento:")
+    print([t.lexema for t in tokens[:20]])
+    
+    # Debug - imprimir los primeros 5 lexemas para verificar
+    print("Primeros 5 lexemas:")
+    for i, lex in enumerate(lexemas[:5]):
+        print(f"{i+1}. '{lex}'")
+    
     
     # Calcular estadísticas de tokens (ejemplo)
     estadisticas = {
-        "Estructura del Programa": sum(1 for t in tokens if t.tipo in ['IF', 'ELSE', 'WHILE']),
-        "Tipos de datos": sum(1 for t in tokens if t.tipo in ['INT', 'FLOAT', 'BOOL']),
-        # ... otras categorías
+        "Palabras reservadas": sum(1 for t in tokens if t.tipo in PALABRAS_RESERVADAS.values()),
+        "Identificadores": sum(1 for t in tokens if t.tipo == 'IDENTIFICADOR'),
+        "Literales numéricos": sum(1 for t in tokens if t.tipo in ['NUMERO_ENTERO', 'NUMERO_DECIMAL']),
+        "Literales de texto": sum(1 for t in tokens if t.tipo == 'CADENA'),
+        "Operadores": sum(1 for t in tokens if t.tipo in [
+            'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 'MODULO',
+            'MAYOR_QUE', 'MENOR_QUE', 'MAYOR_IGUAL', 'MENOR_IGUAL',
+            'IGUAL', 'DOBLE_IGUAL', 'DIFERENTE', 'PUNTO_Y_COMA',
+            'COMA', 'PUNTO', 'DOS_PUNTOS', 'PARENTESIS_ABRE',
+            'PARENTESIS_CIERRA', 'CORCHETE_ABRE', 'CORCHETE_CIERRA',
+            'LLAVE_ABRE', 'LLAVE_CIERRA', 'HASH'
+        ]),
+        "Errores léxicos": sum(1 for t in tokens if t.tipo == 'ERROR')
     }
     
     # Manejo de errores robusto
