@@ -1,7 +1,8 @@
 $* 
   Prueba_PR_Estructura.ne
   Propósito: Verificar el reconocimiento de palabras reservadas de estructura del programa
-  Fecha: Abril 10, 2025
+  Probar: WorldName, Bedrock, ResourcePack, Inventory, Recipe, CraftingTable, SpawnPoint
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de la estructura básica del programa NotchEngine
@@ -9,26 +10,26 @@ $$ Verificando las palabras reservadas: WorldName, Bedrock, ResourcePack, Invent
 
 WorldName PruebaEstructura:
 
-Bedrock {
+Bedrock 
     Obsidian Stack MAX_VALOR 100;
     Obsidian Spider SALUDO "Prueba de estructura";
-}
 
-ResourcePack {
+
+ResourcePack 
     Anvil Stack -> Spider;
-}
 
-Inventory {
+
+Inventory 
     Stack contador = 0;
     Spider mensaje = "Hola mundo";
-}
 
-Recipe {
+
+Recipe 
     Spell sumar(Stack :: a, b) -> Stack;
     Ritual mostrarMensaje(Spider :: texto);
-}
 
-CraftingTable {
+
+CraftingTable 
     Spell sumar(Stack :: a, b) -> Stack
     PolloCrudo
         Stack resultado = a + b;
@@ -39,14 +40,13 @@ CraftingTable {
     PolloCrudo
         dropperSpider(texto);
     PolloAsado
-}
 
-SpawnPoint {
+
+SpawnPoint 
     PolloCrudo
         dropperSpider(SALUDO);
         Stack resultado = sumar(5, 10);
         dropperSpider("El resultado es: " bind resultado);
     PolloAsado
-}
 
 worldSave

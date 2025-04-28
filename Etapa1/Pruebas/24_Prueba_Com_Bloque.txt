@@ -1,6 +1,7 @@
 $* 
-  24_Prueba_Com_Bloque.txt
-  Prueba para verificar el reconocimiento de comentarios de bloque en Notch Engine
+  24_Prueba_Com_Bloque.ne
+  Propósito: Verificar el reconocimiento de comentarios de bloque en Notch Engine
+  Fecha: 28/04/2025
   Sintaxis: $* comentario *$
 *$
 
@@ -10,14 +11,15 @@ $* Este es un comentario de bloque
    al inicio del archivo
    que ocupa varias líneas *$
 
-Bedrock {
+Bedrock
+
     $* Comentario de bloque 
        dentro de la sección de constantes *$
     Obsidian Stack MAX_LEVEL 100;
     Obsidian Spider VERSION $* Comentario en medio de una declaración *$ "1.0";
-}
 
-Inventory {
+Inventory
+
     $* 
     Comentario de bloque al inicio
     de la sección de variables 
@@ -53,15 +55,15 @@ Inventory {
     	Línea con tabulación
     		Línea con doble tabulación
     *$
-}
 
-Recipe {
+Recipe
+
     $* Comentario de bloque
        en sección de prototipos *$
     Spell calcular(Stack :: a, b) -> Stack;
-}
 
-CraftingTable {
+CraftingTable
+
     $* Comentario de bloque al inicio de la sección de rutinas *$
     
     Spell calcular(Stack :: a, b) -> Stack
@@ -78,61 +80,62 @@ CraftingTable {
            de un procedimiento *$
         dropperSpider(mensaje);
     PolloAsado $* Comentario de bloque al final de un bloque *$
-}
 
-SpawnPoint {
-    $* Comentario de bloque 
-       al inicio del punto de entrada *$
-    
-    contador = 5 $* Comentario en medio
-                    de una expresión *$ + 10;
-    
-    target contador > $* Comentario dentro
-                         de una condición *$ 0 craft hit
+SpawnPoint
+
     PolloCrudo
-        dropperSpider("Contador positivo");
+        $* Comentario de bloque 
+           al inicio del punto de entrada *$
+        
+        contador = 5 $* Comentario en medio
+                        de una expresión *$ + 10;
+        
+        target contador > $* Comentario dentro
+                             de una condición *$ 0 craft hit
+        PolloCrudo
+            dropperSpider("Contador positivo");
+        PolloAsado
+        
+        $* Casos especiales para probar el scanner *$
+        
+        $* Comentario con símbolo $ dentro *$
+        
+        $* Comentario con símbolo * dentro *$
+        
+        $* Comentario con la secuencia *$ dentro pero sin cerrar aún *$
+        
+        $* Comentario con la secuencia $* dentro pero sin iniciar uno nuevo *$
+        
+        $* Comentario con múltiples
+            $* estos no deberían iniciar
+               nuevos comentarios *$
+            secuencias $* anidadas *$
+        *$
+        
+        $* Comentario con
+           múltiples líneas
+           
+           y líneas en blanco
+           
+           y más contenido
+        *$
+        
+        $* Comentario justo antes de un comentario de línea *$ $$ Comentario de línea
+        
+        $* 
+           Comentario muy largo para probar límites del buffer
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+           ........................................................................
+        *$
     PolloAsado
-    
-    $* Casos especiales para probar el scanner *$
-    
-    $* Comentario con símbolo $ dentro *$
-    
-    $* Comentario con símbolo * dentro *$
-    
-    $* Comentario con la secuencia *$ dentro pero sin cerrar aún *$
-    
-    $* Comentario con la secuencia $* dentro pero sin iniciar uno nuevo *$
-    
-    $* Comentario con múltiples
-        $* estos no deberían iniciar
-           nuevos comentarios *$
-        secuencias $* anidadas *$
-    *$
-    
-    $* Comentario con
-       múltiples líneas
-       
-       y líneas en blanco
-       
-       y más contenido
-    *$
-    
-    $* Comentario justo antes de un comentario de línea *$ $$ Comentario de línea
-    
-    $* 
-       Comentario muy largo para probar límites del buffer
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-       ........................................................................
-    *$
-}
 
 $* Comentario de bloque 
    antes del cierre del programa *$

@@ -3,7 +3,7 @@
 ; * Descripcion: Conversiones desde creativo*
 ; * (probabilidad entre 0 y 1)              *
 ; * Autores: Luis Urbina, Samir Cabrera     *
-; * Fecha de entrega: 10/04/2025            *
+; * Fecha de entrega: 28/04/2025            *
 ; ********************************************
 
 ; Este archivo implementa conversiones desde el tipo creativo "SpyderEye"

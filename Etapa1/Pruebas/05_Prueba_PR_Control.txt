@@ -1,7 +1,8 @@
 $* 
   Prueba_PR_Control.ne
   Propósito: Verificar reconocimiento de palabras de control de flujo
-  Fecha: Abril 10, 2025
+  Probar: Entity, PolloCrudo, PolloAsado, Punto, SpawnPoint, Inventory, WorldName
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de palabras reservadas de control de flujo en NotchEngine
@@ -10,20 +11,24 @@ $$ spawner, exhausted, walk, set, to, step, wither
 
 WorldName PruebaControl:
 
-Inventory {
+Inventory
+
     $$ Variables para las pruebas
     Stack contador = 0;
     Stack opcion = 2;
     Torch condicion = On;
     Stack iterador = 0;
-    Entity Punto {
+    
+    Entity Punto 
+    PolloCrudo
         Stack x;
         Stack y;
-    };
+    PolloAsado;
+    
     Entity Punto coordenada;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ 1. Prueba de repeater (while) con craft
         dropperSpider("Prueba de repeater:");
@@ -87,6 +92,5 @@ SpawnPoint {
             dropperSpider("Coordenadas: (" bind x bind ", " bind y bind ")");
         PolloAsado
     PolloAsado
-}
 
 worldSave

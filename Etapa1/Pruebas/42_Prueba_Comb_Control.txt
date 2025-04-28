@@ -1,12 +1,13 @@
 $* 
-   Prueba: 42_Prueba_Comb_Control
+   Prueba: 42_Prueba_Comb_Control.ne
    Descripción: Verificar estructuras de control anidadas
-   Lenguaje: Notch Engine
+   Fecha: 28/04/2025
 *$
 
 WorldName PruebaControlAnidado:
 
-Inventory {
+Inventory
+
     $$ Variables para las pruebas
     Stack contador = 0;
     Stack max_iteraciones = 5;
@@ -21,16 +22,17 @@ Inventory {
     
     Shelf[5] Stack matriz = [1, 2, 3, 4, 5];
     
-    Entity Personaje {
+    Entity Personaje
+    PolloCrudo
         Spider nombre;
         Stack nivel;
         Torch activo;
-    };
+    PolloAsado;
     
     Entity Personaje jugador;
-}
 
-SpawnPoint {
+SpawnPoint
+
     dropperSpider(mensaje);
     jugador@nombre = "Steve";
     jugador@nivel = 1;
@@ -242,6 +244,5 @@ SpawnPoint {
     PolloAsado
     
     dropperSpider("Programa completado con éxito.");
-}
 
 worldSave

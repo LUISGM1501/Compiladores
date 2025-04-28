@@ -1,7 +1,8 @@
 $* 
   Prueba_Lit_Enteros.ne
   Propósito: Verificar reconocimiento de literales enteros (positivos, negativos, cero)
-  Fecha: Abril 10, 2025
+  Probar: Stack
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de literales enteros en NotchEngine
@@ -9,16 +10,17 @@ $$ Verificando: enteros positivos, negativos y cero
 
 WorldName PruebaLitEnteros:
 
-Bedrock {
+Bedrock
+
     $$ Constantes enteras
     Obsidian Stack CERO 0;
     Obsidian Stack POSITIVO 42;
     Obsidian Stack NEGATIVO -42;
     Obsidian Stack MAX_VALOR 2147483647;  $$ Valor máximo de 32 bits
     Obsidian Stack MIN_VALOR -2147483648; $$ Valor mínimo de 32 bits
-}
 
-Inventory {
+Inventory
+
     $$ Variables con literales enteros
     Stack cero = 0;
     Stack uno = 1;
@@ -40,9 +42,9 @@ Inventory {
     
     $$ Variables para resultados
     Stack resultado = 0;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Operaciones aritméticas con literales enteros directos
         resultado = 5 + 3;      $$ 8
@@ -106,6 +108,5 @@ SpawnPoint {
             dropperSpider("Ambas representaciones de cero son iguales");
         PolloAsado
     PolloAsado
-}
 
 worldSave

@@ -1,16 +1,18 @@
 $* 
-  22_Prueba_Op_Especiales.txt
-  Prueba para verificar el reconocimiento de operadores especiales en Notch Engine
+  22_Prueba_Op_Especiales.ne
+  Propósito: Verificar el reconocimiento de operadores especiales en Notch Engine
+  Fecha: 28/04/2025
   Operadores: chunk (size of), >> (coherción de tipos)
 *$
 
 WorldName PruebaOpEspeciales:
 
-Bedrock {
-    Obsidian Stack MAX_SIZE 1024;
-}
+Bedrock
 
-Inventory {
+    Obsidian Stack MAX_SIZE 1024;
+
+Inventory
+
     $$ Declaración de variables de diferentes tipos
     Stack entero = 42;
     Ghast flotante = 3.14159;
@@ -22,106 +24,108 @@ Inventory {
     Shelf[5] Stack arreglo;
     Chest conjunto = {: 1, 2, 3 :};
     
-    Entity Punto {
+    Entity Punto 
+    PolloCrudo
         Stack x;
         Stack y;
-    };
+    PolloAsado;
+    
     Entity Punto punto;
-}
 
-SpawnPoint {
-    $$ Pruebas con operador chunk (size of)
-    
-    $$ Tamaño de tipos básicos
-    Stack tamanoStack = chunk Stack;
-    Stack tamanoGhast = chunk Ghast;
-    Stack tamanoSpider = chunk Spider;
-    Stack tamanoRune = chunk Rune;
-    Stack tamanoTorch = chunk Torch;
-    
-    dropperSpider("Tamaño de Stack en bytes: " bind tamanoStack);
-    dropperSpider("Tamaño de Ghast en bytes: " bind tamanoGhast);
-    dropperSpider("Tamaño de Spider en bytes: " bind tamanoSpider);
-    dropperSpider("Tamaño de Rune en bytes: " bind tamanoRune);
-    dropperSpider("Tamaño de Torch en bytes: " bind tamanoTorch);
-    
-    $$ Tamaño de tipos compuestos
-    Stack tamanoShelf = chunk Shelf[5] Stack;
-    Stack tamanoChest = chunk Chest;
-    Stack tamanoPunto = chunk Punto;
-    
-    dropperSpider("Tamaño de arreglo en bytes: " bind tamanoShelf);
-    dropperSpider("Tamaño de conjunto en bytes: " bind tamanoChest);
-    dropperSpider("Tamaño de Punto en bytes: " bind tamanoPunto);
-    
-    $$ Tamaño de variables
-    Stack tamanoVariable = chunk entero;
-    Stack tamanoArreglo = chunk arreglo;
-    Stack tamanoTexto = chunk texto;
-    
-    dropperSpider("Tamaño de variable entero en bytes: " bind tamanoVariable);
-    dropperSpider("Tamaño de variable arreglo en bytes: " bind tamanoArreglo);
-    dropperSpider("Tamaño de variable texto en bytes: " bind tamanoTexto);
-    
-    $$ Tamaño de expresiones
-    Stack tamanoExpresion = chunk (entero * 2 + 10);
-    
-    dropperSpider("Tamaño de expresión en bytes: " bind tamanoExpresion);
-    
-    $$ Pruebas con operador >> (coherción de tipos)
-    
-    $$ Coherción de Ghast a Stack
-    Stack enteroDeFlotante = flotante >> Stack;
-    dropperSpider("Flotante convertido a entero: " bind enteroDeFlotante);
-    
-    $$ Coherción de Stack a Torch
-    Torch booleanoDeEntero = entero >> Torch;
-    dropperSpider("Entero convertido a booleano: " bind booleanoDeEntero);
-    
-    $$ Coherción de Spider a Rune
-    Rune caracterDeTexto = texto >> Rune;
-    dropperSpider("Primer carácter del texto: " bind caracterDeTexto);
-    
-    $$ Coherción de expresiones
-    Stack resultadoEntero = (flotante :+ 2.5) >> Stack;
-    dropperSpider("Suma flotante convertida a entero: " bind resultadoEntero);
-    
-    $$ Casos especiales para probar el scanner
-    
-    $$ Operadores sin espacios
-    Stack tam1 = chunkStack;        $$ Esto debería ser un identificador
-    Stack tam2 = chunk Stack;       $$ Esto es correcto
-    Stack tam3 = chunk(Stack);      $$ Esto podría ser problemático
-    
-    Stack ent1 = flotante>>Stack;   $$ Sin espacios
-    Stack ent2 = flotante >> Stack; $$ Con espacios
-    
-    $$ Operadores con espacios variados
-    Stack tam4 = chunk  Stack;
-    Stack ent3 = flotante  >>  Stack;
-    
-    $$ Operaciones con comentarios
-    Stack tam5 = chunk $$ Comentario en medio
-                 Stack;
-    
-    Stack ent4 = flotante $$ Comentario en medio
-                >> Stack;
-    
-    $$ Combinaciones de ambos operadores
-    Stack tamCombinado = chunk (flotante >> Stack);
-    
-    $$ Casos con posibles confusiones para el scanner
-    Spider textoMayor = "Esto no es una coherción >>";
-    Spider textoChunk = "La palabra chunk no es un operador aquí";
-    
-    $$ Uso en expresiones más complejas
-    Stack resultado = (flotante :* 2.0 >> Stack) + (entero * 3);
-    
-    $$ Uso en estructuras de control
-    target (flotante >> Stack) > 3 craft hit
+SpawnPoint
+
     PolloCrudo
-        dropperSpider("La parte entera de flotante es mayor que 3");
+        $$ Pruebas con operador chunk (size of)
+        
+        $$ Tamaño de tipos básicos
+        Stack tamanoStack = chunk Stack;
+        Stack tamanoGhast = chunk Ghast;
+        Stack tamanoSpider = chunk Spider;
+        Stack tamanoRune = chunk Rune;
+        Stack tamanoTorch = chunk Torch;
+        
+        dropperSpider("Tamaño de Stack en bytes: " bind tamanoStack);
+        dropperSpider("Tamaño de Ghast en bytes: " bind tamanoGhast);
+        dropperSpider("Tamaño de Spider en bytes: " bind tamanoSpider);
+        dropperSpider("Tamaño de Rune en bytes: " bind tamanoRune);
+        dropperSpider("Tamaño de Torch en bytes: " bind tamanoTorch);
+        
+        $$ Tamaño de tipos compuestos
+        Stack tamanoShelf = chunk Shelf[5] Stack;
+        Stack tamanoChest = chunk Chest;
+        Stack tamanoPunto = chunk Punto;
+        
+        dropperSpider("Tamaño de arreglo en bytes: " bind tamanoShelf);
+        dropperSpider("Tamaño de conjunto en bytes: " bind tamanoChest);
+        dropperSpider("Tamaño de Punto en bytes: " bind tamanoPunto);
+        
+        $$ Tamaño de variables
+        Stack tamanoVariable = chunk entero;
+        Stack tamanoArreglo = chunk arreglo;
+        Stack tamanoTexto = chunk texto;
+        
+        dropperSpider("Tamaño de variable entero en bytes: " bind tamanoVariable);
+        dropperSpider("Tamaño de variable arreglo en bytes: " bind tamanoArreglo);
+        dropperSpider("Tamaño de variable texto en bytes: " bind tamanoTexto);
+        
+        $$ Tamaño de expresiones
+        Stack tamanoExpresion = chunk (entero * 2 + 10);
+        dropperSpider("Tamaño de expresión en bytes: " bind tamanoExpresion);
+        
+        $$ Pruebas con operador >> (coherción de tipos)
+        
+        $$ Coherción de Ghast a Stack
+        Stack enteroDeFlotante = flotante >> Stack;
+        dropperSpider("Flotante convertido a entero: " bind enteroDeFlotante);
+        
+        $$ Coherción de Stack a Torch
+        Torch booleanoDeEntero = entero >> Torch;
+        dropperSpider("Entero convertido a booleano: " bind booleanoDeEntero);
+        
+        $$ Coherción de Spider a Rune
+        Rune caracterDeTexto = texto >> Rune;
+        dropperSpider("Primer carácter del texto: " bind caracterDeTexto);
+        
+        $$ Coherción de expresiones
+        Stack resultadoEntero = (flotante :+ 2.5) >> Stack;
+        dropperSpider("Suma flotante convertida a entero: " bind resultadoEntero);
+        
+        $$ Casos especiales para probar el scanner
+        
+        $$ Operadores sin espacios
+        Stack tam1 = chunkStack;        $$ Esto debería ser un identificador
+        Stack tam2 = chunk Stack;       $$ Esto es correcto
+        Stack tam3 = chunk(Stack);      $$ Esto podría ser problemático
+        
+        Stack ent1 = flotante>>Stack;   $$ Sin espacios
+        Stack ent2 = flotante >> Stack; $$ Con espacios
+        
+        $$ Operadores con espacios variados
+        Stack tam4 = chunk  Stack;
+        Stack ent3 = flotante  >>  Stack;
+        
+        $$ Operaciones con comentarios
+        Stack tam5 = chunk $$ Comentario en medio
+                     Stack;
+        
+        Stack ent4 = flotante $$ Comentario en medio
+                    >> Stack;
+        
+        $$ Combinaciones de ambos operadores
+        Stack tamCombinado = chunk (flotante >> Stack);
+        
+        $$ Casos con posibles confusiones para el scanner
+        Spider textoMayor = "Esto no es una coherción >>";
+        Spider textoChunk = "La palabra chunk no es un operador aquí";
+        
+        $$ Uso en expresiones más complejas
+        Stack resultado = (flotante :* 2.0 >> Stack) + (entero * 3);
+        
+        $$ Uso en estructuras de control
+        target (flotante >> Stack) > 3 craft hit
+        PolloCrudo
+            dropperSpider("La parte entera de flotante es mayor que 3");
+        PolloAsado
     PolloAsado
-}
 
 worldSave

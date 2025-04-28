@@ -1,18 +1,19 @@
 $* 
   Prueba_ID_Similares.ne
   Propósito: Verificar identificadores similares a palabras reservadas
-  Fecha: Abril 10, 2025
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaIdentificadoresSimilares:
 
-Bedrock {
+Bedrock
+
   Obsidian Stack WorldNameTest 100;
   Obsidian Spider BedrockType "Hard Stone";
   Obsidian Torch InventoryFull On;
-}
 
-Inventory {
+Inventory
+
   $$ Identificadores que son similares a palabras reservadas
   Stack worldname;
   Stack WorldName2;
@@ -102,9 +103,9 @@ Inventory {
   Stack hopperMinecart;
   Stack dropper;
   Stack dropperFunction;
-}
 
-CraftingTable {
+CraftingTable
+
   Spell worldNameGenerator() -> Spider
   PolloCrudo
     Spider spawnpoint = "DefaultSpawn";
@@ -122,31 +123,32 @@ CraftingTable {
     
     dropperSpider("Crafting table ready");
   PolloAsado
-}
 
-SpawnPoint {
-  $$ Usando identificadores similares a palabras reservadas
-  Stack worldname = 1;
-  Stack bedrock = 2;
-  Stack inventory = 3;
-  Stack recipe = 4;
-  Stack craftingtable = 5;
-  Stack spawnpoint = 6;
-  
-  $$ Operaciones mezclando palabras reservadas e identificadores
-  worldname = worldname + bedrock;
-  inventory = craftingtable * spawnpoint;
-  
-  $$ Uso en estructuras de control
-  target worldname > recipe craft hit
+SpawnPoint
+
   PolloCrudo
-    Spider spell = "Magic";
-    dropperSpider(spell);
+    $$ Usando identificadores similares a palabras reservadas
+    Stack worldname = 1;
+    Stack bedrock = 2;
+    Stack inventory = 3;
+    Stack recipe = 4;
+    Stack craftingtable = 5;
+    Stack spawnpoint = 6;
+    
+    $$ Operaciones mezclando palabras reservadas e identificadores
+    worldname = worldname + bedrock;
+    inventory = craftingtable * spawnpoint;
+    
+    $$ Uso en estructuras de control
+    target worldname > recipe craft hit
+    PolloCrudo
+      Spider spell = "Magic";
+      dropperSpider(spell);
+    PolloAsado
+    
+    $$ Llamadas a rutinas
+    Spider generatedName = worldNameGenerator();
+    ender_pearl craftingTableMaker("New Recipe", inventory);
   PolloAsado
-  
-  $$ Llamadas a rutinas
-  Spider generatedName = worldNameGenerator();
-  ender_pearl craftingTableMaker("New Recipe", inventory);
-}
 
 worldSave

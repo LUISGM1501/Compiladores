@@ -1,12 +1,14 @@
 $* 
-  15_Prueba_Lit_Conjuntos.txt
-  Prueba para verificar el reconocimiento de literales de conjuntos en Notch Engine
-  Sintaxis: {: elemento1, elemento2, ... :}
+  15_Prueba_Lit_Conjuntos.ne
+  Propósito: Verificar el reconocimiento de literales de conjuntos en Notch Engine
+  Probar: Stack, Rune, Spider, Torch, Chest, Book, Ghast, Shelf, Entity
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaLitConjuntos:
 
-Inventory {
+Inventory
+
     $$ Conjuntos de valores enteros
     Chest numeros = {: 1, 2, 3, 4, 5 :};
     Chest primos = {: 2, 3, 5, 7, 11, 13, 17, 19 :};
@@ -18,7 +20,7 @@ Inventory {
     
     $$ Conjuntos de cadenas
     Chest nombres = {: "Steve", "Alex", "Herobrine", "Notch" :};
-    Chest items = {: "Espada", "Pico", "Hacha", "Pala" :};
+    Chest herramientas = {: "Espada", "Pico", "Hacha", "Pala" :};
     
     $$ Conjunto vacío
     Chest vacio = {: :};
@@ -35,42 +37,42 @@ Inventory {
     
     $$ Conjuntos con literales booleanos
     Chest booleanos = {: On, Off :};
-}
 
-SpawnPoint {
-    $$ Operaciones con conjuntos
-    add(numeros, 6);
-    dropperSpider("Después de agregar 6:");
-    
-    drop(primos, 2);
-    dropperSpider("Después de eliminar 2:");
-    
-    $$ Unión de conjuntos
-    Chest union = items(numeros, primos);
-    
-    $$ Intersección de conjuntos
-    Chest interseccion = feed(numeros, pares);
-    
-    $$ Verificar pertenencia
-    Torch contiene = map(vocales, 'a');
-    dropperTorch(contiene);
-    
-    $$ Verificar si está vacío
-    Torch esVacio = biom(vacio);
-    dropperTorch(esVacio);
-    
-    $$ Vaciar un conjunto
-    kill(nombres);
-    
-    $$ Casos de prueba adicionales para el scanner
-    Chest conEspacios = {:'a',  'b',    'c':};
-    Chest conComentarios = {: 1, $$ Primer elemento
-                            2, $$ Segundo elemento
-                            3  $$ Último elemento
-                         :};
-    
-    $$ Conjunto con sintaxis variada
-    Chest{:1,'x',"y":};
-}
+SpawnPoint
+
+    PolloCrudo
+        $$ Operaciones con conjuntos
+        add(numeros, 6);
+        dropperSpider("Después de add(numeros, 6):");
+        
+        drop(primos, 2);
+        dropperSpider("Después de drop(primos, 2):");
+        
+        $$ Unión de conjuntos
+        Chest union = feed(numeros, primos);
+        dropperSpider("Unión de numeros y primos:");
+        
+        $$ Intersección de conjuntos
+        Chest interseccion = map(numeros, pares);
+        dropperSpider("Intersección de numeros y pares:");
+        
+        $$ Verificar pertenencia
+        Torch contiene = biom(vocales, 'a');
+        dropperTorch(contiene);
+        
+        $$ Verificar si un conjunto está vacío
+        Torch esVacio = void(vacio);
+        dropperTorch(esVacio);
+        
+        $$ Casos de prueba adicionales para el scanner
+        Chest conEspacios = {:'a',  'b',    'c':};
+        Chest conComentarios = {: 1, $$ Primer elemento
+                                2, $$ Segundo elemento
+                                3  $$ Último elemento
+                             :};
+        
+        $$ Conjunto con sintaxis variada
+        Chest{:1,'x',"y":};
+    PolloAsado
 
 worldSave

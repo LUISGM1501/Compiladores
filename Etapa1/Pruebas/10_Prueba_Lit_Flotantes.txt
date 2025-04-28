@@ -1,7 +1,8 @@
 $* 
   Prueba_Lit_Flotantes.ne
   Propósito: Verificar reconocimiento de números flotantes (con parte decimal, sin parte decimal, negativos)
-  Fecha: Abril 10, 2025
+  Probar: Ghast
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de literales flotantes en NotchEngine
@@ -9,16 +10,17 @@ $$ Verificando: flotantes con parte decimal, sin parte decimal, y negativos
 
 WorldName PruebaLitFlotantes:
 
-Bedrock {
+Bedrock
+
     $$ Constantes flotantes
     Obsidian Ghast CERO_PUNTO_CERO 0.0;
     Obsidian Ghast PI 3.14159;
     Obsidian Ghast E 2.71828;
     Obsidian Ghast NEG_PI -3.14159;
     Obsidian Ghast GRAVEDAD -9.8;
-}
 
-Inventory {
+Inventory
+
     $$ Flotantes positivos con parte decimal
     Ghast decimal1 = 0.5;
     Ghast decimal2 = 1.25;
@@ -46,9 +48,9 @@ Inventory {
     
     $$ Variables para resultados
     Ghast resultado = 0.0;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Operaciones aritméticas con literales flotantes directos
         resultado = 5.5 :+ 3.5;      $$ 9.0
@@ -123,6 +125,5 @@ SpawnPoint {
         dropperSpider("Número muy grande: ");
         dropperGhast(muyGrande);
     PolloAsado
-}
 
 worldSave

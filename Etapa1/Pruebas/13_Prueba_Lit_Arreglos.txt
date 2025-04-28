@@ -1,7 +1,8 @@
 $* 
   Prueba_Lit_Arreglos.ne
   Propósito: Verificar reconocimiento de literales de arreglos ([1, 2, 3, 4, 5])
-  Fecha: Abril 10, 2025
+  Probar: Stack, Rune, Spider, Torch, Chest, Book, Ghast, Shelf, Entity
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de literales de arreglos en NotchEngine
@@ -9,12 +10,13 @@ $$ Verificando: arreglos de diferentes tipos y dimensiones
 
 WorldName PruebaLitArreglos:
 
-Bedrock {
+Bedrock
+
     $$ Constantes de arreglos (no se permiten, solo como comentario)
     $$ Obsidian Shelf Stack NUMEROS [1, 2, 3, 4, 5];
-}
 
-Inventory {
+Inventory
+
     $$ Arreglos de enteros
     Shelf[5] Stack numerosSimples = [1, 2, 3, 4, 5];
     Shelf[3] Stack numerosNegativos = [-10, -20, -30];
@@ -58,9 +60,9 @@ Inventory {
     $$ Variables para resultados
     Stack suma = 0;
     Stack elementoActual = 0;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Acceso a elementos de arreglos unidimensionales
         elementoActual = numerosSimples[0];  $$ 1
@@ -142,6 +144,5 @@ SpawnPoint {
             dropperStack(fibonacci[i]);
         PolloAsado
     PolloAsado
-}
 
 worldSave

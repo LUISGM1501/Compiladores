@@ -1,13 +1,14 @@
 $* 
-  16_Prueba_Lit_Archivos.txt
-  Prueba para verificar el reconocimiento de literales de archivos en Notch Engine
-  Sintaxis: {/ "nombre archivo", 'modo' /}
-  Modos: 'L' (lectura), 'E' (escritura), 'A' (actualización)
+  16_Prueba_Lit_Archivos.ne
+  Propósito: Verificar el reconocimiento de literales de archivos en Notch Engine
+  Probar: Book, unlock, lock, make, gather, expand
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaLitArchivos:
 
-Inventory {
+Inventory
+
     $$ Archivos en modo lectura
     Book archivoConfiguracion = {/ "config.txt", 'L' /};
     Book archivoJugadores = {/ "jugadores.dat", 'L' /};
@@ -46,40 +47,41 @@ Inventory {
     
     $$ Con comentarios cerca
     Book comentado = {/ "log.txt", 'L' /}; $$ Archivo de log
-}
 
-SpawnPoint {
-    $$ Operaciones con archivos
-    
-    $$ Abrir archivo
-    unlock(archivoLog);
-    
-    $$ Escribir en archivo
-    forge(archivoLog, "Entrada de log: Inicio de programa");
-    
-    $$ Cerrar archivo
-    lock(archivoLog);
-    
-    $$ Crear nuevo archivo
-    Book nuevoArchivo = craft({/ "nuevo.txt", 'E' /});
-    
-    $$ Leer archivo
-    unlock(archivoConfiguracion);
-    Spider contenido = gather(archivoConfiguracion);
-    lock(archivoConfiguracion);
-    
-    $$ Concatenar archivos
-    expand(archivoLog, archivoResultados);
-    
-    $$ Casos adicionales para probar el scanner
-    Book {/ "sinVariable.txt", 'A' /};
-    
-    $$ Con sintaxis de literales seguidos
-    Book arch1 = {/ "uno.txt", 'L' /};Book arch2 = {/ "dos.txt", 'E' /};
-    
-    $$ Con comentarios dentro
-    Book conComentarioMedio = {/ $$ Este comentario no debería ser válido
-        "comentado.txt", 'A' /};
-}
+SpawnPoint
+
+    PolloCrudo
+        $$ Operaciones con archivos
+        
+        $$ Abrir archivo
+        unlock(archivoLog);
+        
+        $$ Escribir en archivo
+        forge(archivoLog, "Entrada de log: Inicio de programa");
+        
+        $$ Cerrar archivo
+        lock(archivoLog);
+        
+        $$ Crear nuevo archivo
+        Book nuevoArchivo = make({/ "nuevo.txt", 'E' /});
+        
+        $$ Leer archivo
+        unlock(archivoConfiguracion);
+        Spider contenido = gather(archivoConfiguracion);
+        lock(archivoConfiguracion);
+        
+        $$ Concatenar archivos
+        expand(archivoLog, archivoResultados);
+        
+        $$ Casos adicionales para probar el scanner
+        Book {/ "sinVariable.txt", 'A' /};
+        
+        $$ Con sintaxis de literales seguidos
+        Book arch1 = {/ "uno.txt", 'L' /}; Book arch2 = {/ "dos.txt", 'E' /};
+        
+        $$ Con comentarios dentro
+        Book conComentarioMedio = {/ $$ Este comentario no debería ser válido
+            "comentado.txt", 'A' /};
+    PolloAsado
 
 worldSave

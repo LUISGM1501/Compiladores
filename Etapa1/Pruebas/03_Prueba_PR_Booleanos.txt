@@ -1,7 +1,8 @@
 $* 
   Prueba_PR_Booleanos.ne
   Propósito: Verificar reconocimiento de literales booleanas (On, Off)
-  Fecha: Abril 10, 2025
+  Probar: Torch, And, Or, Not
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de literales booleanas en NotchEngine
@@ -9,12 +10,13 @@ $$ Verificando: On, Off
 
 WorldName PruebaBooleanos:
 
-Bedrock {
+Bedrock
+
     Obsidian Torch VERDADERO On;
     Obsidian Torch FALSO Off;
-}
 
-Inventory {
+Inventory
+
     $$ Declaración e inicialización con valores booleanos
     Torch activo = On;
     Torch inactivo = Off;
@@ -25,9 +27,9 @@ Inventory {
     Torch resultado3;
     Torch resultado4;
     Torch resultado5;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Mostrar valores booleanos directos
         dropperSpider("Valor de On: ");
@@ -72,6 +74,5 @@ SpawnPoint {
             dropperSpider("Condición Off es falsa");
         PolloAsado
     PolloAsado
-}
 
 worldSave

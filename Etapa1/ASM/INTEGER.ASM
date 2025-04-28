@@ -2,7 +2,7 @@
 ; * Programa: INTEGER.ASM                   *
 ; * Descripcion: Conversiones desde entero  *
 ; * Autores: Luis Urbina, Samir Cabrera     *
-; * Fecha de entrega: 10/04/2025            *
+; * Fecha de entrega: 28/04/2025            *
 ; ********************************************
 
 ; El segmento DATOS contiene todas las variables y constantes que usara el programa

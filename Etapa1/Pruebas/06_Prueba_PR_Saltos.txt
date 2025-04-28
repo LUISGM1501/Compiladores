@@ -1,7 +1,7 @@
 $* 
   Prueba_PR_Saltos.ne
   Propósito: Verificar palabras para saltos y terminación (creeper, enderPearl, ragequit)
-  Fecha: Abril 10, 2025
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de palabras reservadas para saltos y terminación en NotchEngine
@@ -9,15 +9,16 @@ $$ Verificando: creeper, enderPearl, ragequit
 
 WorldName PruebaSaltos:
 
-Inventory {
+Inventory
+
     $$ Variables para las pruebas
     Stack contador = 0;
     Stack totalPares = 0;
     Stack totalImpares = 0;
     Torch errorCritico = Off;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ 1. Prueba de creeper (break) para salir de un bucle
         dropperSpider("Prueba de creeper (break):");
@@ -95,6 +96,5 @@ SpawnPoint {
             ragequit;
         PolloAsado
     PolloAsado
-}
 
 worldSave

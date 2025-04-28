@@ -1,7 +1,8 @@
 $* 
   Prueba_Lit_Caracteres.ne
   Propósito: Verificar reconocimiento de caracteres (letras, dígitos, símbolos, escapes)
-  Fecha: Abril 10, 2025
+  Probar: Rune, dropperRune, dropperSpider, dropperTorch
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de literales de caracteres en NotchEngine
@@ -9,7 +10,8 @@ $$ Verificando: letras, dígitos, símbolos y secuencias de escape
 
 WorldName PruebaLitCaracteres:
 
-Bedrock {
+Bedrock
+
     $$ Constantes de caracteres
     Obsidian Rune LETRA_A 'A';
     Obsidian Rune LETRA_Z 'Z';
@@ -17,9 +19,9 @@ Bedrock {
     Obsidian Rune DIGITO_9 '9';
     Obsidian Rune NUEVA_LINEA '\n';
     Obsidian Rune TABULACION '\t';
-}
 
-Inventory {
+Inventory
+
     $$ Letras mayúsculas
     Rune letraA = 'A';
     Rune letraB = 'B';
@@ -76,9 +78,9 @@ Inventory {
     Rune escapeBarraInversa = '\\';
     Rune escapeComillaSimple = '\'';
     Rune escapeComillaDoble = '\"';
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Mostrar algunos caracteres
         dropperSpider("Letras mayúsculas: ");
@@ -153,6 +155,5 @@ SpawnPoint {
         
         dropperSpider("Valor ASCII de 'A': " bind valorAsciiA);
     PolloAsado
-}
 
 worldSave

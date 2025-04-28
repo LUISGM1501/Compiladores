@@ -50,7 +50,8 @@ $* Comentario
    multilínea
    para probar *$
 
-Inventory {
+Inventory
+
   $* Comentario dentro
      de una sección *$
   Stack contador = 10; $$ Comentario al final de la línea
@@ -62,15 +63,16 @@ Inventory {
   
   Spider texto = "Comentario /* falso */ dentro de un string";
   Rune caracter = '*'; $$ Carácter que podría confundirse con comentario
-}
 
-SpawnPoint {
-  $* Comentario con símbolos +, -, *, /, %, <, >, <=, >=, is, isNot
-     y otros caracteres especiales !@#$^&()_=[]{}|;:'",.<>/?`~ *$
-  
-  dropperSpider("Los comentarios son importantes");
-  
-  $$ Comentario que parece tener $* bloque *$ pero es de línea
-}
+SpawnPoint
+
+  PolloCrudo
+    $* Comentario con símbolos +, -, *, /, %, <, >, <=, >=, is, isNot
+       y otros caracteres especiales !@#$^&()_=[]{}|;:'",.<>/?`~ *$
+    
+    dropperSpider("Los comentarios son importantes");
+    
+    $$ Comentario que parece tener $* bloque *$ pero es de línea
+  PolloAsado
 
 worldSave

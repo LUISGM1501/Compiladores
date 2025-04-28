@@ -2,16 +2,18 @@ $*
   26_Prueba_ID_Simples.ne
   Prueba de identificadores simples (una sola palabra)
   para el analizador léxico de Notch Engine
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaIdentificadoresSimples:
 
-Bedrock {
+Bedrock
+
   Obsidian Stack MAX 100;
   Obsidian Spider TITULO "Notch Engine";
-}
 
-Inventory {
+Inventory
+
   $$ Identificadores de una sola palabra
   Stack a;
   Stack contador;
@@ -53,9 +55,9 @@ Inventory {
   Spider s;
   Torch b;
   Ghast f;
-}
 
-CraftingTable {
+CraftingTable
+
   Spell suma(Stack :: a, b) -> Stack
   PolloCrudo
     Stack resultado;
@@ -67,23 +69,24 @@ CraftingTable {
   PolloCrudo
     dropperSpider(mensaje);
   PolloAsado
-}
 
-SpawnPoint {
-  $$ Uso de identificadores en expresiones
-  Stack valor;
-  Stack resultado;
-  Spider mensaje;
-  
-  $$ Asignaciones simples
-  valor = 10;
-  mensaje = "Hola";
-  
-  $$ Operaciones con identificadores
-  resultado = valor + 5;
-  valor = suma(valor, 20);
-  
-  ender_pearl imprimir(mensaje);
-}
+SpawnPoint
+
+  PolloCrudo
+    $$ Uso de identificadores en expresiones
+    Stack valor;
+    Stack resultado;
+    Spider mensaje;
+    
+    $$ Asignaciones simples
+    valor = 10;
+    mensaje = "Hola";
+    
+    $$ Operaciones con identificadores
+    resultado = valor + 5;
+    valor = suma(valor, 20);
+    
+    ender_pearl imprimir(mensaje);
+  PolloAsado
 
 worldSave

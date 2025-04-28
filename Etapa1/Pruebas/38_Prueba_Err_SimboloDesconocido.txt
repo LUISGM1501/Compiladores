@@ -1,20 +1,21 @@
 $* 
-   Prueba: 38_Prueba_Err_SimboloDesconocido
-   Descripción: Verificar detección de símbolos no reconocidos
-   Lenguaje: Notch Engine
+  Prueba: 38_Prueba_Err_SimboloDesconocido
+  Descripción: Verificar detección de símbolos no reconocidos
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaSimboloDesconocido:
 
-Bedrock {
+Bedrock
+
     $$ Símbolos válidos para comparación
     Obsidian Stack MAX_VALUE 100;
     
     $$ Símbolo no reconocido: flecha de asignación errónea
     Obsidian Stack MIN_VALUE => 0;  $$ => no es un símbolo válido
-}
 
-Inventory {
+Inventory
+
     $$ Símbolos válidos (para comparación)
     Stack contador = 10;
     Stack resultado = contador + 5;
@@ -34,28 +35,29 @@ Inventory {
     
     $$ Símbolo inválido en acceso a estructura
     Stack elemento = numeros->0;    $$ -> no es válido para acceso (debe ser [])
-}
 
-ResourcePack {
+ResourcePack
+
     $$ Símbolo inválido en declaración de tipo
     Anvil Stack ==> Spider;         $$ ==> no es un símbolo válido (debe ser ->)
-}
 
-SpawnPoint {
-    $$ Operadores inválidos en expresiones
-    Stack a = 5;
-    Stack b = 10;
-    Stack c = a ||| b;              $$ ||| no es un operador válido
-    
-    $$ Símbolos inválidos en estructuras de control
-    target a < b craft hit 
+SpawnPoint
+
     PolloCrudo
-        dropperSpider("a es menor que b");
+        $$ Operadores inválidos en expresiones
+        Stack a = 5;
+        Stack b = 10;
+        Stack c = a ||| b;              $$ ||| no es un operador válido
+        
+        $$ Símbolos inválidos en estructuras de control
+        target a < b craft hit 
+        PolloCrudo
+            dropperSpider("a es menor que b");
+        PolloAsado
+        ?> $$ ?> no es un símbolo válido
+        
+        $$ Símbolo inválido como terminador de instrucción
+        Stack valor = 100#
     PolloAsado
-    ?> $$ ?> no es un símbolo válido
-    
-    $$ Símbolo inválido como terminador de instrucción
-    Stack valor = 100#             $$ # no es un terminador válido (debe ser ;)
-}
 
 worldSave

@@ -1,16 +1,18 @@
 $* 
   Prueba_PR_Funciones.ne
   Propósito: Verificar palabras para funciones y procedimientos (Spell, Ritual, respawn, ender_pearl)
-  Fecha: Abril 10, 2025
+  Probar: Spell, Ritual, respawn, ender_pearl, crafting_table
+  Fecha: 28/04/2025
 *$
 
-$ Prueba de palabras reservadas para funciones y procedimientos en NotchEngine
-$ Verificando: Spell, Ritual, respawn
+$$ Prueba de palabras reservadas para funciones y procedimientos en NotchEngine
+$$ Verificando: Spell, Ritual, respawn
 
 WorldName PruebaFunciones:
 
 $$ Sección de prototipos
-Recipe {
+Recipe
+
     $$ Prototipos de funciones (Spell)
     Spell sumar(Stack :: a, b) -> Stack;
     Spell factorial(Stack :: n) -> Stack;
@@ -21,10 +23,10 @@ Recipe {
     Ritual imprimirLinea(Spider :: texto);
     Ritual mostrarResultado(Spider :: operacion; Stack valor);
     Ritual imprimirArreglo(Shelf[10] Stack :: arr; Stack tamano);
-}
 
 $$ Sección de rutinas (implementación de funciones y procedimientos)
-CraftingTable {
+CraftingTable
+
     $$ Funciones (Spell) con instrucción de retorno (respawn)
     Spell sumar(Stack :: a, b) -> Stack
     PolloCrudo
@@ -110,10 +112,10 @@ CraftingTable {
             dropperStack(arr[i]);
         PolloAsado
     PolloAsado
-}
 
 $$ Punto de entrada con llamadas a funciones y procedimientos
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Declaración de variables
         Stack a = 5;
@@ -141,7 +143,7 @@ SpawnPoint {
         resultado = sumarArreglo(numeros, 10);
         dropperSpider("Suma del arreglo: " bind resultado);
         
-        $ Llamadas a procedimientos
+        $$ Llamadas a procedimientos
         imprimirLinea("==== Resultados de pruebas ====");
         
         mostrarResultado("Suma de 5 y 7", sumar(a, b));
@@ -150,6 +152,5 @@ SpawnPoint {
         imprimirArreglo(numeros, 5);
         imprimirArreglo(numeros, 0);
     PolloAsado
-}
 
 worldSave

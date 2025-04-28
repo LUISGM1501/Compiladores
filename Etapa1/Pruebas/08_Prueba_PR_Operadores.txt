@@ -1,178 +1,93 @@
 $* 
   Prueba_PR_Operadores.ne
-  Propósito: Verificar operadores textuales (soulsand, magma, and, or, not, xor, bind, etc.)
-  Fecha: Abril 10, 2025
+  Propósito: Verificar operadores textuales reales en Notch Engine
+  Probar: soulsand, magma, and, or, not, xor, bind, #, from ##, except ##, seek,
+          add, drop, feed, map, biom, void, isEngraved, isInscribed, etchUp, etchDown,
+          unlock, lock, make, gather, forge, expand
+  Fecha: 28/04/2025
 *$
-
-$$ Prueba de operadores textuales en NotchEngine
-$$ Verificando: soulsand, magma, and, or, not, xor, bind, #, from ##, except ##, seek,
-$$ add, drop, items, feed, map, biom, kill, isEngraved, isInscribed, etchUp, etchDown,
-$$ unlock, lock, craft, gather, forge, expand
 
 WorldName PruebaOperadores:
 
 Inventory {
-    $$ Variables para las pruebas
-    Stack contador = 5;
-    Torch condicion1 = On;
-    Torch condicion2 = Off;
-    Torch resultado;
-    
-    Spider texto1 = "Notch";
-    Spider texto2 = "Engine";
-    Spider textoCompleto;
-    
-    Rune letra = 'a';
-    Rune letraMayuscula;
-    
-    Chest conjunto1 = {: 1, 2, 3 :};
-    Chest conjunto2 = {: 3, 4, 5 :};
-    Chest conjuntoResultado;
-    
-    Book archivo = {/ "datos.txt", 'E' /};
-    Book archivo2 = {/ "resultado.txt", 'E' /};
-    
-    Ghast flotante1 = 3.5;
-    Ghast flotante2 = 2.5;
-    Ghast resultadoFlotante;
+    Stack contador = 5; $$ Inicializa contador con 5
+    Torch condicion1 = On; $$ Condición 1 es verdadera
+    Torch condicion2 = Off; $$ Condición 2 es falsa
+    Torch resultado; $$ Variable para almacenar resultados booleanos
+
+    Spider texto1 = "Notch"; $$ Texto inicial "Notch"
+    Spider texto2 = "Engine"; $$ Texto inicial "Engine"
+    Spider textoCompleto; $$ Variable para texto combinado
+
+    Rune letra = 'a'; $$ Letra inicial 'a'
+    Rune letraMayuscula; $$ Variable para letra mayúscula
+
+    Chest conjunto1 = {: 1, 2, 3 :}; $$ Conjunto inicial con 1, 2, 3
+    Chest conjunto2 = {: 3, 4, 5 :}; $$ Conjunto inicial con 3, 4, 5
+    Chest conjuntoResultado; $$ Variable para resultado de conjuntos
+
+    Book archivo1 = {/ "datos.txt", 'E' /}; $$ Archivo para escritura "datos.txt"
+    Book archivo2 = {/ "resultado.txt", 'E' /}; $$ Archivo para escritura "resultado.txt"
+
+    Ghast flotante1 = 3.5; $$ Flotante inicial 3.5
+    Ghast flotante2 = 2.5; $$ Flotante inicial 2.5
+    Ghast resultadoFlotante; $$ Variable para resultado de operaciones flotantes
 }
 
 SpawnPoint {
-    PolloCrudo
-        $$ 1. Operadores de incremento/decremento: soulsand, magma
-        dropperSpider("Prueba de soulsand y magma:");
-        dropperStack(contador);  $$ Muestra 5
-        soulsand contador;       $$ Incrementa a 6
-        dropperStack(contador);  $$ Muestra 6
-        magma contador;          $$ Decrementa a 5
-        dropperStack(contador);  $$ Muestra 5
-        
-        $$ 2. Operadores lógicos: and, or, not, xor
-        dropperSpider("Prueba de operadores lógicos:");
-        resultado = condicion1 and condicion2;  $$ On and Off = Off
-        dropperSpider("and: ");
-        dropperTorch(resultado);
-        
-        resultado = condicion1 or condicion2;   $$ On or Off = On
-        dropperSpider("or: ");
-        dropperTorch(resultado);
-        
-        resultado = not condicion1;             $$ not On = Off
-        dropperSpider("not: ");
-        dropperTorch(resultado);
-        
-        resultado = condicion1 xor condicion2;  $$ On xor Off = On
-        dropperSpider("xor: ");
-        dropperTorch(resultado);
-        
-        $$ 3. Operadores de strings: bind, #, from ##, except ##, seek
-        dropperSpider("Prueba de operadores de strings:");
-        textoCompleto = bind(texto1, " " bind texto2);  $$ "Notch Engine"
-        dropperSpider(textoCompleto);
-        
-        Stack longitud = #(textoCompleto);              $$ Longitud de "Notch Engine" = 12
-        dropperSpider("Longitud: " bind longitud);
-        
-        Spider subcadena = from textoCompleto ## 0 ## 5;  $$ "Notch"
-        dropperSpider("Subcadena: " bind subcadena);
-        
-        Spider sinNotch = except textoCompleto ## 0 ## 6;  $$ "Engine"
-        dropperSpider("Sin primeros 6 caracteres: " bind sinNotch);
-        
-        Stack posicion = seek(textoCompleto, "Engine");  $$ 6
-        dropperSpider("Posición de 'Engine': " bind posicion);
-        
-        $$ 4. Operadores de caracteres: isEngraved, isInscribed, etchUp, etchDown
-        dropperSpider("Prueba de operadores de caracteres:");
-        Torch esLetra = isEngraved(letra);       $$ ¿'a' es letra? = On
-        dropperSpider("¿Es letra?: ");
-        dropperTorch(esLetra);
-        
-        Torch esDigito = isInscribed(letra);     $$ ¿'a' es dígito? = Off
-        dropperSpider("¿Es dígito?: ");
-        dropperTorch(esDigito);
-        
-        letraMayuscula = etchUp(letra);          $$ 'a' -> 'A'
-        dropperSpider("Letra en mayúscula: ");
-        dropperRune(letraMayuscula);
-        
-        Rune letraMinuscula = etchDown(letraMayuscula);  $$ 'A' -> 'a'
-        dropperSpider("Letra en minúscula: ");
-        dropperRune(letraMinuscula);
-        
-        $$ 5. Operadores de conjuntos: add, drop, items, feed, map, biom, kill
-        dropperSpider("Prueba de operadores de conjuntos:");
-        
-        dropperSpider("Conjunto1 original:");
-        $$ Mostrar conjunto1 = {: 1, 2, 3 :}
-        
-        add(conjunto1, 4);                       $$ Añade 4 a conjunto1
-        dropperSpider("Después de add(conjunto1, 4):");
-        $$ Mostrar conjunto1 = {: 1, 2, 3, 4 :}
-        
-        drop(conjunto1, 2);                      $$ Elimina 2 de conjunto1
-        dropperSpider("Después de drop(conjunto1, 2):");
-        $$ Mostrar conjunto1 = {: 1, 3, 4 :}
-        
-        conjuntoResultado = items(conjunto1, conjunto2);  $$ Unión: {: 1, 3, 4, 5 :}
-        dropperSpider("Unión de conjuntos (items):");
-        $$ Mostrar conjuntoResultado
-        
-        conjuntoResultado = feed(conjunto1, conjunto2);   $$ Intersección: {: 3, 4 :}
-        dropperSpider("Intersección de conjuntos (feed):");
-        $$ Mostrar conjuntoResultado
-        
-        resultado = map(conjunto1, 3);           $$ ¿3 está en conjunto1? = On
-        dropperSpider("¿3 está en conjunto1?: ");
-        dropperTorch(resultado);
-        
-        resultado = biom(conjunto1);             $$ ¿conjunto1 está vacío? = Off
-        dropperSpider("¿conjunto1 está vacío?: ");
-        dropperTorch(resultado);
-        
-        kill(conjunto1);                         $$ Vacía conjunto1
-        dropperSpider("Después de kill(conjunto1):");
-        $$ Mostrar conjunto1 = {: :}
-        
-        resultado = biom(conjunto1);             $$ ¿conjunto1 está vacío? = On
-        dropperSpider("¿conjunto1 está vacío ahora?: ");
-        dropperTorch(resultado);
-        
-        $$ 6. Operadores de archivos: unlock, lock, craft, gather, forge, expand
-        dropperSpider("Prueba de operadores de archivos:");
-        
-        unlock(archivo);                         $$ Abre archivo
-        forge(archivo, "Texto de prueba");       $$ Escribe en archivo
-        lock(archivo);                           $$ Cierra archivo
-        
-        Book nuevoArchivo = craft({/ "nuevo.txt", 'E' /});  $$ Crea nuevo archivo
-        forge(nuevoArchivo, "Contenido del nuevo archivo");
-        lock(nuevoArchivo);
-        
-        unlock(archivo);
-        unlock(nuevoArchivo);
-        expand(archivo, nuevoArchivo);           $$ Concatena archivos
-        lock(archivo);
-        lock(nuevoArchivo);
-        
-        $$ 7. Operadores de números flotantes: :+, :-, :*, :%, ://
-        dropperSpider("Prueba de operadores de números flotantes:");
-        
-        resultadoFlotante = flotante1 :+ flotante2;  $$ 3.5 + 2.5 = 6.0
-        dropperGhast(resultadoFlotante);
-        
-        resultadoFlotante = flotante1 :- flotante2;  $$ 3.5 - 2.5 = 1.0
-        dropperGhast(resultadoFlotante);
-        
-        resultadoFlotante = flotante1 :* flotante2;  $$ 3.5 * 2.5 = 8.75
-        dropperGhast(resultadoFlotante);
-        
-        resultadoFlotante = flotante1 :// flotante2; $$ 3.5 / 2.5 = 1.4
-        dropperGhast(resultadoFlotante);
-        
-        resultadoFlotante = flotante1 :% flotante2;  $$ 3.5 % 2.5 = 1.0
-        dropperGhast(resultadoFlotante);
-    PolloAsado
+PolloCrudo
+    $$ soulsand y magma
+    soulsand contador; $$ Aplica soulsand a contador
+    magma contador; $$ Aplica magma a contador
+
+    $$ and, or, not, xor
+    resultado = condicion1 and condicion2; $$ Resultado es verdadero si ambas condiciones son verdaderas
+    resultado = condicion1 or condicion2; $$ Resultado es verdadero si al menos una condición es verdadera
+    resultado = not condicion1; $$ Resultado es el opuesto de condicion1
+    resultado = condicion1 xor condicion2; $$ Resultado es verdadero si solo una condición es verdadera
+
+    $$ bind, #, from ##, except ##, seek
+    textoCompleto = bind(texto1, " " bind texto2); $$ Combina texto1 y texto2 con un espacio
+    Stack longitud = #(textoCompleto); $$ Longitud de textoCompleto
+    Spider subcadena = from textoCompleto ## 0 ## 5; $$ Subcadena de textoCompleto desde 0 hasta 5
+    Spider sinNotch = except textoCompleto ## 0 ## 6; $$ Elimina caracteres de 0 a 6 en textoCompleto
+    Stack posicion = seek(textoCompleto, "Engine"); $$ Posición de "Engine" en textoCompleto
+
+    $$ isEngraved, isInscribed, etchUp, etchDown
+    Torch esLetra = isEngraved(letra); $$ Verifica si letra es una letra
+    Torch esDigito = isInscribed(letra); $$ Verifica si letra es un dígito
+    letraMayuscula = etchUp(letra); $$ Convierte letra a mayúscula
+    Rune letraMinuscula = etchDown(letraMayuscula); $$ Convierte letraMayuscula a minúscula
+
+    $$ Operaciones de conjuntos
+    add(conjunto1, 4); $$ Añade 4 a conjunto1
+    drop(conjunto1, 2); $$ Elimina 2 de conjunto1
+    conjuntoResultado = feed(conjunto1, conjunto2); $$ Intersección de conjunto1 y conjunto2
+    resultado = map(conjunto1, 3); $$ Verifica si 3 está en conjunto1
+    Torch conjuntoVacio = void(conjunto1); $$ Verifica si conjunto1 está vacío
+
+    $$ Operaciones de archivos
+    unlock(archivo1); $$ Abre archivo1 para escritura
+    forge(archivo1, "Texto de prueba"); $$ Escribe "Texto de prueba" en archivo1
+    lock(archivo1); $$ Cierra archivo1
+
+    Book nuevoArchivo = make({/ "nuevo.txt", 'E' /}); $$ Crea nuevo archivo "nuevo.txt"
+    forge(nuevoArchivo, "Contenido del nuevo archivo"); $$ Escribe en nuevoArchivo
+    lock(nuevoArchivo); $$ Cierra nuevoArchivo
+
+    unlock(archivo1); $$ Abre archivo1
+    unlock(nuevoArchivo); $$ Abre nuevoArchivo
+    expand(archivo1, nuevoArchivo); $$ Expande archivo1 con contenido de nuevoArchivo
+    lock(archivo1); $$ Cierra archivo1
+    lock(nuevoArchivo); $$ Cierra nuevoArchivo
+
+    $$ Operadores de flotantes
+    resultadoFlotante = flotante1 :+ flotante2; $$ Suma de flotante1 y flotante2
+    resultadoFlotante = flotante1 :- flotante2; $$ Resta de flotante1 y flotante2
+    resultadoFlotante = flotante1 :* flotante2; $$ Multiplicación de flotante1 y flotante2
+    resultadoFlotante = flotante1 :// flotante2; $$ División de flotante1 y flotante2
+    resultadoFlotante = flotante1 :% flotante2; $$ Módulo de flotante1 y flotante2
+PolloAsado
 }
 
 worldSave

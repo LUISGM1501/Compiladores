@@ -1,107 +1,108 @@
 $* 
-  18_Prueba_Op_Flotantes.txt
-  Prueba para verificar el reconocimiento de operadores para números flotantes en Notch Engine
-  Operadores: :+, :-, :*, :%, ://
+  18_Prueba_Op_Flotantes.ne
+  Propósito: Verificar el reconocimiento de operadores para números flotantes en Notch Engine
+  Probar: Ghast
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaOpFlotantes:
 
-Inventory {
+Inventory
+
     Ghast x = 10.5;
     Ghast y = 3.25;
     Ghast z;
     Ghast resultado;
-}
 
-SpawnPoint {
-    $$ Prueba operador de suma flotante (:+)
-    z = x :+ y;
-    dropperSpider("Suma flotante: " bind z);
-    
-    $$ Prueba operador de resta flotante (:-)
-    z = x :- y;
-    dropperSpider("Resta flotante: " bind z);
-    
-    $$ Prueba operador de multiplicación flotante (:*)
-    z = x :* y;
-    dropperSpider("Multiplicación flotante: " bind z);
-    
-    $$ Prueba operador de división flotante (://)
-    z = x :// y;
-    dropperSpider("División flotante: " bind z);
-    
-    $$ Prueba operador de módulo flotante (:%)
-    z = x :% y;
-    dropperSpider("Módulo flotante: " bind z);
-    
-    $$ Pruebas con expresiones más complejas
-    
-    $$ Operaciones combinadas
-    resultado = x :+ y :* z;
-    dropperSpider("x :+ y :* z = " bind resultado);
-    
-    $$ Operaciones con paréntesis
-    resultado = (x :+ y) :* z;
-    dropperSpider("(x :+ y) :* z = " bind resultado);
-    
-    $$ Operaciones encadenadas
-    resultado = x :+ y :+ z;
-    dropperSpider("x :+ y :+ z = " bind resultado);
-    
-    $$ Operaciones con múltiples operadores
-    resultado = x :* y :// z :+ x :- y;
-    dropperSpider("x :* y :// z :+ x :- y = " bind resultado);
-    
-    $$ Operador unario menos
-    resultado = -x;
-    dropperSpider("-x = " bind resultado);
-    
-    $$ Operaciones con literales
-    resultado = 5.5 :+ 3.2;
-    dropperSpider("5.5 :+ 3.2 = " bind resultado);
-    
-    $$ Operaciones con operador unario y paréntesis
-    resultado = -(x :+ y);
-    dropperSpider("-(x :+ y) = " bind resultado);
-    
-    $$ Casos especiales para probar el scanner
-    
-    $$ Operadores sin espacios
-    resultado = x:+y;
-    resultado = x:-y;
-    resultado = x:*y;
-    resultado = x://y;
-    resultado = x:%y;
-    
-    $$ Operadores con espacios variados
-    resultado = x :+  y;
-    resultado = x  :-y;
-    resultado = x:* y;
-    resultado = x  ://   y;
-    resultado = x :% y;
-    
-    $$ Operaciones con comentarios
-    resultado = x :+ y; $$ Suma flotante
-    resultado = x $$ operando 1
-               :* y; $$ operando 2
-    
-    $$ Casos extremos
-    resultado = ((((x :+ y) :* z) :// 2.0) :% 10.0);
-    
-    $$ Mezcla con operadores enteros (podría no ser válido semánticamente,
-    $$ pero sirve para probar el reconocimiento léxico)
-    Ghast mezcla1 = x :+ 5;
-    Ghast mezcla2 = 3.5 :* y;
-    Ghast mezcla3 = x :+ (y :* 2.0) :// 1.5;
-    
-    $$ Casos de prueba adicionales
-    
-    $$ Operador : seguido de otros símbolos (para verificar que el scanner
-    $$ no confunda los operadores flotantes con otros usos de :)
-    Spider texto = "Notch:Engine";
-    
-    $$ Operadores flotantes en expresiones con coherción
-    Stack entero = (x :+ y) >> Stack;
-}
+SpawnPoint
+
+    PolloCrudo
+        $$ Prueba operador de suma flotante (:+)
+        z = x :+ y;
+        dropperSpider("Suma flotante: " bind z);
+        
+        $$ Prueba operador de resta flotante (:-)
+        z = x :- y;
+        dropperSpider("Resta flotante: " bind z);
+        
+        $$ Prueba operador de multiplicación flotante (:*)
+        z = x :* y;
+        dropperSpider("Multiplicación flotante: " bind z);
+        
+        $$ Prueba operador de división flotante (://)
+        z = x :// y;
+        dropperSpider("División flotante: " bind z);
+        
+        $$ Prueba operador de módulo flotante (:%)
+        z = x :% y;
+        dropperSpider("Módulo flotante: " bind z);
+        
+        $$ Pruebas con expresiones más complejas
+        
+        $$ Operaciones combinadas
+        resultado = x :+ y :* z;
+        dropperSpider("x :+ y :* z = " bind resultado);
+        
+        $$ Operaciones con paréntesis
+        resultado = (x :+ y) :* z;
+        dropperSpider("(x :+ y) :* z = " bind resultado);
+        
+        $$ Operaciones encadenadas
+        resultado = x :+ y :+ z;
+        dropperSpider("x :+ y :+ z = " bind resultado);
+        
+        $$ Operaciones con múltiples operadores
+        resultado = x :* y :// z :+ x :- y;
+        dropperSpider("x :* y :// z :+ x :- y = " bind resultado);
+        
+        $$ Operador unario menos
+        resultado = -x;
+        dropperSpider("-x = " bind resultado);
+        
+        $$ Operaciones con literales
+        resultado = 5.5 :+ 3.2;
+        dropperSpider("5.5 :+ 3.2 = " bind resultado);
+        
+        $$ Operaciones con operador unario y paréntesis
+        resultado = -(x :+ y);
+        dropperSpider("-(x :+ y) = " bind resultado);
+        
+        $$ Casos especiales para probar el scanner
+        
+        $$ Operadores sin espacios
+        resultado = x:+y;
+        resultado = x:-y;
+        resultado = x:*y;
+        resultado = x://y;
+        resultado = x:%y;
+        
+        $$ Operadores con espacios variados
+        resultado = x :+  y;
+        resultado = x  :-y;
+        resultado = x:* y;
+        resultado = x  ://   y;
+        resultado = x :% y;
+        
+        $$ Operaciones con comentarios
+        resultado = x :+ y; $$ Suma flotante
+        resultado = x $$ operando 1
+                   :* y; $$ operando 2
+        
+        $$ Casos extremos
+        resultado = ((((x :+ y) :* z) :// 2.0) :% 10.0);
+        
+        $$ Mezcla con operadores enteros (para prueba de scanner)
+        Ghast mezcla1 = x :+ 5;
+        Ghast mezcla2 = 3.5 :* y;
+        Ghast mezcla3 = x :+ (y :* 2.0) :// 1.5;
+        
+        $$ Casos de prueba adicionales
+        
+        $$ Operador : seguido de otros símbolos (verificar scanner)
+        Spider texto = "Notch:Engine";
+        
+        $$ Operadores flotantes en expresiones con coherción
+        Stack entero = (x :+ y) >> Stack;
+    PolloAsado
 
 worldSave

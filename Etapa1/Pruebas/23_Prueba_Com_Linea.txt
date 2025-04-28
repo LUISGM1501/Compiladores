@@ -1,6 +1,7 @@
 $* 
-  23_Prueba_Com_Linea.txt
-  Prueba para verificar el reconocimiento de comentarios de línea en Notch Engine
+  23_Prueba_Com_Linea.ne
+  Propósito: Verificar el reconocimiento de comentarios de línea en Notch Engine
+  Fecha: 28/04/2025
   Sintaxis: $$ comentario
 *$
 
@@ -8,14 +9,15 @@ WorldName PruebaComLinea:
 
 $$ Este es un comentario de línea al inicio del archivo
 
-Bedrock {
+Bedrock
+
     $$ Comentario dentro de la sección de constantes
     Obsidian Stack MAX_LEVEL 100; $$ Comentario después de una constante
     $$ Comentario antes de una constante
     Obsidian Spider VERSION "1.0";
-}
 
-Inventory {
+Inventory
+
     $$ Comentario al inicio de la sección de variables
     Stack contador = 0; $$ Inicialización del contador
     
@@ -35,14 +37,14 @@ Inventory {
     $$ Comentarios con caracteres especiales: !@#$%^&*()_+-=[]{}|;:'",.<>/?
     $$ Comentarios con números: 1234567890
     $$ Comentarios con espacios en blanco:     espacios    tabulaciones	tabulaciones
-}
 
-Recipe {
+Recipe
+
     $$ Comentario en sección de prototipos
     Spell calcular(Stack :: a, b) -> Stack; $$ Prototipo de función con comentario
-}
 
-CraftingTable {
+CraftingTable
+
     $$ Comentario al inicio de la sección de rutinas
     
     Spell calcular(Stack :: a, b) -> Stack
@@ -57,43 +59,44 @@ CraftingTable {
         $$ Comentario al inicio de un procedimiento
         dropperSpider(mensaje); $$ Mostrar el mensaje
     PolloAsado $$ Comentario al final de un bloque
-}
 
-SpawnPoint {
-    $$ Comentario al inicio del punto de entrada
-    
-    $$ Comentario antes de una instrucción
-    contador = 5; $$ Asignación con comentario
-    
-    $$ Comentario antes de estructura de control
-    target contador > 0 craft hit
+SpawnPoint
+
     PolloCrudo
-        $$ Comentario dentro de estructura de control
-        dropperSpider("Contador positivo"); $$ Mensaje
+        $$ Comentario al inicio del punto de entrada
+        
+        $$ Comentario antes de una instrucción
+        contador = 5; $$ Asignación con comentario
+        
+        $$ Comentario antes de estructura de control
+        target contador > 0 craft hit
+        PolloCrudo
+            $$ Comentario dentro de estructura de control
+            dropperSpider("Contador positivo"); $$ Mensaje
+        PolloAsado
+        
+        $$ Prueba de comentarios en expresiones
+        Stack resultado = contador $$ Comentario en medio de una expresión
+                        + 10;
+        
+        $$ Comentarios en llamadas a funciones/procedimientos
+        Stack suma = calcular(5 $$ Comentario en medio de argumentos
+                           , 10);
+        
+        $$ Comentario antes de una instrucción nula
+        ; $$ Comentario después de una instrucción nula
+        
+        $$ Comentarios con símbolos de operadores: + - * / % < > <= >= is isNot and or not
+        $$ Comentarios con palabras reservadas: PolloCrudo PolloAsado repeater craft target
+        
+        $$ Comentario con símbolos que podrían confundirse con inicio de comentario de bloque
+        $$ Este comentario tiene $* dentro pero no debería iniciar un comentario de bloque
+        
+        $$ Comentario con símbolos que podrían confundirse con fin de comentario de bloque
+        $$ Este comentario tiene *$ dentro pero no debería cerrar nada
+        
+        $$ Comentario al final de una sección
     PolloAsado
-    
-    $$ Prueba de comentarios en expresiones
-    Stack resultado = contador $$ Comentario en medio de una expresión
-                    + 10;
-    
-    $$ Comentarios en llamadas a funciones/procedimientos
-    Stack suma = calcular(5 $$ Comentario en medio de argumentos
-                       , 10);
-    
-    $$ Comentario antes de una instrucción nula
-    ; $$ Comentario después de una instrucción nula
-    
-    $$ Comentarios con símbolos de operadores: + - * / % < > <= >= is isNot and or not
-    $$ Comentarios con palabras reservadas: PolloCrudo PolloAsado repeater craft target
-    
-    $$ Comentario con símbolos que podrían confundirse con inicio de comentario de bloque
-    $$ Este comentario tiene $* dentro pero no debería iniciar un comentario de bloque
-    
-    $$ Comentario con símbolos que podrían confundirse con fin de comentario de bloque
-    $$ Este comentario tiene *$ dentro pero no debería cerrar nada
-    
-    $$ Comentario al final de una sección
-}
 
 $$ Comentario antes del cierre del programa
 

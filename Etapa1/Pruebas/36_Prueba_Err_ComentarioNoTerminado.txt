@@ -1,93 +1,95 @@
 $* 
   Prueba_Err_ComentarioNoTerminado.ne
   Propósito: Verificar detección de comentarios de bloque sin cierre
-  Fecha: Abril 10, 2025
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaComentarioNoTerminado:
 
-Bedrock {
-  $$ Constantes normales para contraste
-  Obsidian Stack MAX_LEVEL 100;
-  
-  $* Comentario de bloque correctamente cerrado *$
-  Obsidian Stack MIN_LEVEL 1;
-  
-  $* Comentario de bloque sin cierre - falta el terminador *$
-  
-  Obsidian Stack MEDIO_LEVEL 50;
-}
+Bedrock
 
-Inventory {
-  $$ Variables normales para contraste
-  Stack contador = 0;
-  Spider mensaje = "Hola Mundo";
-  
-  $* 
-    Comentario de bloque multi-línea correctamente terminado
-    con varias líneas de texto
-  *$
-  
-  Stack variable_normal = 5;
-  
-  $* 
-    Comentario de bloque multi-línea sin terminar
-    Este comentario no tiene el terminador correspondiente
-    y debería generar un error
+    $$ Constantes normales para contraste
+    Obsidian Stack MAX_LEVEL 100;
     
-  Torch activo = On;  $$ Esta línea no debería ser reconocida como código
-  Stack valor = 10;   $$ Esta línea no debería ser reconocida como código
-  
-  $$ Variables después del error para verificar recuperación
-  Stack recuperacion = 20;
-  
-  $* Otro comentario no terminado
-     con símbolos que podrían confundir al analizador:
-     * asterisco suelto
-     $ signo dólar suelto
-     *$ esto parece un terminador pero no lo es
-     $* esto parece un iniciador dentro del comentario
-  
-  $$ Más código después del segundo comentario no terminado
-  Torch otra_variable = Off;
-  
-  $* Comentario aparentemente cerrado, pero con un espacio entre * y $
-  que debería causar que no se reconozca como terminador * $
-  
-  $$ Código después del tercer comentario no terminado
-  Stack tercera_recuperacion = 30;
-  
-  $* 
-    Este comentario tiene una secuencia que parece un terminador,
-    pero tiene caracteres en medio: *texto$
-    Por lo tanto, no está realmente terminado.
-  
-  $$ Último código para verificar recuperación
-  Stack ultima_recuperacion = 40;
-}
+    $* Comentario de bloque correctamente cerrado *$
+    Obsidian Stack MIN_LEVEL 1;
+    
+    $* Comentario de bloque sin cierre - falta el terminador *$
+    
+    Obsidian Stack MEDIO_LEVEL 50;
 
-SpawnPoint {
-  $$ Código normal para contraste
-  dropperSpider("Inicio de programa");
-  
-  $* Comentario de bloque sin terminar en el SpawnPoint
-     Esta sección del código no debería ejecutarse
-  
-  contador = 5;
-  dropperStack(contador);
-  
-  $$ Código después del comentario no terminado
-  Stack final = 100;
-  dropperStack(final);
-  
-  dropperSpider("Fin de programa");
-}
+Inventory
+
+    $$ Variables normales para contraste
+    Stack contador = 0;
+    Spider mensaje = "Hola Mundo";
+    
+    $* 
+      Comentario de bloque multi-línea correctamente terminado
+      con varias líneas de texto
+    *$
+    
+    Stack variable_normal = 5;
+    
+    $* 
+      Comentario de bloque multi-línea sin terminar
+      Este comentario no tiene el terminador correspondiente
+      y debería generar un error
+      
+    Torch activo = On;  $$ Esta línea no debería ser reconocida como código
+    Stack valor = 10;   $$ Esta línea no debería ser reconocida como código
+    
+    $$ Variables después del error para verificar recuperación
+    Stack recuperacion = 20;
+    
+    $* Otro comentario no terminado
+       con símbolos que podrían confundir al analizador:
+       * asterisco suelto
+       $ signo dólar suelto
+       *$ esto parece un terminador pero no lo es
+       $* esto parece un iniciador dentro del comentario
+    
+    $$ Más código después del segundo comentario no terminado
+    Torch otra_variable = Off;
+    
+    $* Comentario aparentemente cerrado, pero con un espacio entre * y $
+      que debería causar que no se reconozca como terminador * $
+    
+    $$ Código después del tercer comentario no terminado
+    Stack tercera_recuperacion = 30;
+    
+    $* 
+      Este comentario tiene una secuencia que parece un terminador,
+      pero tiene caracteres en medio: *texto$
+      Por lo tanto, no está realmente terminado.
+    
+    $$ Último código para verificar recuperación
+    Stack ultima_recuperacion = 40;
+
+SpawnPoint
+
+    PolloCrudo
+        $$ Código normal para contraste
+        dropperSpider("Inicio de programa");
+        
+        $* Comentario de bloque sin terminar en el SpawnPoint
+           Esta sección del código no debería ejecutarse
+        
+        contador = 5;
+        dropperStack(contador);
+        
+        $$ Código después del comentario no terminado
+        Stack final = 100;
+        dropperStack(final);
+        
+        dropperSpider("Fin de programa");
+    PolloAsado
 
 $$ Esto debería ser código después del SpawnPoint, que no es válido
 $$ pero el analizador léxico igual debería procesarlo como tokens
 
 $* 
-   Comentario final sin terminar
-   Este es el último elemento del archivo
+  Comentario final sin terminar
+  Este es el último elemento del archivo
 
 worldSave

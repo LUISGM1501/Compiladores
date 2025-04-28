@@ -1,32 +1,28 @@
 $* 
    Prueba: 43_Prueba_Rend_MuchosTokens
    Descripción: Verificar rendimiento con un archivo con miles de tokens
-   Lenguaje: Notch Engine
+   Fecha: 28/04/2025
 *$
 
 WorldName PruebaMuchosTokens:
 
-Bedrock {
+Bedrock
     Obsidian Stack MAX_ITERATIONS 1000;
     Obsidian Stack ARRAY_SIZE 500;
     Obsidian Stack STEP_VALUE 1;
     Obsidian Spider TEST_NAME "Prueba de rendimiento con muchos tokens";
-}
 
-$$ Declaramos un tipo de registro para usar en la prueba
-ResourcePack {
-    Entity TestData {
+ResourcePack
+    Entity TestData
+    PolloCrudo
         Stack id;
         Stack value;
         Ghast weight;
         Spider name;
         Torch active;
-    };
-}
-
-$$ Declaramos variables extensas para generar muchos tokens
-Inventory {
-    $$ Creamos un array grande de enteros
+    PolloAsado;
+Inventory
+    $$ Declaramos variables extensas para generar muchos tokens
     Shelf[500] Stack numbers;
     
     $$ Creamos un array grande de registros
@@ -44,14 +40,12 @@ Inventory {
     Stack k;
     Stack temp;
     Torch condition;
-}
 
-$$ Sección principal con muchas operaciones para generar miles de tokens
-SpawnPoint {
+SpawnPoint
     dropperSpider(TEST_NAME);
     dropperSpider("Inicializando arrays...");
     
-    $$ Inicialización masiva del array de enteros 
+    $$ Inicialización masiva del array de enteros
     walk i set 0 to ARRAY_SIZE - 1 craft
     PolloCrudo
         numbers[i] = i * STEP_VALUE;
@@ -155,7 +149,7 @@ SpawnPoint {
     
     dropperSpider("Array ordenado.");
     
-    $$ Busqueda binaria para generar más tokens
+    $$ Búsqueda binaria para generar más tokens
     dropperSpider("Realizando búsquedas...");
     
     walk k set 0 to 20 craft
@@ -197,6 +191,5 @@ SpawnPoint {
     PolloAsado
     
     dropperSpider("Prueba de rendimiento completada.");
-}
 
 worldSave

@@ -1,7 +1,8 @@
 $* 
   Prueba_Lit_Strings.ne
   Propósito: Verificar reconocimiento de cadenas (vacías, con espacios, con escape sequences)
-  Fecha: Abril 10, 2025
+  Probar: Spider, Rune, dropperSpider, dropperRune
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de literales de cadenas en NotchEngine
@@ -9,16 +10,17 @@ $$ Verificando: cadenas vacías, con espacios, con secuencias de escape
 
 WorldName PruebaLitStrings:
 
-Bedrock {
+Bedrock
+
     $$ Constantes de cadenas
     Obsidian Spider VACIO "";
     Obsidian Spider ESPACIO " ";
     Obsidian Spider SALUDO "Hola Mundo";
     Obsidian Spider CON_COMILLAS "Este string tiene \"comillas\"";
     Obsidian Spider MULTILINEA "Primera línea\nSegunda línea";
-}
 
-Inventory {
+Inventory
+
     $$ Cadenas vacías y simples
     Spider cadenaVacia = "";
     Spider espacioSimple = " ";
@@ -47,9 +49,9 @@ Inventory {
     Spider prefijo = "Notch";
     Spider sufijo = "Engine";
     Spider resultado;
-}
 
-SpawnPoint {
+SpawnPoint
+
     PolloCrudo
         $$ Mostrar algunas cadenas
         dropperSpider("Cadena simple: " bind cadenaSimple);
@@ -107,6 +109,5 @@ SpawnPoint {
             dropperSpider("Las cadenas son iguales");
         PolloAsado
     PolloAsado
-}
 
 worldSave

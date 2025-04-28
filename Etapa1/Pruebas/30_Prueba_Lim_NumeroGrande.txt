@@ -1,12 +1,13 @@
 $* 
   Prueba_Lim_NumeroGrande.ne
   Propósito: Verificar números enteros muy grandes para probar los límites del analizador léxico
-  Fecha: Abril 10, 2025
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaNumeroGrande:
 
-Bedrock {
+Bedrock
+
   $$ Constantes con números enteros de diferentes tamaños
   Obsidian Stack NUM_PEQUENO 42;
   Obsidian Stack NUM_MEDIANO 12345;
@@ -30,9 +31,9 @@ Bedrock {
   $$ Números extremadamente grandes (posiblemente fuera del rango de representación numérica típica)
   Obsidian Stack NUM_EXTREMO 123456789012345678901234567890;
   Obsidian Stack NEG_EXTREMO -123456789012345678901234567890;
-}
 
-Inventory {
+Inventory
+
   $$ Variables con valores iniciales grandes
   Stack num1 = 1234567890;
   Stack num2 = 9876543210;
@@ -61,48 +62,49 @@ Inventory {
   Stack multiplicacion;
   Stack division;
   Stack modulo;
-}
 
-SpawnPoint {
-  $$ Operaciones aritméticas con números grandes
-  suma = num1 + num2;  $$ 1234567890 + 9876543210 = 11111111100
-  resta = num2 - num1;  $$ 9876543210 - 1234567890 = 8641975320
-  multiplicacion = num1 * 10;  $$ 1234567890 * 10 = 12345678900
-  division = num2 // 10;  $$ 9876543210 // 10 = 987654321
-  modulo = num2 % 10;  $$ 9876543210 % 10 = 0
-  
-  $$ Operaciones con números extremadamente grandes
-  Stack resultado1 = grande1 + grande2;
-  Stack resultado2 = extremo // 1000;
-  
-  $$ Operaciones que podrían causar desbordamiento
-  Stack posible_overflow = max32 + 1;
-  Stack posible_underflow = min32 - 1;
-  
-  $$ Probando operaciones potencialmente problemáticas
-  Stack producto_grande = grande1 * grande2;
-  Stack division_extrema = extremo // 3;
-  
-  $$ Mostrando algunos resultados
-  dropperStack(suma);
-  dropperStack(resta);
-  dropperStack(multiplicacion);
-  dropperStack(division);
-  
-  $$ Usando números grandes en estructuras de control
-  target producto_grande > 0 craft hit
+SpawnPoint
+
   PolloCrudo
-    dropperSpider("El resultado es positivo");
+    $$ Operaciones aritméticas con números grandes
+    suma = num1 + num2;  $$ 1234567890 + 9876543210 = 11111111100
+    resta = num2 - num1;  $$ 9876543210 - 1234567890 = 8641975320
+    multiplicacion = num1 * 10;  $$ 1234567890 * 10 = 12345678900
+    division = num2 // 10;  $$ 9876543210 // 10 = 987654321
+    modulo = num2 % 10;  $$ 9876543210 % 10 = 0
+    
+    $$ Operaciones con números extremadamente grandes
+    Stack resultado1 = grande1 + grande2;
+    Stack resultado2 = extremo // 1000;
+    
+    $$ Operaciones que podrían causar desbordamiento
+    Stack posible_overflow = max32 + 1;
+    Stack posible_underflow = min32 - 1;
+    
+    $$ Probando operaciones potencialmente problemáticas
+    Stack producto_grande = grande1 * grande2;
+    Stack division_extrema = extremo // 3;
+    
+    $$ Mostrando algunos resultados
+    dropperStack(suma);
+    dropperStack(resta);
+    dropperStack(multiplicacion);
+    dropperStack(division);
+    
+    $$ Usando números grandes en estructuras de control
+    target producto_grande > 0 craft hit
+    PolloCrudo
+      dropperSpider("El resultado es positivo");
+    PolloAsado
+    
+    $$ Ciclo con un número grande
+    Stack i = 0;
+    repeater i < 5 craft
+    PolloCrudo
+      dropperStack(i);
+      dropperStack(grande1);
+      soulsand i;
+    PolloAsado
   PolloAsado
-  
-  $$ Ciclo con un número grande
-  Stack i = 0;
-  repeater i < 5 craft
-  PolloCrudo
-    dropperStack(i);
-    dropperStack(grande1);
-    soulsand i;
-  PolloAsado
-}
 
 worldSave

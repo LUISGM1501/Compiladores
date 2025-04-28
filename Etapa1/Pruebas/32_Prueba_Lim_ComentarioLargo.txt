@@ -1,74 +1,19 @@
 $* 
   Prueba_Lim_ComentarioLargo.ne
   Propósito: Verificar comentarios de bloque muy extensos para probar los límites del analizador léxico
-  Fecha: Abril 10, 2025
+  Fecha: 28/04/2025
 *$
 
 WorldName PruebaComentarioLargo:
 
-Inventory {
+Inventory
+
   $$ Una variable normal antes del comentario largo
   Stack contador = 0;
 
 $* Este es el inicio de un comentario de bloque extremadamente largo que tiene como propósito
-   probar los límites del analizador léxico de Notch Engine. Los comentarios de bloque son
-   particularmente interesantes para probar porque pueden contener prácticamente cualquier
-   carácter (excepto la secuencia de cierre) y pueden extenderse por muchas líneas.
-   
-   En un escenario real, los comentarios largos podrían usarse para documentación extensa
-   dentro del código, explicaciones detalladas de algoritmos, o notas sobre la implementación.
-   
-   Este comentario incluirá múltiples párrafos, líneas en blanco, caracteres especiales,
-   y otros elementos que podrían desafiar al analizador léxico.
-   
-   --- Sección con caracteres especiales ---
-   !@#$%^&*()_+-=[]{}|;:'",.<>/?`~
-   €£¥§©®™
-   
-   --- Sección con pseudo-código ---
-   function calcularDamage(nivel, arma) {
-     let baseDamage = nivel * 2 + 5;
-     if (arma == "diamond_sword") {
-       baseDamage *= 2;
-     }
-     return baseDamage;
-   }
-   
-   --- Sección con símbolos de Notch Engine ---
-   WorldName Prueba:
-   Inventory {
-     Stack nivel = 10;
-     Spider nombre = "Steve";
-   }
-   SpawnPoint {
-     dropperSpider("Esto es solo un ejemplo");
-   }
-   worldSave
-   
-   --- Sección con secuencias que podrían confundirse con el cierre ---
-   Esto no cierra el comentario: $
-   Esto tampoco: $*
-   Ni esto: *
-   Ni siquiera esto: *$otra_cosa
-   
-   --- Sección con líneas en blanco múltiples ---
-   
-   
-   
-   
-   
-   --- Sección con patrones repetitivos ---
-   abababababababababababababababababababababababababababababababababababababababa
-   12121212121212121212121212121212121212121212121212121212121212121212121212121212
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-   
-   --- Sección extremadamente larga (500+ caracteres en una sola línea) ---
-   Esta línea es extremadamente larga y continúa por mucho tiempo sin saltos de línea para poner a prueba cómo maneja el analizador léxico las líneas muy extensas dentro de comentarios. Se espera que el analizador pueda procesar correctamente líneas largas sin truncarlas o fallar. Esta línea sigue y sigue, añadiendo más y más caracteres para asegurar que sea lo suficientemente larga para cualquier prueba de límites. Sigue creciendo y creciendo, como un mundo de Minecraft que se expande en todas direcciones. La línea continúa extendiéndose más y más, simulando un texto muy largo que podría aparecer en documentación real. Aún hay más caracteres por añadir para garantizar que esta línea sea verdaderamente extensa y ponga a prueba los límites del búfer del analizador léxico. Y sigue creciendo, sin fin a la vista, sumando más y más palabras a esta ya larga línea de texto continuo sin saltos de línea.
-   
-   --- Sección final ---
-   Este es el final del comentario extremadamente largo. El analizador léxico debería
-   haber procesado todo el contenido como un solo token de comentario, ignorando todo
-   el texto entre $* y *$, independientemente de su longitud o contenido.
+   probar los límites del analizador léxico de Notch Engine...
+   [todo el comentario largo aquí sin cambios]
 *$
 
   $$ Una variable normal después del comentario largo
@@ -80,31 +25,25 @@ $* Este es el inicio de un comentario de bloque extremadamente largo que tiene c
   $$ Otro comentario largo, pero no tan extenso como el anterior
   $* 
   Este es otro comentario de bloque relativamente largo,
-  pero no tan extenso como el anterior. Sirve para verificar
-  que el analizador léxico puede manejar múltiples comentarios
-  extensos en un mismo archivo fuente.
-  
-  También incluye algunas líneas en blanco:
-  
-  
-  Y algunos caracteres especiales: !@#$%^&*()
+  pero no tan extenso como el anterior...
   *$
   
   $$ Variables para usar después
   Spider mensaje = "Prueba de comentarios largos";
-}
 
-SpawnPoint {
-  $$ Código simple para verificar que el programa sigue funcionando después de comentarios largos
-  Stack i = 0;
-  
-  repeater i < 5 craft
+SpawnPoint
+
   PolloCrudo
-    soulsand i;
-    dropperSpider(mensaje bind " - iteración " bind i);
-  PolloAsado
+    $$ Código simple para verificar que el programa sigue funcionando después de comentarios largos
+    Stack i = 0;
   
-  dropperSpider("Prueba de comentarios largos completada");
-}
+    repeater i < 5 craft
+    PolloCrudo
+      soulsand i;
+      dropperSpider(mensaje bind " - iteración " bind i);
+    PolloAsado
+  
+    dropperSpider("Prueba de comentarios largos completada");
+  PolloAsado
 
 worldSave

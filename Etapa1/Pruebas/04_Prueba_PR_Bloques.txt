@@ -1,7 +1,8 @@
 $* 
   Prueba_PR_Bloques.ne
   Propósito: Verificar reconocimiento de delimitadores de bloques (PolloCrudo, PolloAsado)
-  Fecha: Abril 10, 2025
+  Probar: PolloCrudo, PolloAsado
+  Fecha: 28/04/2025
 *$
 
 $$ Prueba de delimitadores de bloques en NotchEngine
@@ -9,15 +10,16 @@ $$ Verificando: PolloCrudo, PolloAsado
 
 WorldName PruebaBloques:
 
-Inventory {
+Inventory
+
     $$ Variables para las pruebas
     Stack contador = 0;
     Stack acumulador = 0;
     Stack resultado = 0;
     Spider mensaje = "Prueba de bloques PolloCrudo y PolloAsado";
-}
 
-CraftingTable {
+CraftingTable
+
     $$ Función con bloques de código
     Spell sumarPares(Stack :: limite) -> Stack
     PolloCrudo
@@ -47,9 +49,9 @@ CraftingTable {
         Stack resultado = n * calcularFactorial(n - 1);
         respawn resultado;
     PolloAsado
-}
 
-SpawnPoint {
+SpawnPoint
+
     $$ Bloque principal
     PolloCrudo
         $$ Bloque simple
@@ -95,6 +97,5 @@ SpawnPoint {
         
         dropperSpider("Valor final del resultado: " bind resultado);
     PolloAsado
-}
 
 worldSave
