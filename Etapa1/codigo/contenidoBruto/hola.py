@@ -1,1 +1,0 @@
-print("prueba Realizada exitosa")
