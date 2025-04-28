@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# /Etapa1/codigo/contenidoBruto/mc_scan.py
 """
 MC Scanner - Interfaz de línea de comandos principal
 """
@@ -8,6 +7,7 @@ import sys
 import os
 from scanner.core import Scanner
 from scanner.error_handling import ErrorHandler
+from scanner.html_generator import HtmlGenerator
 
 def main():
     """
@@ -29,6 +29,9 @@ def main():
     # Crear manejador de errores
     manejador_errores = ErrorHandler()
     
+    # Crear generador HTML
+    generador_html = HtmlGenerator()
+    
     # Crear y inicializar el scanner
     scanner = Scanner(archivo_fuente, manejador_errores)
     scanner.inicializar_scanner()
@@ -37,14 +40,32 @@ def main():
     print(f"Analizando archivo: {archivo_fuente}")
     print("-" * 50)
     
+    # Contar líneas y caracteres del archivo
+    with open(archivo_fuente, 'r', encoding='utf-8') as f:
+        contenido = f.read()
+        num_lineas = len(contenido.splitlines())
+        num_caracteres = len(contenido)
+    
+    # Establecer estadísticas de archivo
+    generador_html.establecer_estadisticas_archivo(num_lineas, num_caracteres)
+    
+    # Procesar todos los tokens
     while True:
         token = scanner.deme_token()
+        print(f"Token: {token}")
+        
+        # Agregar token al generador HTML
+        generador_html.agregar_token(token)
+        
         if token.tipo == 'EOF':
             break
-        print(f"Token: {token}")
     
     # Finalizar el scanner
     scanner.finalizar_scanner()
+    
+    # Generar el archivo HTML con el muro de ladrillos
+    nombre_archivo_html = os.path.splitext(archivo_fuente)[0] + "_ladrillos.html"
+    generador_html.generar_html(nombre_archivo_html)
     
     # Mostrar resumen de errores
     if manejador_errores.hay_errores():

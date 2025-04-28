@@ -1,3 +1,4 @@
+# /Etapa1/codigo/scanner/automata/identifiers.py
 """
 Autómata para identificadores
 """

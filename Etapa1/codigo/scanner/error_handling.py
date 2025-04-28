@@ -1,3 +1,6 @@
+# /Etapa1/codigo/scanner/error_handling.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Sistema de manejo de errores para el scanner
 """

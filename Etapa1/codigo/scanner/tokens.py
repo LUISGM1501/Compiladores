@@ -1,3 +1,6 @@
+# /Etapa1/codigo/scanner/tokens.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Definición de tokens para el lenguaje MC
 """

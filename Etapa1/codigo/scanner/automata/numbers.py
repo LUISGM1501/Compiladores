@@ -1,3 +1,4 @@
+# /Etapa1/codigo/scanner/automata/numbers.py
 """
 Autómata para números
 """

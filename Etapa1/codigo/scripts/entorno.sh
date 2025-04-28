@@ -1,3 +1,5 @@
+# /Etapa1/codigo/scripts/entorno.sh
+
 #!/bin/bash
 
 #Ejemplos ejecucion:

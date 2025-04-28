@@ -1,3 +1,6 @@
+# /Etapa1/codigo/scanner/core.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Núcleo del scanner para el lenguaje MC
 """

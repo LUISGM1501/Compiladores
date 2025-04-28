@@ -1,3 +1,4 @@
+# /Etapa1/codigo/scanner/automata/base.py
 """
 Clase base para los autómatas del scanner
 """

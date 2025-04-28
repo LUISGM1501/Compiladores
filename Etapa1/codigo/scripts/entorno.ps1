@@ -1,3 +1,5 @@
+# /Etapa1/codigo/scripts/entorno.ps1
+
 # Script para crear/activar entorno virtual y gestionar archivos
 
 # Ejemplos ejecucion:
