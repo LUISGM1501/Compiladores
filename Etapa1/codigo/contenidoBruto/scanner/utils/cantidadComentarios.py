@@ -1,3 +1,4 @@
+# /Etapa1/codigo/contenidoBruto/scanner/utils/cantidadComentarios.py
 def contar_comentarios_linea(texto):
     """
     Cuenta la cantidad de comentarios de línea que comienzan con '$$'.

@@ -2,9 +2,7 @@ $*
   25_Prueba_Com_Anidados.ne
   Prueba de comentarios de bloque con contenido complejo
   Para el analizador léxico de Notch Engine
-  
-  $* Esto parece un comentario anidado, pero no lo es,
-     simplemente es texto dentro del comentario principal *$
+
   
   A continuación elementos que el analizador debe considerar como texto
   dentro del comentario y no como tokens independientes:

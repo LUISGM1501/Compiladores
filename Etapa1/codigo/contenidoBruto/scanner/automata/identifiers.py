@@ -39,11 +39,12 @@ class IdentifierAutomaton(Automaton):
         Retorna:
             bool: True si el autómata puede iniciar con el carácter, False en caso contrario
         """
-        # Verificar si el carácter puede iniciar un identificador
+        # Verificar si el carácter puede iniciar un identificador (letras o guión bajo)
         if caracter.isalpha() or caracter == '_':
             self.estado_actual = "identificador"
             return True
         
+        self.estado_actual = self.estado_inicial
         return False
     
     def obtener_tipo_token(self, estado, lexema):

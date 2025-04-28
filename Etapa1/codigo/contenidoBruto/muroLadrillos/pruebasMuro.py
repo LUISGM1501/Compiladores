@@ -1,3 +1,4 @@
+# /Etapa1/codigo/contenidoBruto/muroLadrillos/pruebasMuro.py
 from muroLadrillos import generarLadrillos
 
 # Datos de ejemplo

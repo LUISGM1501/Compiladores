@@ -114,26 +114,37 @@ class Scanner:
         columna_inicial = self.columna
         
         # Intentar reconocer con cada autómata
+        posicion_inicial = self.posicion
+        
         for automata in self.automatas:
-            self.posicion += 1
-            self.columna += 1
+            # Reiniciar posición para cada intento de autómata
+            self.posicion = posicion_inicial
+            self.buffer = caracter
+            self.columna = columna_inicial
             
             if automata.iniciar(caracter):
                 estado = automata.estado_actual
+                posicion_avanzada = self.posicion + 1  # Avanzamos después de verificar
                 
                 # Procesar caracteres según el autómata
-                while self.posicion < len(self.contenido) and estado != "error" and not automata.es_estado_final(estado):
-                    caracter = self.contenido[self.posicion]
-                    self.buffer += caracter
-                    estado = automata.transicion(estado, caracter)
+                while posicion_avanzada < len(self.contenido) and estado != "error" and not automata.es_estado_final(estado):
+                    siguiente_caracter = self.contenido[posicion_avanzada]
+                    nuevo_estado = automata.transicion(estado, siguiente_caracter)
                     
-                    self.posicion += 1
-                    self.columna += 1
-                    
-                    # Manejo especial para saltos de línea
-                    if caracter == '\n':
-                        self.linea += 1
-                        self.columna = 1
+                    # Si la transición es válida, actualizamos el estado y seguimos
+                    if nuevo_estado != "error":
+                        estado = nuevo_estado
+                        self.buffer += siguiente_caracter
+                        posicion_avanzada += 1
+                        
+                        # Manejo especial para saltos de línea
+                        if siguiente_caracter == '\n':
+                            self.linea += 1
+                            self.columna = 1
+                        else:
+                            self.columna += 1
+                    else:
+                        break
                 
                 # Si terminamos en estado de aceptación
                 if automata.es_estado_final(estado):
@@ -144,14 +155,13 @@ class Scanner:
                     if tipo == "IDENTIFICADOR" and lexema in PALABRAS_RESERVADAS:
                         tipo = PALABRAS_RESERVADAS[lexema]
                     
+                    # Actualizar posición final
+                    self.posicion = posicion_avanzada
+                    
                     # Crear y devolver el token
                     valor = automata.obtener_valor(estado, lexema)
                     return Token(tipo, lexema, linea_inicial, columna_inicial, valor)
-                
-                # Si no se reconoció, restaurar posición
-                self.posicion -= len(self.buffer)
-                self.columna = columna_inicial
-                
+        
         # Si ningún autómata reconoció el token, es un error
         caracter = self.contenido[self.posicion]
         self.posicion += 1

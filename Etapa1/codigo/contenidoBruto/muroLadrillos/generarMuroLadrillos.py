@@ -1,3 +1,4 @@
+# /Etapa1/codigo/contenidoBruto/muroLadrillos/generarMuroLadrillos.py
 def generarLadrillos(contenido, estadisticaToken, lineasPrograma, numeroCaracteresEntrada, 
                     numeroComentariosLinea, numeroComentariosBloque, cantidadErrores):
     """

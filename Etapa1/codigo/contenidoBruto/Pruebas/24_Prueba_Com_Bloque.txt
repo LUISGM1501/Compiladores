@@ -2,7 +2,6 @@ $*
   24_Prueba_Com_Bloque.ne
   Propósito: Verificar el reconocimiento de comentarios de bloque en Notch Engine
   Fecha: 28/04/2025
-  Sintaxis: $* comentario *$
 *$
 
 WorldName PruebaComBloque:

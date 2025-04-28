@@ -1,3 +1,4 @@
+# /Etapa1/codigo/contenidoBruto/mc_scan.py  
 """
 MC Scanner - Interfaz de línea de comandos principal
 """
@@ -7,7 +8,6 @@ import os
 from pathlib import Path
 from scanner.core import Scanner
 from scanner.error_handling import ErrorHandler
-from scanner.html_generator import HtmlGenerator
 from scanner.utils.cantidadComentarios import contar_comentarios_bloque, contar_comentarios_linea
 from muroLadrillos.generarMuroLadrillos import generarLadrillos
 

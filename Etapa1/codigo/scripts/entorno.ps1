@@ -13,6 +13,12 @@
 # Eliminar entorno
 #.\scripts\entorno.ps1 -accion eliminar
 
+# deactivate
+# .\scripts\entorno.ps1 -accion eliminar
+# .\mi_entorno\Scripts\activate
+# cd .\mi_entorno\src
+# python mc_scan.py
+
 
 param(
     [string]$accion
