@@ -3,7 +3,7 @@ $*
   Propósito: Verificar operadores textuales reales en Notch Engine
   Probar: soulsand, magma, and, or, not, xor, bind, #, from ##, except ##, seek,
           add, drop, feed, map, biom, void, isEngraved, isInscribed, etchUp, etchDown,
-          unlock, lock, make, gather, forge, expand
+          unlock, lock, make, gather, forge, tag
   Fecha: 28/04/2025
 *$
 
@@ -77,7 +77,7 @@ PolloCrudo
 
     unlock(archivo1); $$ Abre archivo1
     unlock(nuevoArchivo); $$ Abre nuevoArchivo
-    expand(archivo1, nuevoArchivo); $$ Expande archivo1 con contenido de nuevoArchivo
+    tag(archivo1, nuevoArchivo); $$ Expande archivo1 con contenido de nuevoArchivo
     lock(archivo1); $$ Cierra archivo1
     lock(nuevoArchivo); $$ Cierra nuevoArchivo
 

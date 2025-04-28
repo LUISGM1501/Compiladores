@@ -1,7 +1,7 @@
 $* 
   16_Prueba_Lit_Archivos.ne
   Propósito: Verificar el reconocimiento de literales de archivos en Notch Engine
-  Probar: Book, unlock, lock, make, gather, expand
+  Probar: Book, unlock, lock, make, gather, tag
   Fecha: 28/04/2025
 *$
 
@@ -71,7 +71,7 @@ SpawnPoint
         lock(archivoConfiguracion);
         
         $$ Concatenar archivos
-        expand(archivoLog, archivoResultados);
+        tag(archivoLog, archivoResultados);
         
         $$ Casos adicionales para probar el scanner
         Book {/ "sinVariable.txt", 'A' /};
