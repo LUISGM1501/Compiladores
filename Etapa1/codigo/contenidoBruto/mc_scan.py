@@ -8,6 +8,7 @@ import os
 from scanner.core import Scanner
 from scanner.error_handling import ErrorHandler
 from scanner.html_generator import HtmlGenerator
+from scanner.utils.cantidadComentarios import contar_comentarios_bloque, contar_comentarios_linea
 
 def main():
     """
@@ -25,26 +26,34 @@ def main():
     if not os.path.exists(archivo_fuente):
         print(f"Error: El archivo '{archivo_fuente}' no existe.")
         sys.exit(1)
-    
-    # Crear manejador de errores
-    manejador_errores = ErrorHandler()
-    
-    # Crear generador HTML
-    generador_html = HtmlGenerator()
-    
-    # Crear y inicializar el scanner
-    scanner = Scanner(archivo_fuente, manejador_errores)
-    scanner.inicializar_scanner()
-    
-    # Procesar todos los tokens
-    print(f"Analizando archivo: {archivo_fuente}")
-    print("-" * 50)
-    
+
     # Contar líneas y caracteres del archivo
     with open(archivo_fuente, 'r', encoding='utf-8') as f:
         contenido = f.read()
         num_lineas = len(contenido.splitlines())
         num_caracteres = len(contenido)
+        num_cometario_lineas = contar_comentarios_linea(contenido)
+        num_comentario_bloque = contar_comentarios_bloque(contenido)
+
+        print("numero de lineas: ", num_lineas)
+        print("numero de caracteres: ", num_caracteres)
+        print("numero comentario linea: ", num_cometario_lineas)
+        print("numero comentario bloques: ",num_comentario_bloque)    
+    # Crear manejador de errores
+    #manejador_errores = ErrorHandler()
+    
+    # Crear generador HTML
+    #generador_html = HtmlGenerator()
+    
+    # Crear y inicializar el scanner
+    #scanner = Scanner(archivo_fuente, manejador_errores)
+    #scanner.inicializar_scanner()
+    
+
+    """
+    # Procesar todos los tokens
+    print(f"Analizando archivo: {archivo_fuente}")
+    print("-" * 50)
     
     # Establecer estadísticas de archivo
     generador_html.establecer_estadisticas_archivo(num_lineas, num_caracteres)
@@ -75,6 +84,8 @@ def main():
     else:
         print("\nAnálisis léxico completado sin errores.")
         return 0
+
+    """
 
 if __name__ == "__main__":
     sys.exit(main())
