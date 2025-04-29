@@ -1,15 +1,14 @@
-# /Etapa1/codigo/scanner/tokens.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Definición de tokens para el lenguaje MC
+Definición de tokens para el lenguaje Notch Engine
 """
 
 class Token:
     """
     Clase que representa un token del lenguaje
     """
-    def __init__(self, tipo, lexema, linea, columna, valor=None):
+    def __init__(self, tipo, lexema, linea, columna, valor=None, error=None):
         """
         Inicializa un nuevo token
         
@@ -19,36 +18,39 @@ class Token:
             linea: Número de línea donde aparece el token
             columna: Número de columna donde aparece el token
             valor: Valor semántico del token (opcional)
+            error: Código de error si el token representa un error léxico
         """
         self.tipo = tipo
         self.lexema = lexema
         self.linea = linea
         self.columna = columna
         self.valor = valor
+        self.error = error
     
     def __str__(self):
         """
         Representación textual del token
         """
+        error_info = f", ERROR: {self.error}" if self.error else ""
         if self.valor is not None:
-            return f"<{self.tipo}, '{self.lexema}', {self.linea}:{self.columna}, {self.valor}>"
+            return f"<{self.tipo}, '{self.lexema}', {self.linea}:{self.columna}, {self.valor}{error_info}>"
         else:
-            return f"<{self.tipo}, '{self.lexema}', {self.linea}:{self.columna}>"
+            return f"<{self.tipo}, '{self.lexema}', {self.linea}:{self.columna}{error_info}>"
 
 
 # Definición de tipos de tokens
 TIPOS_TOKEN = {
     # Palabras reservadas - Estructura del Programa
-    'WORLD_NAME': 'WorldName',
+    'WORLDNAME': 'WorldName',
     'BEDROCK': 'Bedrock',
-    'RESOURCE_PACK': 'ResourcePack',
+    'RESOURCEPACK': 'ResourcePack',
     'INVENTORY': 'Inventory',
     'RECIPE': 'Recipe',
-    'CRAFTING_TABLE': 'CraftingTable',
-    'SPAWN_POINT': 'SpawnPoint',
+    'CRAFTINGTABLE': 'CraftingTable',
+    'SPAWNPOINT': 'SpawnPoint',
     'OBSIDIAN': 'Obsidian',
     'ANVIL': 'Anvil',
-    'WORLD_SAVE': 'worldSave',
+    'WORLDSAVE': 'worldSave',
     
     # Tipos de datos
     'STACK': 'Stack',
@@ -67,8 +69,8 @@ TIPOS_TOKEN = {
     'OFF': 'Off',
     
     # Delimitadores de bloques
-    'POLLO_CRUDO': 'PolloCrudo',
-    'POLLO_ASADO': 'PolloAsado',
+    'POLLOCRUDO': 'PolloCrudo',
+    'POLLOASADO': 'PolloAsado',
     
     # Control de flujo
     'REPEATER': 'repeater',
@@ -87,7 +89,7 @@ TIPOS_TOKEN = {
     'STEP': 'step',
     'WITHER': 'wither',
     'CREEPER': 'creeper',
-    'ENDER_PEARL': 'enderPearl',
+    'ENDERPEARL': 'enderPearl',
     'RAGEQUIT': 'ragequit',
     
     # Funciones y procedimientos
@@ -96,10 +98,10 @@ TIPOS_TOKEN = {
     'RESPAWN': 'respawn',
     
     # Operadores de caracteres
-    'IS_ENGRAVED': 'isEngraved',
-    'IS_INSCRIBED': 'isInscribed',
-    'ETCH_UP': 'etchUp',
-    'ETCH_DOWN': 'etchDown',
+    'ISENGRAVED': 'isEngraved',
+    'ISINSCRIBED': 'isInscribed',
+    'ETCHUP': 'etchUp',
+    'ETCHDOWN': 'etchDown',
     
     # Operadores lógicos
     'AND': 'and',
@@ -128,25 +130,25 @@ TIPOS_TOKEN = {
     'MAKE': 'make',
     'GATHER': 'gather',
     'FORGE': 'forge',
-    'EXPAND': 'expand',
+    'TAG': 'tag',
     
     # Operadores de comparación
     'IS': 'is',
-    'IS_NOT': 'isNot',
+    'ISNOT': 'isNot',
     
     # Funciones de entrada/salida
-    'HOPPER_STACK': 'hopperStack',
-    'HOPPER_RUNE': 'hopperRune',
-    'HOPPER_SPIDER': 'hopperSpider',
-    'HOPPER_TORCH': 'hopperTorch',
-    'HOPPER_CHEST': 'hopperChest',
-    'HOPPER_GHAST': 'hopperGhast',
-    'DROPPER_STACK': 'dropperStack',
-    'DROPPER_RUNE': 'dropperRune',
-    'DROPPER_SPIDER': 'dropperSpider',
-    'DROPPER_TORCH': 'dropperTorch',
-    'DROPPER_CHEST': 'dropperChest',
-    'DROPPER_GHAST': 'dropperGhast',
+    'HOPPERSTACK': 'hopperStack',
+    'HOPPERRUNE': 'hopperRune',
+    'HOPPERSPIDER': 'hopperSpider',
+    'HOPPERTORCH': 'hopperTorch',
+    'HOPPERCHEST': 'hopperChest',
+    'HOPPERGHAST': 'hopperGhast',
+    'DROPPERSTACK': 'dropperStack',
+    'DROPPERRUNE': 'dropperRune',
+    'DROPPERSPIDER': 'dropperSpider',
+    'DROPPERTORCH': 'dropperTorch',
+    'DROPPERCHEST': 'dropperChest',
+    'DROPPERGHAST': 'dropperGhast',
     
     # Otros operadores
     'CHUNK': 'chunk',
@@ -158,6 +160,7 @@ TIPOS_TOKEN = {
     'NUMERO_ENTERO': 'NUMERO_ENTERO',
     'NUMERO_DECIMAL': 'NUMERO_DECIMAL',
     'CADENA': 'CADENA',
+    'CARACTER': 'CARACTER',
     'COMENTARIO': 'COMENTARIO',
     
     # Operadores y símbolos
@@ -165,32 +168,91 @@ TIPOS_TOKEN = {
     'RESTA': '-',
     'MULTIPLICACION': '*',
     'DIVISION': '/',
+    'DIVISION_ENTERA': '//',
     'MODULO': '%',
     'MAYOR_QUE': '>',
     'MENOR_QUE': '<',
     'MAYOR_IGUAL': '>=',
     'MENOR_IGUAL': '<=',
     'IGUAL': '=',
-    'DOBLE_IGUAL': '==',
-    'DIFERENTE': '!=',
+    'SUMA_IGUAL': '+=',
+    'RESTA_IGUAL': '-=',
+    'MULTIPLICACION_IGUAL': '*=',
+    'DIVISION_IGUAL': '/=',
+    'MODULO_IGUAL': '%=',
     'PUNTO_Y_COMA': ';',
     'COMA': ',',
     'PUNTO': '.',
     'DOS_PUNTOS': ':',
+    'DOS_PUNTOS_DOBLE': '::',
     'PARENTESIS_ABRE': '(',
     'PARENTESIS_CIERRA': ')',
     'CORCHETE_ABRE': '[',
     'CORCHETE_CIERRA': ']',
     'LLAVE_ABRE': '{',
     'LLAVE_CIERRA': '}',
+    'LLAVE_COLON_ABRE': '{:',
+    'COLON_LLAVE_CIERRA': ':}',
+    'LLAVE_SLASH_ABRE': '{/',
+    'SLASH_LLAVE_CIERRA': '/}',
+    'ARROBA': '@',
+    'HASH_HASH': '##',
+    'FLECHA': '->',
+    'COERCION': '>>',
+    'COLON_SUMA': ':+',
+    'COLON_RESTA': ':-',
+    'COLON_MULTI': ':*',
+    'COLON_DIV': ':/',
+    'COLON_DIV_ENTERA': '://',
+    'COLON_MODULO': ':%',
     
     # Especiales
     'EOF': 'EOF',
     'ERROR': 'ERROR'
 }
 
+# Errores léxicos
+ERRORES_LEXICOS = {
+    'E1': 'Carácter no reconocido',
+    'E2': 'Carácter Unicode no soportado',
+    'E3': 'String sin cerrar',
+    'E4': 'Carácter sin cerrar',
+    'E5': 'Literal de carácter vacío',
+    'E6': 'Secuencia de escape inválida',
+    'E7': 'Múltiples caracteres en literal de carácter',
+    'E8': 'Comentario de bloque sin cerrar',
+    'E9': 'Múltiples puntos decimales',
+    'E10': 'Número mal formado',
+    'E11': 'Operador flotante incompleto',
+    'E12': 'Literal de conjunto mal formado',
+    'E13': 'Literal de archivo mal formado',
+    'E14': 'Literal de registro mal formado',
+    'E15': 'Literal de arreglo mal formado',
+    'E16': 'Identificador mal formado',
+    'E17': 'Identificador demasiado largo',
+    'E18': 'Delimitador PolloCrudo sin cerrar',
+    'E19': 'PolloAsado sin apertura',
+    'E20': 'Delimitadores de estructuras de control incompletos',
+    'E21': 'Palabra reservada mal escrita',
+    'E22': 'Palabra reservada en contexto incorrecto',
+    'E23': 'Operador de coerción incompleto',
+    'E24': 'Operador de acceso incompleto',
+    'E25': 'Error de lectura de archivo',
+    'E26': 'Fin de archivo inesperado',
+    'E27': 'Buffer overflow'
+}
+
 # Mapa inverso para buscar por lexema
 PALABRAS_RESERVADAS = {}
 for clave, valor in TIPOS_TOKEN.items():
-    if valor not in ['+', '-', '*', '/', '%', '>', '<', '>=', '<=', '=', '==', '!=', ';', ',', '.', ':', '(', ')', '[', ']', '{', '}', 'IDENTIFICADOR', 'NUMERO_ENTERO', 'NUMERO_DECIMAL', 'CADENA', 'COMENTARIO', 'EOF', 'ERROR']:
+    # Excluir símbolos y tipos genéricos de token
+    if not (valor.startswith('+') or valor.startswith('-') or valor.startswith('*') or 
+            valor.startswith('/') or valor.startswith('%') or valor.startswith('>') or 
+            valor.startswith('<') or valor.startswith('=') or valor.startswith(';') or 
+            valor.startswith(',') or valor.startswith('.') or valor.startswith(':') or 
+            valor.startswith('(') or valor.startswith(')') or valor.startswith('[') or 
+            valor.startswith(']') or valor.startswith('{') or valor.startswith('}') or 
+            valor.startswith('@') or valor.startswith('#') or valor in 
+            ['IDENTIFICADOR', 'NUMERO_ENTERO', 'NUMERO_DECIMAL', 'CADENA', 'CARACTER', 
+             'COMENTARIO', 'EOF', 'ERROR']):
         PALABRAS_RESERVADAS[valor] = clave

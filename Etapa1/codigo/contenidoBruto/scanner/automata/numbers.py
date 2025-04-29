@@ -1,13 +1,15 @@
-# /Etapa1/codigo/scanner/automata/numbers.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Autómata para números
+Autómata para reconocer números (enteros y decimales) en Notch Engine
 """
 
 from .base import Automaton
 
+
 class NumberAutomaton(Automaton):
     """
-    Autómata para reconocer números (enteros y decimales)
+    Autómata para reconocer números enteros (Stack) y decimales (Ghast)
     """
     def __init__(self):
         """
@@ -22,23 +24,39 @@ class NumberAutomaton(Automaton):
         
         # Definir transiciones
         self.transiciones = {
-            # Inicio -> Entero: Dígitos
-            (self.estado_inicial, lambda c: c.isdigit()): "entero",
+            # Manejo del signo negativo
+            (self.estado_inicial, '-'): "signo_negativo",
+            ("signo_negativo", lambda c: c.isdigit()): "entero",
             
-            # Entero -> Entero: Dígitos
+            # Enteros
+            (self.estado_inicial, lambda c: c.isdigit()): "entero",
             ("entero", lambda c: c.isdigit()): "entero",
             
-            # Entero -> Punto: Punto decimal
-            ("entero", lambda c: c == '.'): "punto",
+            # Punto decimal
+            ("entero", '.'): "punto_decimal",
             
-            # Punto -> Decimal: Dígitos
-            ("punto", lambda c: c.isdigit()): "decimal",
-            
-            # Decimal -> Decimal: Dígitos
-            ("decimal", lambda c: c.isdigit()): "decimal",
+            # Parte decimal
+            ("punto_decimal", lambda c: c.isdigit()): "decimal",
+            ("decimal", lambda c: c.isdigit()): "decimal"
+        }
+        
+        # Definir manejadores de error
+        self.error_handlers = {
+            # Error si después del punto no hay dígito
+            "punto_decimal": {
+                lambda c: not c.isdigit(): ("error", ("E10", "Número mal formado: después del punto decimal debe haber dígitos"))
+            },
+            # Error si después del signo negativo no hay dígito
+            "signo_negativo": {
+                lambda c: not c.isdigit(): ("error", ("E10", "Número mal formado: después del signo debe haber dígitos"))
+            },
+            # Error si hay múltiples puntos decimales
+            "decimal": {
+                '.': ("error", ("E9", "Múltiples puntos decimales"))
+            }
         }
     
-    def iniciar(self, caracter):
+    def iniciar(self, caracter: str) -> bool:
         """
         Inicia el autómata con el carácter dado
         
@@ -48,14 +66,17 @@ class NumberAutomaton(Automaton):
         Retorna:
             bool: True si el autómata puede iniciar con el carácter, False en caso contrario
         """
-        # Verificar si el carácter puede iniciar un número
+        # Un número puede comenzar con un dígito o un signo negativo
         if caracter.isdigit():
             self.estado_actual = "entero"
+            return True
+        elif caracter == '-':
+            self.estado_actual = "signo_negativo"
             return True
         
         return False
     
-    def obtener_tipo_token(self, estado, lexema):
+    def obtener_tipo_token(self, estado: str, lexema: str) -> str:
         """
         Obtiene el tipo de token para el estado final y lexema dados
         
@@ -73,16 +94,16 @@ class NumberAutomaton(Automaton):
         else:
             return "ERROR"
     
-    def obtener_valor(self, estado, lexema):
+    def obtener_valor(self, estado: str, lexema: str):
         """
-        Obtiene el valor semántico para el estado final y lexema dados
+        Obtiene el valor semántico del token
         
         Argumentos:
             estado: Estado final
             lexema: Lexema reconocido
         
         Retorna:
-            any: Valor semántico del token
+            int o float: El valor numérico del lexema
         """
         if estado == "entero":
             return int(lexema)

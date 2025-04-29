@@ -1,26 +1,184 @@
-# /Etapa1/codigo/contenidoBruto/mc_scan.py  
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-MC Scanner - Interfaz de línea de comandos principal
+MC Scanner - Interfaz de línea de comandos principal para Notch Engine
 """
 
 import sys
 import os
+import time
 from pathlib import Path
 from scanner.core import Scanner
 from scanner.error_handling import ErrorHandler
 from scanner.utils.cantidadComentarios import contar_comentarios_bloque, contar_comentarios_linea
 from muroLadrillos.generarMuroLadrillos import generarLadrillos
-from scanner.tokens import PALABRAS_RESERVADAS
+from scanner.tokens import TIPOS_TOKEN
 
 def main():
-    """Función principal original (se mantiene intacta)"""
-    # ... (código original de main permanece igual)
-    # Solo añadimos el return al final para evitar código inalcanzable
-    return 0
+    """
+    Función principal para ejecución desde línea de comandos
+    
+    Uso: python mc_scan.py <archivo_fuente>
+    """
+    # Verificar argumentos
+    if len(sys.argv) != 2:
+        print(f"Uso: python {sys.argv[0]} <archivo_fuente>")
+        return 1
+    
+    archivo_fuente = sys.argv[1]
+    
+    # Verificar que el archivo existe
+    if not os.path.isfile(archivo_fuente):
+        print(f"Error: El archivo '{archivo_fuente}' no existe")
+        return 1
+    
+    # Ejecutar el scanner
+    return procesar_archivo(archivo_fuente)
+
+def procesar_archivo(ruta_archivo):
+    """
+    Procesa un archivo con el scanner
+    
+    Argumentos:
+        ruta_archivo (str): Ruta al archivo a procesar
+    
+    Retorna:
+        int: Código de salida (0 si ok, 1 si error)
+    """
+    print(f"\n=== Analizando archivo: {ruta_archivo} ===")
+    
+    try:
+        # Contar líneas y caracteres
+        with open(ruta_archivo, 'r', encoding='utf-8') as f:
+            contenido = f.read()
+            num_lineas = len(contenido.splitlines())
+            num_caracteres = len(contenido)
+            num_comentarios_linea = contar_comentarios_linea(contenido)
+            num_comentarios_bloque = contar_comentarios_bloque(contenido)
+        
+        # Instanciar manejador de errores
+        manejador_errores = ErrorHandler()
+        
+        # Instanciar y ejecutar scanner
+        inicio = time.time()
+        scanner = Scanner(ruta_archivo, manejador_errores)
+        scanner.inicializar_scanner()
+        
+        # Recopilar todos los tokens
+        tokens = []
+        token = scanner.deme_token()
+        tokens.append(token)
+        
+        while token.tipo != "EOF":
+            token = scanner.deme_token()
+            tokens.append(token)
+        
+        scanner.finalizar_scanner()
+        fin = time.time()
+        
+        # Imprimir resumen
+        print(f"\nAnalizado en {fin - inicio:.4f} segundos")
+        print(f"Líneas de código: {num_lineas}")
+        print(f"Caracteres: {num_caracteres}")
+        print(f"Tokens encontrados: {len(tokens)}")
+        print(f"Errores detectados: {manejador_errores.contar_errores()}")
+        
+        # Preparar datos para el muro de ladrillos
+        lexemas = []
+        for t in tokens:
+            if t.tipo not in ['EOF', 'COMENTARIO']:
+                lexemas.append(t.lexema)
+        
+        # Calcular estadísticas de tokens
+        estadisticas = calcular_estadisticas_tokens(tokens)
+        
+        # Generar HTML con los resultados
+        nombre_base = Path(ruta_archivo).stem
+        nombre_resultado = f"{nombre_base}_Resultado.html"
+        ruta_resultado = Path("resultados") / nombre_resultado
+        
+        # Asegurar que la carpeta resultados existe
+        Path("resultados").mkdir(exist_ok=True)
+        
+        # Generar el HTML
+        generarLadrillos(
+            contenido=lexemas,
+            estadisticaToken=estadisticas,
+            lineasPrograma=num_lineas,
+            numeroCaracteresEntrada=num_caracteres,
+            numeroComentariosLinea=num_comentarios_linea,
+            numeroComentariosBloque=num_comentarios_bloque,
+            cantidadErrores=manejador_errores.contar_errores()
+        )
+        
+        # Mover el archivo generado a la carpeta resultados
+        try:
+            Path("analisis_lexico.html").rename(ruta_resultado)
+            print(f"\n✅ Resultado guardado en: {ruta_resultado}")
+        except Exception as e:
+            print(f"\n⚠️ Error al guardar resultados: {e}")
+            print(f"El archivo temporal está en: analisis_lexico.html")
+        
+        # Si hay errores, mostrar resumen
+        if manejador_errores.hay_errores():
+            print("\n--- Resumen de errores ---")
+            print(manejador_errores.obtener_resumen())
+            return 1
+        
+        return 0
+    
+    except Exception as e:
+        print(f"\n❌ Error durante el análisis: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
+
+def calcular_estadisticas_tokens(tokens):
+    """
+    Calcula estadísticas sobre los tokens encontrados
+    
+    Argumentos:
+        tokens (list): Lista de tokens encontrados
+    
+    Retorna:
+        dict: Diccionario con estadísticas de tokens
+    """
+    # Inicializar categorías
+    estadisticas = {
+        "Palabras reservadas": 0,
+        "Identificadores": 0,
+        "Literales numéricos": 0,
+        "Literales de texto": 0,
+        "Operadores": 0,
+        "Comentarios": 0,
+        "Errores léxicos": 0
+    }
+    
+    # Clasificar tokens por categoría
+    for token in tokens:
+        if token.tipo == "IDENTIFICADOR":
+            estadisticas["Identificadores"] += 1
+        elif token.tipo in ["NUMERO_ENTERO", "NUMERO_DECIMAL"]:
+            estadisticas["Literales numéricos"] += 1
+        elif token.tipo in ["CADENA", "CARACTER"]:
+            estadisticas["Literales de texto"] += 1
+        elif token.tipo == "COMENTARIO":
+            estadisticas["Comentarios"] += 1
+        elif token.tipo == "ERROR":
+            estadisticas["Errores léxicos"] += 1
+        elif token.tipo in TIPOS_TOKEN:
+            # Verificar si es un operador
+            lexema = TIPOS_TOKEN.get(token.tipo, "")
+            if any(c in lexema for c in "+-*/%<>=&|!~@#[]{}();:,."):
+                estadisticas["Operadores"] += 1
+            else:
+                estadisticas["Palabras reservadas"] += 1
+    
+    return estadisticas
 
 def ejecucion():
     """
-    Función de ejecución interactiva con gestión correcta de resultados
+    Función de ejecución interactiva
     """
     # Asegurar que la carpeta resultados existe
     resultados_dir = Path("resultados")
@@ -60,104 +218,7 @@ def ejecucion():
     archivo_prueba = pruebas[seleccion-1]
     
     # Procesar el archivo
-    print(f"\nEjecutando prueba: {archivo_prueba.name}")
-    
-    # Contar líneas y caracteres
-    with open(archivo_prueba, 'r', encoding='utf-8') as f:
-        contenido = f.read()
-        num_lineas = len(contenido.splitlines())
-        num_caracteres = len(contenido)
-        num_cometario_lineas = contar_comentarios_linea(contenido)
-        num_comentario_bloque = contar_comentarios_bloque(contenido)
-    
-    # Procesar tokens
-    manejador_errores = ErrorHandler()
-    scanner = Scanner(str(archivo_prueba), manejador_errores)
-    scanner.inicializar_scanner()
-    
-    tokens = []
-    while True:
-        token = scanner.deme_token()
-        tokens.append(token)
-        if token.tipo == 'EOF':
-            break
-    
-    scanner.finalizar_scanner()
-    
-    # Preparar datos para el HTML - Solución corregida
-    lexemas = []
-    for t in tokens:
-        if t.tipo not in ['EOF', 'COMENTARIO']:
-            # Añadir el lexema completo directamente
-            lexemas.append(t.lexema)
-    
-    # Filtrar espacios y elementos vacíos, asegurándose de no descomponer los lexemas
-    lexemas = [lex for lex in lexemas if lex.strip() and len(lex) > 0]
-    
-    # Después de recolectar todos los tokens
-    print("\nDebug - Tokens recolectados:")
-    for i, token in enumerate(tokens[:20]):  # Mostrar primeros 20 tokens para debug
-        print(f"Token {i+1}: Tipo='{token.tipo}' | Lexema='{token.lexema}' | Pos={token.linea}:{token.columna}")
-
-    # Verificar si los lexemas ya vienen divididos del scanner
-    print("\nLexemas antes de cualquier procesamiento:")
-    print([t.lexema for t in tokens[:20]])
-    
-    # Debug - imprimir los primeros 5 lexemas para verificar
-    print("Primeros 5 lexemas:")
-    for i, lex in enumerate(lexemas[:5]):
-        print(f"{i+1}. '{lex}'")
-    
-    
-    # Calcular estadísticas de tokens (ejemplo)
-    estadisticas = {
-        "Palabras reservadas": sum(1 for t in tokens if t.tipo in PALABRAS_RESERVADAS.values()),
-        "Identificadores": sum(1 for t in tokens if t.tipo == 'IDENTIFICADOR'),
-        "Literales numéricos": sum(1 for t in tokens if t.tipo in ['NUMERO_ENTERO', 'NUMERO_DECIMAL']),
-        "Literales de texto": sum(1 for t in tokens if t.tipo == 'CADENA'),
-        "Operadores": sum(1 for t in tokens if t.tipo in [
-            'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 'MODULO',
-            'MAYOR_QUE', 'MENOR_QUE', 'MAYOR_IGUAL', 'MENOR_IGUAL',
-            'IGUAL', 'DOBLE_IGUAL', 'DIFERENTE', 'PUNTO_Y_COMA',
-            'COMA', 'PUNTO', 'DOS_PUNTOS', 'PARENTESIS_ABRE',
-            'PARENTESIS_CIERRA', 'CORCHETE_ABRE', 'CORCHETE_CIERRA',
-            'LLAVE_ABRE', 'LLAVE_CIERRA', 'HASH'
-        ]),
-        "Errores léxicos": sum(1 for t in tokens if t.tipo == 'ERROR')
-    }
-    
-    # Manejo de errores robusto
-    cantidad_errores = 0
-    if hasattr(manejador_errores, 'contar_errores'):
-        cantidad_errores = manejador_errores.contar_errores()
-    elif manejador_errores.hay_errores():
-        cantidad_errores = 1  # Valor por defecto si no podemos contar
-    
-    # Generar nombre del archivo de resultado exacto como se solicita
-    nombre_base = archivo_prueba.stem  # Elimina la extensión .txt
-    nombre_resultado = f"{nombre_base}_Resultado.html"
-    ruta_resultado = resultados_dir / nombre_resultado
-    
-    # Generar el HTML
-    generarLadrillos(
-        contenido=lexemas,
-        estadisticaToken=estadisticas,
-        lineasPrograma=num_lineas,
-        numeroCaracteresEntrada=num_caracteres,
-        numeroComentariosLinea=num_cometario_lineas,
-        numeroComentariosBloque=num_comentario_bloque,
-        cantidadErrores=cantidad_errores
-    )
-    
-    # Mover el archivo generado a la carpeta resultados
-    try:
-        Path("analisis_lexico.html").rename(ruta_resultado)
-        print(f"\n✅ Resultado guardado en: {ruta_resultado}")
-    except Exception as e:
-        print(f"\n⚠️ Error al guardar resultados: {e}")
-        print(f"El archivo temporal está en: analisis_lexico.html")
-    
-    print("="*50 + "\n")
+    procesar_archivo(str(archivo_prueba))
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
