@@ -1,41 +1,67 @@
 ; ********************************************
-; * Programa: BOOLEAN.ASM                   *
-; * Descripcion: Conversiones desde booleano*
+; * Programa: BOOLEAN.ASM  (TORCH)          *
+; * Descripcion: Operaciones sobre booleanos*
 ; * Autores: Luis Urbina, Samir Cabrera     *
-; * Fecha de entrega: 28/04/2025            *
+; * Fecha: 10/05/2025                       *
+; * Version: 1.0                            *
+; * Curso: Compiladores e Interpretes       *
+; * Proyecto: Notch Engine - Etapa 2        *
 ; ********************************************
 
 ; El segmento DATOS contiene todas las variables y constantes que usara el programa
 DATOS SEGMENT
     ; Mensajes de entrada y salida
-    prompt_in    DB 'Ingrese 1 para TRUE o 0 para FALSE: $'  ; Mensaje para solicitar entrada al usuario
-    prompt_bool  DB 'El valor booleano es: $'                ; Mensaje para mostrar el valor booleano original
-    prompt_int   DB 'Convertido a entero: $'                 ; Mensaje para mostrar la conversión a entero
-    prompt_float DB 'Convertido a flotante: $'               ; Mensaje para mostrar la conversión a flotante
-    prompt_char  DB 'Convertido a caracter: $'               ; Mensaje para mostrar la conversión a carácter
-    prompt_str   DB 'Convertido a string: $'                 ; Mensaje para mostrar la conversión a string
-    prompt_creativo DB 'Convertido a creativo (probabilidad): $' ; Mensaje para conversión a creativo
-
-    ; Valores para mostrar booleanos
-    valor_true   DB 'TRUE$'       ; Cadena de texto para mostrar cuando el valor es verdadero
-    valor_false  DB 'FALSE$'      ; Cadena de texto para mostrar cuando el valor es falso
+    titulo       DB "DEMOSTRACION DE OPERACIONES CON TORCH (BOOLEANOS)", 0Dh, 0Ah, '$'
+    separador    DB "----------------------------------------", 0Dh, 0Ah, '$'
+    
+    menu         DB "MENU DE OPERACIONES:", 0Dh, 0Ah
+                 DB "1. AND - Conjuncion logica", 0Dh, 0Ah
+                 DB "2. OR - Disyuncion logica", 0Dh, 0Ah
+                 DB "3. NOT - Negacion logica", 0Dh, 0Ah
+                 DB "4. XOR - Disyuncion exclusiva", 0Dh, 0Ah
+                 DB "5. Comparaciones de valores booleanos", 0Dh, 0Ah
+                 DB "6. Convertir a otros tipos", 0Dh, 0Ah
+                 DB "0. Salir", 0Dh, 0Ah
+                 DB "Seleccione una opcion: $"
+    
+    prompt_bool1  DB "Ingrese primer valor booleano (1=On, 0=Off): $"
+    prompt_bool2  DB "Ingrese segundo valor booleano (1=On, 0=Off): $"
+    result_msg    DB "Resultado: $"
+    
+    prompt_bool   DB 'El valor booleano ingresado es: $'
+    prompt_int    DB 'Convertido a entero: $'
+    prompt_float  DB 'Convertido a flotante: $'
+    prompt_char   DB 'Convertido a caracter: $'
+    prompt_string DB 'Convertido a string: $'
+    prompt_creativo DB 'Convertido a creativo (probabilidad): $'
     
     ; Variables para almacenar valores
-    booleano     DB ?             ; Variable para almacenar el valor booleano (1 = TRUE, 0 = FALSE)
-    entero       DW ?             ; Variable para almacenar el valor convertido a entero
+    bool_valor1   DB ?     ; Primer valor booleano (1=On, 0=Off)
+    bool_valor2   DB ?     ; Segundo valor booleano
+    resultado_bool DB ?    ; Resultado de operación booleana
     
-    ; Variables para valor flotante
-    float_entero DW ?             ; Parte entera del flotante
-    float_decimal DW ?            ; Parte decimal del flotante
-    dec_digitos  DB ?             ; Número de dígitos decimales
+    ; Valores para mostrar booleanos
+    valor_true    DB 'TRUE$'
+    valor_false   DB 'FALSE$'
+    str_on        DB 'On$'
+    str_off       DB 'Off$'
     
-    ; Variables para valor creativo (probabilidad)
-    prob_valor   DB ?             ; Valor de la probabilidad (0.0 o 1.0)
+    ; Variables para conversiones
+    entero_result  DW ?    ; Conversión a entero
+    float_entero   DW ?    ; Parte entera del flotante
+    float_decimal  DW ?    ; Parte decimal del flotante
+    dec_digitos    DB ?    ; Dígitos decimales
+    char_result    DB ?    ; Conversión a carácter
+    string_buffer  DB 10 DUP(?), '$' ; Buffer para conversión a string
+    prob_valor     DB ?    ; Valor para tipo creativo
+    
+    ; Mensajes para comparaciones
+    msg_igual    DB 0Dh, 0Ah, "IGUAL A (is): $"
+    msg_distinto DB 0Dh, 0Ah, "DISTINTO DE (isNot): $"
     
     ; Auxiliares
-    nueva_lin    DB 0Dh, 0Ah, '$' ; Códigos para crear una nueva línea en pantalla
-    punto        DB '.$'          ; Punto decimal para mostrar flotantes
-    const_diez   DW 10            ; Constante 10 para cálculos
+    nueva_lin    DB 0Dh, 0Ah, '$'
+    punto        DB '.$'
 DATOS ENDS
 
 ; El segmento CODIGO contiene las instrucciones que ejecutara el programa
@@ -43,243 +69,464 @@ CODIGO SEGMENT
     ; Indicamos al ensamblador donde encontrar nuestros datos y codigo
     ASSUME CS:CODIGO, DS:DATOS
 INICIO:
-    ; Inicializacion: Preparamos el acceso al segmento de datos
+    ; Inicialización: Preparamos el acceso al segmento de datos
     MOV AX, DATOS
     MOV DS, AX
     
-    ; Mostramos el mensaje pidiendo al usuario que ingrese un 1 o un 0
-    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena terminada en $
-    LEA DX, prompt_in ; Cargamos la direccion del mensaje en DX
-    INT 21h           ; Llamamos a la interrupcion 21h (servicios de DOS)
+    ; Mostrar título
+    MOV AH, 09h
+    LEA DX, titulo
+    INT 21h
     
-    ; Leemos un caracter del teclado
-    MOV AH, 01h       ; Funcion 1 de DOS: leer un caracter (con eco en pantalla)
-    INT 21h           ; Llamamos a la interrupcion 21h - El caracter leido queda en AL
-    
-    ; Verificamos si el caracter ingresado es '1' o '0'
-    CMP AL, '1'       ; ¿El caracter es '1'?
-    JE ES_TRUE        ; Si es '1', saltamos a ES_TRUE
-    CMP AL, '0'       ; ¿El caracter es '0'?
-    JE ES_FALSE       ; Si es '0', saltamos a ES_FALSE
-    
-    ; Si no es ni '1' ni '0', consideramos como FALSE por defecto
-ES_FALSE:
-    MOV [booleano], 0 ; Almacenamos 0 (FALSE) en la variable booleano
-    JMP REALIZAR_CONVERSIONES
-    
-ES_TRUE:
-    MOV [booleano], 1 ; Almacenamos 1 (TRUE) en la variable booleano
-    
-REALIZAR_CONVERSIONES:
-    ; Convertir booleano a todos los demás tipos
-    CALL BOOL_A_ENTERO    ; Convertir a entero
-    CALL BOOL_A_FLOTANTE  ; Convertir a flotante
-    CALL BOOL_A_CREATIVO  ; Convertir a creativo (probabilidad)
-    
-    ; Ahora mostramos todas las conversiones
-    CALL MOSTRAR_RESULTADO
-    
-    ; Terminamos el programa y regresamos al sistema operativo
-    MOV AX, 4C00h      ; Funcion 4Ch de DOS: terminar programa (con codigo de salida 0)
-    INT 21h            ; Llamamos a la interrupcion 21h
+    LEA DX, separador
+    INT 21h
 
+MENU_PRINCIPAL:
+    ; Mostrar menú de opciones
+    MOV AH, 09h
+    LEA DX, menu
+    INT 21h
+    
+    ; Leer opción del usuario
+    MOV AH, 01h
+    INT 21h
+    
+    ; Comparar con las opciones disponibles - usando saltos largos
+    CMP AL, '1'
+    JNE @NOT1
+    JMP OPCION_AND
+@NOT1:
+    CMP AL, '2'
+    JNE @NOT2
+    JMP OPCION_OR
+@NOT2:
+    CMP AL, '3'
+    JNE @NOT3
+    JMP OPCION_NOT
+@NOT3:
+    CMP AL, '4'
+    JNE @NOT4
+    JMP OPCION_XOR
+@NOT4:
+    CMP AL, '5'
+    JNE @NOT5
+    JMP OPCION_COMPARACIONES
+@NOT5:
+    CMP AL, '6'
+    JNE @NOT6
+    JMP OPCION_CONVERSIONES
+@NOT6:
+    CMP AL, '0'
+    JNE @NOT0
+    JMP SALIR
+@NOT0:
+    
+    ; Si llegamos aquí, la opción no es válida, volver al menú
+    JMP MENU_PRINCIPAL
+
+    OPCION_AND:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_BOOLEANOS
+    
+    ; Realizar la operación AND
+    MOV AL, [bool_valor1]
+    AND AL, [bool_valor2]
+    MOV [resultado_bool], AL
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_BOOL
+    JMP MENU_PRINCIPAL
+    
+OPCION_OR:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_BOOLEANOS
+    
+    ; Realizar la operación OR
+    MOV AL, [bool_valor1]
+    OR AL, [bool_valor2]
+    MOV [resultado_bool], AL
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_BOOL
+    JMP MENU_PRINCIPAL
+
+OPCION_NOT:
+    CALL NUEVA_LINEA
+    
+    ; Leer un solo valor booleano
+    MOV AH, 09h
+    LEA DX, prompt_bool1
+    INT 21h
+    
+    CALL LEER_BOOLEANO
+    MOV [bool_valor1], AL
+    
+    ; Realizar la operación NOT
+    MOV AL, [bool_valor1]
+    XOR AL, 1       ; Invertir el bit menos significativo (0->1, 1->0)
+    MOV [resultado_bool], AL
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_BOOL
+    JMP MENU_PRINCIPAL
+
+OPCION_XOR:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_BOOLEANOS
+    
+    ; Realizar la operación XOR
+    MOV AL, [bool_valor1]
+    XOR AL, [bool_valor2]
+    MOV [resultado_bool], AL
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_BOOL
+    JMP MENU_PRINCIPAL
+
+    OPCION_COMPARACIONES:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_BOOLEANOS
+    
+    ; Comparar IGUAL A (is)
+    MOV AH, 09h
+    LEA DX, msg_igual
+    INT 21h
+    
+    MOV AL, [bool_valor1]
+    CMP AL, [bool_valor2]
+    MOV AH, 09h
+    JE @COMP_IGUAL_TRUE
+    LEA DX, valor_false
+    JMP @SHOW_IGUAL
+@COMP_IGUAL_TRUE:
+    LEA DX, valor_true
+@SHOW_IGUAL:
+    INT 21h
+    
+    ; Comparar DISTINTO DE (isNot)
+    MOV AH, 09h
+    LEA DX, msg_distinto
+    INT 21h
+    
+    MOV AL, [bool_valor1]
+    CMP AL, [bool_valor2]
+    MOV AH, 09h
+    JNE @COMP_NOEQ_TRUE
+    LEA DX, valor_false
+    JMP @SHOW_NOEQ
+@COMP_NOEQ_TRUE:
+    LEA DX, valor_true
+@SHOW_NOEQ:
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    JMP MENU_PRINCIPAL
+
+OPCION_CONVERSIONES:
+    CALL NUEVA_LINEA
+    
+    ; Leer un valor booleano
+    MOV AH, 09h
+    LEA DX, prompt_bool1
+    INT 21h
+    
+    CALL LEER_BOOLEANO
+    MOV [bool_valor1], AL
+    
+    ; Realizar todas las conversiones
+    CALL BOOL_A_INT
+    CALL BOOL_A_FLOAT
+    CALL BOOL_A_CHAR
+    CALL BOOL_A_STRING
+    CALL BOOL_A_CREATIVO
+    
+    ; Mostrar el valor original y todas las conversiones
+    CALL MOSTRAR_CONVERSIONES
+    
+    JMP MENU_PRINCIPAL
+
+    ;------------------------------------------------------------
+; Procedimiento: BOOL_A_INT
+; Convierte el valor booleano a entero (0 o 1)
 ;------------------------------------------------------------
-; Procedimiento: BOOL_A_ENTERO
-; Convierte el valor booleano a un entero (0 o 1)
-;------------------------------------------------------------
-BOOL_A_ENTERO PROC
-    ; Para booleano a entero, simplemente copiamos el valor
-    ; 0 (false) -> 0, 1 (true) -> 1
-    XOR AX, AX                ; Limpiamos AX
-    MOV AL, [booleano]        ; Cargamos el valor booleano en AL
-    MOV [entero], AX          ; Guardamos en la variable entero
+BOOL_A_INT PROC
+    ; Para booleano a entero, copiamos el valor tal cual
+    XOR AX, AX              ; Limpiamos AX
+    MOV AL, [bool_valor1]   ; Cargamos el valor booleano
+    MOV [entero_result], AX ; Guardamos en la variable entero
     
     RET
-BOOL_A_ENTERO ENDP
+BOOL_A_INT ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: BOOL_A_FLOTANTE 
-; Convierte el valor booleano a un flotante (0.0 o 1.0)
+; Procedimiento: BOOL_A_FLOAT
+; Convierte el valor booleano a flotante (0.0 o 1.0)
 ;------------------------------------------------------------
-BOOL_A_FLOTANTE PROC
-    ; Para booleano a flotante, usamos 0.0 para false y 1.0 para true
-    XOR AX, AX                ; Limpiamos AX
-    MOV AL, [booleano]        ; Cargamos el valor booleano en AL
-    MOV [float_entero], AX    ; Guardamos en la parte entera del flotante
+BOOL_A_FLOAT PROC
+    ; Para booleano a flotante, usamos 0.0 para Off y 1.0 para On
+    XOR AX, AX
+    MOV AL, [bool_valor1]
+    MOV [float_entero], AX    ; Parte entera
     
-    ; La parte decimal es siempre 0 para 0.0 y 1.0
+    ; La parte decimal es siempre 0
     MOV WORD PTR [float_decimal], 0
-    MOV BYTE PTR [dec_digitos], 1     ; Un dígito decimal (el cero)
+    MOV BYTE PTR [dec_digitos], 1  ; Un dígito decimal (0)
     
     RET
-BOOL_A_FLOTANTE ENDP
+BOOL_A_FLOAT ENDP
+
+;------------------------------------------------------------
+; Procedimiento: BOOL_A_CHAR
+; Convierte el valor booleano a caracter ('0' o '1')
+;------------------------------------------------------------
+BOOL_A_CHAR PROC
+    ; Para booleano a caracter, usamos '0' o '1'
+    MOV AL, [bool_valor1]
+    ADD AL, '0'             ; Convertir a ASCII
+    MOV [char_result], AL
+    
+    RET
+BOOL_A_CHAR ENDP
+
+;------------------------------------------------------------
+; Procedimiento: BOOL_A_STRING
+; Convierte el valor booleano a string ("On" o "Off")
+;------------------------------------------------------------
+BOOL_A_STRING PROC
+    ; Para booleano a string, usamos "On" o "Off"
+    ; En este procedimiento, en lugar de generar el string,
+    ; sólo establecemos un puntero a la cadena apropiada
+    
+    CMP BYTE PTR [bool_valor1], 0
+    JE BOOL_STRING_OFF
+    
+    ; Si el valor es 1 (On)
+    MOV SI, OFFSET str_on
+    JMP COPY_BOOL_STRING
+    
+BOOL_STRING_OFF:
+    ; Si el valor es 0 (Off)
+    MOV SI, OFFSET str_off
+    
+COPY_BOOL_STRING:
+    ; Copiar el string al buffer (sin incluir el $)
+    MOV DI, OFFSET string_buffer
+    
+COPY_LOOP:
+    MOV AL, [SI]
+    MOV [DI], AL
+    
+    CMP AL, '$'
+    JE END_COPY
+    
+    INC SI
+    INC DI
+    JMP COPY_LOOP
+    
+END_COPY:
+    RET
+BOOL_A_STRING ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: BOOL_A_CREATIVO
-; Convierte el valor booleano a un valor de probabilidad (0.0 o 1.0)
+; Convierte el valor booleano a creativo (0.0 o 1.0)
 ;------------------------------------------------------------
 BOOL_A_CREATIVO PROC
-    ; Para la conversión a nuestro tipo creativo (probabilidad)
-    ; usamos el mismo valor que el booleano (0 o 1)
-    MOV AL, [booleano]
+    ; Para creativo, usamos directamente el valor booleano
+    MOV AL, [bool_valor1]
     MOV [prob_valor], AL
     
     RET
 BOOL_A_CREATIVO ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: MOSTRAR_RESULTADO
-; Muestra el resultado original y todas las conversiones
+; Procedimiento: LEER_BOOLEANO
+; Lee un valor booleano (0 o 1) desde la entrada estándar
+; Retorna: AL = 0 (Off) o 1 (On)
 ;------------------------------------------------------------
-MOSTRAR_RESULTADO PROC
-    ; Mostramos una nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
+LEER_BOOLEANO PROC
+    ; Leer un carácter
+    MOV AH, 01h
     INT 21h
     
-    ; 1. Mostrar el valor booleano original
+    ; Convertir a valor booleano
+    CMP AL, '1'
+    JE VALOR_ON
+    
+    ; Si no es '1', asumimos 0 (Off)
+    XOR AL, AL   ; AL = 0
+    RET
+    
+VALOR_ON:
+    MOV AL, 1    ; AL = 1
+    RET
+LEER_BOOLEANO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: LEER_DOS_BOOLEANOS
+; Lee dos valores booleanos desde la entrada estándar
+;------------------------------------------------------------
+LEER_DOS_BOOLEANOS PROC
+    ; Leer primer valor
+    MOV AH, 09h
+    LEA DX, prompt_bool1
+    INT 21h
+    
+    CALL LEER_BOOLEANO
+    MOV [bool_valor1], AL
+    
+    ; Leer segundo valor
+    MOV AH, 09h
+    LEA DX, prompt_bool2
+    INT 21h
+    
+    CALL LEER_BOOLEANO
+    MOV [bool_valor2], AL
+    
+    RET
+LEER_DOS_BOOLEANOS ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_RESULTADO_BOOL
+; Muestra el resultado de una operación booleana
+;------------------------------------------------------------
+MOSTRAR_RESULTADO_BOOL PROC
+    CALL NUEVA_LINEA
+    
+    MOV AH, 09h
+    LEA DX, result_msg
+    INT 21h
+    
+    ; Mostrar "TRUE" o "FALSE" según el resultado
+    CMP BYTE PTR [resultado_bool], 0
+    JE MOSTRAR_FALSE
+    
+    LEA DX, valor_true
+    JMP MOSTRAR_BOOL_VALOR
+    
+MOSTRAR_FALSE:
+    LEA DX, valor_false
+    
+MOSTRAR_BOOL_VALOR:
+    MOV AH, 09h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    CALL NUEVA_LINEA
+    
+    RET
+MOSTRAR_RESULTADO_BOOL ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_CONVERSIONES
+; Muestra los resultados de todas las conversiones
+;------------------------------------------------------------
+MOSTRAR_CONVERSIONES PROC
+    ; Mostrar el valor booleano original
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_bool
     INT 21h
     
-    ; Decidir si mostrar "TRUE" o "FALSE"
-    CMP [booleano], 0
-    JE MOSTRAR_BOOL_FALSE
+    ; Mostrar "TRUE" o "FALSE"
+    CMP BYTE PTR [bool_valor1], 0
+    JE @MOSTRAR_ORIG_FALSE
     
-    MOV AH, 09h
     LEA DX, valor_true
-    INT 21h
-    JMP MOSTRAR_SIGUIENTE
+    JMP @MOSTRAR_ORIG_VALOR
     
-MOSTRAR_BOOL_FALSE:
-    MOV AH, 09h
+@MOSTRAR_ORIG_FALSE:
     LEA DX, valor_false
-    INT 21h
     
-MOSTRAR_SIGUIENTE:
-    ; Nueva línea
+@MOSTRAR_ORIG_VALOR:
     MOV AH, 09h
-    LEA DX, nueva_lin
     INT 21h
     
-    ; 2. Mostrar conversión a entero
+    ; Mostrar conversión a entero
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_int
     INT 21h
     
-    MOV AX, [entero]
-    CALL MOSTRAR_ENTERO
+    MOV AX, [entero_result]
+    CALL MOSTRAR_NUMERO
     
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 3. Mostrar conversión a flotante
+    ; Mostrar conversión a flotante
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_float
     INT 21h
     
     CALL MOSTRAR_FLOTANTE
     
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 4. Mostrar conversión a carácter
+    ; Mostrar conversión a carácter
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_char
     INT 21h
     
-    ; Para booleano a carácter usamos '0' o '1'
-    MOV DL, '0'            ; Carácter base '0'
-    ADD DL, [booleano]     ; Sumamos 0 o 1 para obtener '0' o '1'
-    MOV AH, 02h            ; Función 2: mostrar carácter
+    MOV DL, [char_result]
+    MOV AH, 02h
     INT 21h
     
-    ; Nueva línea
+    ; Mostrar conversión a string
+    CALL NUEVA_LINEA
     MOV AH, 09h
-    LEA DX, nueva_lin
+    LEA DX, prompt_string
     INT 21h
     
-    ; 5. Mostrar conversión a string
-    MOV AH, 09h
-    LEA DX, prompt_str
+    LEA DX, string_buffer
     INT 21h
     
-    ; Para booleano a string usamos "false" o "true"
-    CMP [booleano], 0
-    JE MOSTRAR_STR_FALSE
-    
-    MOV AH, 09h
-    LEA DX, valor_true
-    INT 21h
-    JMP MOSTRAR_CREATIVO
-    
-MOSTRAR_STR_FALSE:
-    MOV AH, 09h
-    LEA DX, valor_false
-    INT 21h
-    
-MOSTRAR_CREATIVO:
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 6. Mostrar conversión a creativo (probabilidad)
+    ; Mostrar conversión a creativo
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_creativo
     INT 21h
     
-    ; Para el tipo creativo de probabilidad mostramos "0.0" o "1.0"
-    MOV DL, [prob_valor]
-    ADD DL, '0'         ; Convertir a carácter
-    MOV AH, 02h         ; Función 2: mostrar carácter
+    ; Mostrar valor creativo como "0.X"
+    MOV DL, '0'
+    MOV AH, 02h
     INT 21h
     
-    ; Mostrar punto decimal
     MOV AH, 09h
     LEA DX, punto
     INT 21h
     
-    ; Mostrar el decimal (siempre es 0)
-    MOV DL, '0'
+    MOV DL, [prob_valor]
+    ADD DL, '0'
     MOV AH, 02h
     INT 21h
     
+    CALL NUEVA_LINEA
+    
     RET
-MOSTRAR_RESULTADO ENDP
+MOSTRAR_CONVERSIONES ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: MOSTRAR_ENTERO
+; Procedimiento: MOSTRAR_NUMERO
 ; Muestra un número entero en pantalla
 ; Entrada: AX = número a mostrar
 ;------------------------------------------------------------
-MOSTRAR_ENTERO PROC
-    ; Guardamos los registros que vamos a modificar
-    PUSH AX
+MOSTRAR_NUMERO PROC
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Verificamos si el número es cero
+    ; Caso especial: si el número es cero
     CMP AX, 0
-    JNE ENTERO_NO_CERO
+    JNE @ENTERO_NO_CERO
     
-    ; Si es cero, mostrar '0' y terminar
     MOV DL, '0'
     MOV AH, 02h
     INT 21h
-    JMP FIN_MOSTRAR_ENTERO
+    JMP @FIN_MOSTRAR_NUMERO
     
-ENTERO_NO_CERO:
-    ; Verificamos si el número es negativo
-    CMP AX, 0
-    JGE ENTERO_POSITIVO
+@ENTERO_NO_CERO:
+    ; Verificar si es negativo
+    TEST AX, 8000h
+    JZ @ENTERO_POSITIVO
     
-    ; Si es negativo, mostrar '-' y negar el número
     PUSH AX
     MOV DL, '-'
     MOV AH, 02h
@@ -287,92 +534,58 @@ ENTERO_NO_CERO:
     POP AX
     NEG AX
     
-ENTERO_POSITIVO:
-    ; Convertir el número a dígitos usando división por 10
-    MOV BX, 10          ; Divisor = 10
-    XOR CX, CX          ; Contador de dígitos = 0
+@ENTERO_POSITIVO:
+    ; Convertir a dígitos y mostrar
+    MOV BX, 10
+    XOR CX, CX
     
-DIVISION_LOOP:
-    XOR DX, DX          ; Limpiar DX para división
-    DIV BX              ; AX = AX / 10, DX = resto (dígito)
+@DIV_LOOP:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
     
-    PUSH DX             ; Guardar dígito en la pila
-    INC CX              ; Incrementar contador de dígitos
+    CMP AX, 0
+    JNE @DIV_LOOP
     
-    CMP AX, 0           ; ¿Terminamos?
-    JNE DIVISION_LOOP   ; Si no, continuar con la división
+@MOSTRAR_DIGITOS:
+    POP DX
+    ADD DL, '0'
+    MOV AH, 02h
+    INT 21h
+    LOOP @MOSTRAR_DIGITOS
     
-    ; Mostrar los dígitos en orden inverso (de la pila)
-MOSTRAR_DIGITOS:
-    POP DX              ; Obtener dígito de la pila
-    ADD DL, '0'         ; Convertir a carácter ASCII
-    MOV AH, 02h         ; Función 2: mostrar carácter
-    INT 21h             ; Mostrar el dígito
-    LOOP MOSTRAR_DIGITOS ; Repetir para cada dígito
-    
-FIN_MOSTRAR_ENTERO:
-    ; Restaurar registros
+@FIN_MOSTRAR_NUMERO:
     POP DX
     POP CX
     POP BX
-    POP AX
     RET
-MOSTRAR_ENTERO ENDP
+MOSTRAR_NUMERO ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: MOSTRAR_FLOTANTE
-; Muestra un número flotante en pantalla
+; Muestra un número flotante
 ;------------------------------------------------------------
 MOSTRAR_FLOTANTE PROC
-    ; Guardamos los registros que vamos a modificar
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Mostrar la parte entera
+    ; Mostrar parte entera
     MOV AX, [float_entero]
-    CALL MOSTRAR_ENTERO
+    CALL MOSTRAR_NUMERO
     
-    ; Mostrar el punto decimal
+    ; Mostrar punto decimal
     MOV AH, 09h
     LEA DX, punto
     INT 21h
     
-    ; Verificar si hay dígitos decimales
-    CMP BYTE PTR [dec_digitos], 0
-    JE FLOTANTE_SIN_DECIMALES
-    
-    ; Mostrar la parte decimal
-    MOV AX, [float_decimal]
-    
-    ; Si la parte decimal es 0, mostrar un solo 0
-    CMP AX, 0
-    JNE DECIMALES_NO_CERO
-    
-    MOV DL, '0'
-    MOV AH, 02h
-    INT 21h
-    JMP FIN_MOSTRAR_FLOTANTE
-    
-DECIMALES_NO_CERO:
-    ; Convertir la parte decimal a dígitos
-    ; [Aquí iría la lógica para mostrar decimales distintos de cero]
-    ; Para nuestro caso de booleano, siempre es 0.0 o 1.0, así que mostramos un cero
+    ; Mostrar parte decimal (siempre 0 en este caso)
     MOV DL, '0'
     MOV AH, 02h
     INT 21h
     
-    JMP FIN_MOSTRAR_FLOTANTE
-    
-FLOTANTE_SIN_DECIMALES:
-    ; Si no hay decimales, mostrar un 0
-    MOV DL, '0'
-    MOV AH, 02h
-    INT 21h
-    
-FIN_MOSTRAR_FLOTANTE:
-    ; Restaurar registros
     POP DX
     POP CX
     POP BX
@@ -380,5 +593,27 @@ FIN_MOSTRAR_FLOTANTE:
     RET
 MOSTRAR_FLOTANTE ENDP
 
+;------------------------------------------------------------
+; Procedimiento: NUEVA_LINEA
+; Muestra un salto de línea
+;------------------------------------------------------------
+NUEVA_LINEA PROC
+    PUSH AX
+    PUSH DX
+    
+    MOV AH, 09h
+    LEA DX, nueva_lin
+    INT 21h
+    
+    POP DX
+    POP AX
+    RET
+NUEVA_LINEA ENDP
+
+SALIR:
+    ; Terminamos el programa y regresamos al sistema operativo
+    MOV AX, 4C00h      ; Función 4Ch de DOS: terminar programa (con código de salida 0)
+    INT 21h            ; Llamamos a la interrupción 21h
+    
 CODIGO ENDS
 END INICIO              ; Indicamos el punto de entrada del programa
