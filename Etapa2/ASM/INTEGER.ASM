@@ -267,7 +267,7 @@ OPCION_DECREMENTO:
     CALL MOSTRAR_RESULTADO
     JMP MENU_PRINCIPAL
 
-    OPCION_COMPARACIONES:
+OPCION_COMPARACIONES:
     CALL NUEVA_LINEA
     CALL LEER_DOS_NUMEROS
     
@@ -278,17 +278,15 @@ OPCION_DECREMENTO:
     
     MOV AX, [num1]
     CMP AX, [num2]
-    JL COMP_MENOR_TRUE
-    
+    MOV AH, 09h
+    JL @COMP_MENOR_TRUE
     LEA DX, valor_false
-    INT 21h
-    JMP COMP_MAYOR
-    
-COMP_MENOR_TRUE:
+    JMP @SHOW_MENOR
+@COMP_MENOR_TRUE:
     LEA DX, valor_true
+@SHOW_MENOR:
     INT 21h
     
-COMP_MAYOR:
     ; Comparar MAYOR QUE (>)
     MOV AH, 09h
     LEA DX, msg_mayor
@@ -296,17 +294,15 @@ COMP_MAYOR:
     
     MOV AX, [num1]
     CMP AX, [num2]
-    JG COMP_MAYOR_TRUE
-    
+    MOV AH, 09h
+    JG @COMP_MAYOR_TRUE
     LEA DX, valor_false
-    INT 21h
-    JMP COMP_MENIG
-    
-COMP_MAYOR_TRUE:
+    JMP @SHOW_MAYOR
+@COMP_MAYOR_TRUE:
     LEA DX, valor_true
+@SHOW_MAYOR:
     INT 21h
     
-COMP_MENIG:
     ; Comparar MENOR O IGUAL QUE (<=)
     MOV AH, 09h
     LEA DX, msg_menig
@@ -314,17 +310,15 @@ COMP_MENIG:
     
     MOV AX, [num1]
     CMP AX, [num2]
-    JLE COMP_MENIG_TRUE
-    
+    MOV AH, 09h
+    JLE @COMP_MENIG_TRUE
     LEA DX, valor_false
-    INT 21h
-    JMP COMP_MAYIG
-    
-COMP_MENIG_TRUE:
+    JMP @SHOW_MENIG
+@COMP_MENIG_TRUE:
     LEA DX, valor_true
+@SHOW_MENIG:
     INT 21h
     
-COMP_MAYIG:
     ; Comparar MAYOR O IGUAL QUE (>=)
     MOV AH, 09h
     LEA DX, msg_mayig
@@ -332,17 +326,15 @@ COMP_MAYIG:
     
     MOV AX, [num1]
     CMP AX, [num2]
-    JGE COMP_MAYIG_TRUE
-    
+    MOV AH, 09h
+    JGE @COMP_MAYIG_TRUE
     LEA DX, valor_false
-    INT 21h
-    JMP COMP_IGUAL
-    
-COMP_MAYIG_TRUE:
+    JMP @SHOW_MAYIG
+@COMP_MAYIG_TRUE:
     LEA DX, valor_true
+@SHOW_MAYIG:
     INT 21h
     
-COMP_IGUAL:
     ; Comparar IGUAL A (is)
     MOV AH, 09h
     LEA DX, msg_igual
@@ -350,17 +342,15 @@ COMP_IGUAL:
     
     MOV AX, [num1]
     CMP AX, [num2]
-    JE COMP_IGUAL_TRUE
-    
+    MOV AH, 09h
+    JE @COMP_IGUAL_TRUE
     LEA DX, valor_false
-    INT 21h
-    JMP COMP_NOEQ
-    
-COMP_IGUAL_TRUE:
+    JMP @SHOW_IGUAL
+@COMP_IGUAL_TRUE:
     LEA DX, valor_true
+@SHOW_IGUAL:
     INT 21h
     
-COMP_NOEQ:
     ; Comparar DISTINTO DE (isNot)
     MOV AH, 09h
     LEA DX, msg_nig
@@ -368,15 +358,16 @@ COMP_NOEQ:
     
     MOV AX, [num1]
     CMP AX, [num2]
-    JNE COMP_NOEQ_TRUE
-    
+    MOV AH, 09h
+    JNE @COMP_NOEQ_TRUE
     LEA DX, valor_false
-    INT 21h
-    JMP MENU_PRINCIPAL
-    
-COMP_NOEQ_TRUE:
+    JMP @SHOW_NOEQ
+@COMP_NOEQ_TRUE:
     LEA DX, valor_true
+@SHOW_NOEQ:
     INT 21h
+    
+    CALL NUEVA_LINEA
     JMP MENU_PRINCIPAL
 
     OPCION_CONVERSIONES:
