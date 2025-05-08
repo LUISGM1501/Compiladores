@@ -1,45 +1,76 @@
 ; ********************************************
-; * Programa: CHAR.ASM                      *
-; * Descripcion: Conversiones desde caracter*
+; * Programa: CHAR.ASM  (RUNE)              *
+; * Descripcion: Operaciones sobre caracteres*
 ; * Autores: Luis Urbina, Samir Cabrera     *
-; * Fecha de entrega: 28/04/2025            *
+; * Fecha: 10/05/2025                       *
+; * Version: 1.0                            *
+; * Curso: Compiladores e Interpretes       *
+; * Proyecto: Notch Engine - Etapa 2        *
 ; ********************************************
 
 ; El segmento DATOS contiene todas las variables y constantes que usara el programa
 DATOS SEGMENT
     ; Mensajes de entrada y salida
-    prompt_in    DB 'Ingrese un caracter: $'                  ; Mensaje para solicitar entrada al usuario
-    prompt_char  DB 'El caracter ingresado es: $'             ; Mensaje para mostrar el caracter original
-    prompt_int   DB 'Convertido a entero (ASCII): $'          ; Mensaje para mostrar la conversión a entero
-    prompt_float DB 'Convertido a flotante: $'                ; Mensaje para mostrar la conversión a flotante
-    prompt_bool  DB 'Convertido a booleano: $'                ; Mensaje para mostrar la conversión a booleano
-    prompt_str   DB 'Convertido a string: $'                  ; Mensaje para mostrar la conversión a string
-    prompt_creativo DB 'Convertido a creativo (probabilidad): $' ; Mensaje para conversión a creativo
+    titulo       DB "DEMOSTRACION DE OPERACIONES CON RUNE (CARACTERES)", 0Dh, 0Ah, '$'
+    separador    DB "----------------------------------------", 0Dh, 0Ah, '$'
+    
+    menu         DB "MENU DE OPERACIONES:", 0Dh, 0Ah
+                 DB "1. isEngraved - Verificar si es letra", 0Dh, 0Ah
+                 DB "2. isInscribed - Verificar si es digito", 0Dh, 0Ah
+                 DB "3. etchUp - Convertir a mayuscula", 0Dh, 0Ah
+                 DB "4. etchDown - Convertir a minuscula", 0Dh, 0Ah
+                 DB "5. Comparacion de caracteres", 0Dh, 0Ah
+                 DB "6. Convertir a otros tipos", 0Dh, 0Ah
+                 DB "0. Salir", 0Dh, 0Ah
+                 DB "Seleccione una opcion: $"
+    
+    prompt_char   DB "Ingrese un caracter: $"
+    prompt_chars  DB "Ingrese dos caracteres (sin espacio): $"
+    result_msg    DB "Resultado: $"
+    
+    ; Mensajes para resultados específicos
+    msg_is_letter      DB "El caracter es una letra: $"
+    msg_is_digit       DB "El caracter es un digito: $"
+    msg_uppercase      DB "En mayuscula: $"
+    msg_lowercase      DB "En minuscula: $"
+    
+    ; Mensajes para comparaciones
+    msg_menor    DB 0Dh, 0Ah, "MENOR QUE (<): $"
+    msg_mayor    DB 0Dh, 0Ah, "MAYOR QUE (>): $"
+    msg_menig    DB 0Dh, 0Ah, "MENOR O IGUAL QUE (<=): $"
+    msg_mayig    DB 0Dh, 0Ah, "MAYOR O IGUAL QUE (>=): $"
+    msg_igual    DB 0Dh, 0Ah, "IGUAL A (is): $"
+    msg_nig      DB 0Dh, 0Ah, "DISTINTO DE (isNot): $"
+    
+    ; Mensajes para conversiones
+    prompt_original DB 'El caracter ingresado es: $'
+    prompt_int      DB 'Convertido a entero (ASCII): $'
+    prompt_float    DB 'Convertido a flotante: $'
+    prompt_bool     DB 'Convertido a booleano: $'
+    prompt_string   DB 'Convertido a string: $'
+    prompt_creativo DB 'Convertido a creativo (probabilidad): $'
     
     ; Variables para almacenar valores
-    caracter     DB ?           ; Variable para almacenar el caracter ingresado
-    entero       DW ?           ; Variable para almacenar el valor convertido a entero
-    bool_valor   DB ?           ; Variable para almacenar el valor booleano
+    caracter1       DB ?     ; Primer caracter
+    caracter2       DB ?     ; Segundo caracter
+    resultado_bool  DB ?     ; Resultado booleano
     
-    ; Variables para valor flotante
-    float_entero DW ?           ; Parte entera del flotante
-    float_decimal DW ?          ; Parte decimal del flotante
-    dec_digitos  DB ?           ; Número de dígitos decimales
-    
-    ; Variable para valor string
-    string_buffer DB 2 DUP(?), '$' ; Buffer para la conversión a string (caracter + terminador)
-    
-    ; Variables para valor creativo (probabilidad)
-    prob_valor   DB ?           ; Valor de la probabilidad (0.0 o 1.0)
+    ; Variables para conversiones
+    entero_result   DW ?     ; Conversión a entero
+    float_entero    DW ?     ; Parte entera del flotante
+    float_decimal   DW ?     ; Parte decimal del flotante
+    dec_digitos     DB ?     ; Dígitos decimales
+    bool_result     DB ?     ; Conversión a booleano
+    string_buffer   DB 2 DUP(?), '$' ; Buffer para conversión a string
+    prob_valor      DB ?     ; Valor para tipo creativo
     
     ; Valores para mostrar booleanos
-    valor_true   DB 'TRUE$'      ; Cadena de texto para mostrar cuando el valor es verdadero
-    valor_false  DB 'FALSE$'     ; Cadena de texto para mostrar cuando el valor es falso
+    valor_true    DB 'TRUE$'
+    valor_false   DB 'FALSE$'
     
     ; Auxiliares
-    nueva_lin    DB 0Dh, 0Ah, '$' ; Códigos para crear una nueva línea en pantalla
-    punto        DB '.$'          ; Punto decimal para mostrar flotantes
-    const_diez   DW 10            ; Constante 10 para cálculos
+    nueva_lin    DB 0Dh, 0Ah, '$'
+    punto        DB '.$'
 DATOS ENDS
 
 ; El segmento CODIGO contiene las instrucciones que ejecutara el programa
@@ -47,225 +78,664 @@ CODIGO SEGMENT
     ; Indicamos al ensamblador donde encontrar nuestros datos y codigo
     ASSUME CS:CODIGO, DS:DATOS
 INICIO:
-    ; Inicializacion: Preparamos el acceso al segmento de datos
+    ; Inicialización: Preparamos el acceso al segmento de datos
     MOV AX, DATOS
     MOV DS, AX
     
-    ; Mostramos el mensaje pidiendo al usuario que ingrese un caracter
-    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena terminada en $
-    LEA DX, prompt_in ; Cargamos la direccion del mensaje en DX
-    INT 21h           ; Llamamos a la interrupcion 21h (servicios de DOS)
+    ; Mostrar título
+    MOV AH, 09h
+    LEA DX, titulo
+    INT 21h
     
-    ; Leemos un caracter del teclado
-    MOV AH, 01h       ; Funcion 1 de DOS: leer un caracter (con eco en pantalla)
-    INT 21h           ; Llamamos a la interrupcion 21h - El caracter leido queda en AL
-    MOV [caracter], AL ; Guardamos el caracter en nuestra variable
+    LEA DX, separador
+    INT 21h
+
+MENU_PRINCIPAL:
+    ; Mostrar menú de opciones
+    MOV AH, 09h
+    LEA DX, menu
+    INT 21h
     
-    ; Realizar todas las conversiones desde el caracter
-    CALL CHAR_A_ENTERO    ; Convertir a entero (código ASCII)
-    CALL CHAR_A_FLOTANTE  ; Convertir a flotante
-    CALL CHAR_A_BOOLEANO  ; Convertir a booleano
-    CALL CHAR_A_STRING    ; Convertir a string
-    CALL CHAR_A_CREATIVO  ; Convertir a creativo (probabilidad)
+    ; Leer opción del usuario
+    MOV AH, 01h
+    INT 21h
     
-    ; Mostrar todas las conversiones
-    CALL MOSTRAR_RESULTADOS
+    ; Comparar con las opciones disponibles - usando saltos largos
+    CMP AL, '1'
+    JNE @MENU_NOT1
+    JMP OPCION_IS_LETTER
+@MENU_NOT1:
+    CMP AL, '2'
+    JNE @MENU_NOT2
+    JMP OPCION_IS_DIGIT
+@MENU_NOT2:
+    CMP AL, '3'
+    JNE @MENU_NOT3
+    JMP OPCION_TO_UPPERCASE
+@MENU_NOT3:
+    CMP AL, '4'
+    JNE @MENU_NOT4
+    JMP OPCION_TO_LOWERCASE
+@MENU_NOT4:
+    CMP AL, '5'
+    JNE @MENU_NOT5
+    JMP OPCION_COMPARACIONES
+@MENU_NOT5:
+    CMP AL, '6'
+    JNE @MENU_NOT6
+    JMP OPCION_CONVERSIONES
+@MENU_NOT6:
+    CMP AL, '0'
+    JNE @MENU_NOT0
+    JMP SALIR
+@MENU_NOT0:
     
-    ; Terminamos el programa y regresamos al sistema operativo
-    MOV AX, 4C00h      ; Funcion 4Ch de DOS: terminar programa (con codigo de salida 0)
-    INT 21h            ; Llamamos a la interrupcion 21h
+    ; Si llegamos aquí, la opción no es válida, volver al menú
+    JMP MENU_PRINCIPAL
+
+    OPCION_IS_LETTER:
+    CALL NUEVA_LINEA
+    CALL LEER_CARACTER
+    
+    ; Verificar si es letra (isEngraved)
+    MOV AL, [caracter1]
+    CALL ES_LETRA
+    MOV [resultado_bool], AL
+    
+    ; Mostrar resultado
+    MOV AH, 09h
+    LEA DX, msg_is_letter
+    INT 21h
+    
+    CALL MOSTRAR_RESULTADO_BOOL
+    JMP MENU_PRINCIPAL
+    
+OPCION_IS_DIGIT:
+    CALL NUEVA_LINEA
+    CALL LEER_CARACTER
+    
+    ; Verificar si es dígito (isInscribed)
+    MOV AL, [caracter1]
+    CALL ES_DIGITO
+    MOV [resultado_bool], AL
+    
+    ; Mostrar resultado
+    MOV AH, 09h
+    LEA DX, msg_is_digit
+    INT 21h
+    
+    CALL MOSTRAR_RESULTADO_BOOL
+    JMP MENU_PRINCIPAL
+
+OPCION_TO_UPPERCASE:
+    CALL NUEVA_LINEA
+    CALL LEER_CARACTER
+    
+    ; Convertir a mayúscula (etchUp)
+    MOV AL, [caracter1]
+    CALL A_MAYUSCULA
+    MOV [caracter2], AL
+    
+    ; Mostrar resultado
+    MOV AH, 09h
+    LEA DX, msg_uppercase
+    INT 21h
+    
+    MOV DL, [caracter2]
+    MOV AH, 02h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    CALL NUEVA_LINEA
+    JMP MENU_PRINCIPAL
+
+OPCION_TO_LOWERCASE:
+    CALL NUEVA_LINEA
+    CALL LEER_CARACTER
+    
+    ; Convertir a minúscula (etchDown)
+    MOV AL, [caracter1]
+    CALL A_MINUSCULA
+    MOV [caracter2], AL
+    
+    ; Mostrar resultado
+    MOV AH, 09h
+    LEA DX, msg_lowercase
+    INT 21h
+    
+    MOV DL, [caracter2]
+    MOV AH, 02h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    CALL NUEVA_LINEA
+    JMP MENU_PRINCIPAL
+
+    OPCION_COMPARACIONES:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_CARACTERES
+    
+    ; Comparar MENOR QUE (<)
+    MOV AH, 09h
+    LEA DX, msg_menor
+    INT 21h
+    
+    MOV AL, [caracter1]
+    CMP AL, [caracter2]
+    MOV AH, 09h
+    JL @CHAR_COMP_MENOR_TRUE
+    LEA DX, valor_false
+    JMP @CHAR_SHOW_MENOR
+@CHAR_COMP_MENOR_TRUE:
+    LEA DX, valor_true
+@CHAR_SHOW_MENOR:
+    INT 21h
+    
+    ; Comparar MAYOR QUE (>)
+    MOV AH, 09h
+    LEA DX, msg_mayor
+    INT 21h
+    
+    MOV AL, [caracter1]
+    CMP AL, [caracter2]
+    MOV AH, 09h
+    JG @CHAR_COMP_MAYOR_TRUE
+    LEA DX, valor_false
+    JMP @CHAR_SHOW_MAYOR
+@CHAR_COMP_MAYOR_TRUE:
+    LEA DX, valor_true
+@CHAR_SHOW_MAYOR:
+    INT 21h
+    
+    ; Comparar MENOR O IGUAL QUE (<=)
+    MOV AH, 09h
+    LEA DX, msg_menig
+    INT 21h
+    
+    MOV AL, [caracter1]
+    CMP AL, [caracter2]
+    MOV AH, 09h
+    JLE @CHAR_COMP_MENIG_TRUE
+    LEA DX, valor_false
+    JMP @CHAR_SHOW_MENIG
+@CHAR_COMP_MENIG_TRUE:
+    LEA DX, valor_true
+@CHAR_SHOW_MENIG:
+    INT 21h
+    
+    ; Comparar MAYOR O IGUAL QUE (>=)
+    MOV AH, 09h
+    LEA DX, msg_mayig
+    INT 21h
+    
+    MOV AL, [caracter1]
+    CMP AL, [caracter2]
+    MOV AH, 09h
+    JGE @CHAR_COMP_MAYIG_TRUE
+    LEA DX, valor_false
+    JMP @CHAR_SHOW_MAYIG
+@CHAR_COMP_MAYIG_TRUE:
+    LEA DX, valor_true
+@CHAR_SHOW_MAYIG:
+    INT 21h
+    
+    ; Comparar IGUAL A (is)
+    MOV AH, 09h
+    LEA DX, msg_igual
+    INT 21h
+    
+    MOV AL, [caracter1]
+    CMP AL, [caracter2]
+    MOV AH, 09h
+    JE @CHAR_COMP_IGUAL_TRUE
+    LEA DX, valor_false
+    JMP @CHAR_SHOW_IGUAL
+@CHAR_COMP_IGUAL_TRUE:
+    LEA DX, valor_true
+@CHAR_SHOW_IGUAL:
+    INT 21h
+    
+    ; Comparar DISTINTO DE (isNot)
+    MOV AH, 09h
+    LEA DX, msg_nig
+    INT 21h
+    
+    MOV AL, [caracter1]
+    CMP AL, [caracter2]
+    MOV AH, 09h
+    JNE @CHAR_COMP_NOEQ_TRUE
+    LEA DX, valor_false
+    JMP @CHAR_SHOW_NOEQ
+@CHAR_COMP_NOEQ_TRUE:
+    LEA DX, valor_true
+@CHAR_SHOW_NOEQ:
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    JMP MENU_PRINCIPAL
+
+OPCION_CONVERSIONES:
+    CALL NUEVA_LINEA
+    CALL LEER_CARACTER
+    
+    ; Realizar todas las conversiones
+    CALL CHAR_A_INT
+    CALL CHAR_A_FLOAT
+    CALL CHAR_A_BOOL
+    CALL CHAR_A_STRING
+    CALL CHAR_A_CREATIVO
+    
+    ; Mostrar el valor original y todas las conversiones
+    CALL MOSTRAR_CONVERSIONES
+    
+    JMP MENU_PRINCIPAL
+
+    ;------------------------------------------------------------
+; Procedimiento: ES_LETRA
+; Verifica si un carácter es una letra (isEngraved)
+; Entrada: AL = carácter a verificar
+; Salida: AL = 1 si es letra, 0 si no
+;------------------------------------------------------------
+ES_LETRA PROC
+    ; Verificar si es letra mayúscula (A-Z)
+    CMP AL, 'A'
+    JL @LETRA_NO_ES_MAYUSCULA
+    CMP AL, 'Z'
+    JLE @LETRA_ES_LETRA
+    
+@LETRA_NO_ES_MAYUSCULA:
+    ; Verificar si es letra minúscula (a-z)
+    CMP AL, 'a'
+    JL @LETRA_NO_ES_LETRA
+    CMP AL, 'z'
+    JLE @LETRA_ES_LETRA
+    
+@LETRA_NO_ES_LETRA:
+    ; No es letra
+    XOR AL, AL    ; AL = 0 (falso)
+    RET
+    
+@LETRA_ES_LETRA:
+    ; Es letra
+    MOV AL, 1     ; AL = 1 (verdadero)
+    RET
+ES_LETRA ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: CHAR_A_ENTERO
-; Convierte el caracter a su valor ASCII (entero)
+; Procedimiento: ES_DIGITO
+; Verifica si un carácter es un dígito (isInscribed)
+; Entrada: AL = carácter a verificar
+; Salida: AL = 1 si es dígito, 0 si no
 ;------------------------------------------------------------
-CHAR_A_ENTERO PROC
-    ; Para caracter a entero, simplemente copiamos el valor ASCII
-    XOR AX, AX                ; Limpiamos AX
-    MOV AL, [caracter]        ; Cargamos el caracter en AL
-    MOV [entero], AX          ; Guardamos el código ASCII como entero
+ES_DIGITO PROC
+    ; Verificar si es dígito (0-9)
+    CMP AL, '0'
+    JL @DIGITO_NO_ES_DIGITO
+    CMP AL, '9'
+    JG @DIGITO_NO_ES_DIGITO
+    
+    ; Es dígito
+    MOV AL, 1     ; AL = 1 (verdadero)
+    RET
+    
+@DIGITO_NO_ES_DIGITO:
+    ; No es dígito
+    XOR AL, AL    ; AL = 0 (falso)
+    RET
+ES_DIGITO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: A_MAYUSCULA
+; Convierte un carácter a mayúscula (etchUp)
+; Entrada: AL = carácter a convertir
+; Salida: AL = carácter convertido
+;------------------------------------------------------------
+A_MAYUSCULA PROC
+    ; Verificar si es letra minúscula
+    CMP AL, 'a'
+    JL @MAYUS_NO_CONVERTIR
+    CMP AL, 'z'
+    JG @MAYUS_NO_CONVERTIR
+    
+    ; Convertir a mayúscula (restar 32)
+    SUB AL, 32
+    RET
+    
+@MAYUS_NO_CONVERTIR:
+    ; No es letra minúscula, devolver sin cambios
+    RET
+A_MAYUSCULA ENDP
+
+;------------------------------------------------------------
+; Procedimiento: A_MINUSCULA
+; Convierte un carácter a minúscula (etchDown)
+; Entrada: AL = carácter a convertir
+; Salida: AL = carácter convertido
+;------------------------------------------------------------
+A_MINUSCULA PROC
+    ; Verificar si es letra mayúscula
+    CMP AL, 'A'
+    JL @MINUS_NO_CONVERTIR
+    CMP AL, 'Z'
+    JG @MINUS_NO_CONVERTIR
+    
+    ; Convertir a minúscula (sumar 32)
+    ADD AL, 32
+    RET
+    
+@MINUS_NO_CONVERTIR:
+    ; No es letra mayúscula, devolver sin cambios
+    RET
+A_MINUSCULA ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CHAR_A_INT
+; Convierte un carácter a entero (código ASCII)
+;------------------------------------------------------------
+CHAR_A_INT PROC
+    ; Para carácter a entero, usamos el código ASCII
+    XOR AH, AH
+    MOV AL, [caracter1]
+    MOV [entero_result], AX
     
     RET
-CHAR_A_ENTERO ENDP
+CHAR_A_INT ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: CHAR_A_FLOTANTE
-; Convierte el caracter a flotante (valor ASCII.00)
+; Procedimiento: CHAR_A_FLOAT
+; Convierte un carácter a flotante (código ASCII.00)
 ;------------------------------------------------------------
-CHAR_A_FLOTANTE PROC
-    ; Para caracter a flotante, usamos el valor ASCII como parte entera
-    ; y la parte decimal es siempre 0
-    XOR AX, AX                ; Limpiamos AX
-    MOV AL, [caracter]        ; Cargamos el caracter en AL
-    MOV [float_entero], AX    ; Guardamos en la parte entera del flotante
+CHAR_A_FLOAT PROC
+    ; Para carácter a flotante, usamos el código ASCII como parte entera
+    XOR AH, AH
+    MOV AL, [caracter1]
+    MOV [float_entero], AX
     
-    ; La parte decimal es siempre 0 para esta conversión
+    ; La parte decimal es 0
     MOV WORD PTR [float_decimal], 0
-    MOV BYTE PTR [dec_digitos], 2     ; Dos dígitos decimales (00)
+    MOV BYTE PTR [dec_digitos], 2    ; Dos dígitos decimales (00)
     
     RET
-CHAR_A_FLOTANTE ENDP
+CHAR_A_FLOAT ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: CHAR_A_BOOLEANO
-; Convierte el caracter a booleano (FALSE si ASCII=0, TRUE en caso contrario)
+; Procedimiento: CHAR_A_BOOL
+; Convierte un carácter a booleano (false si nulo, true en caso contrario)
 ;------------------------------------------------------------
-CHAR_A_BOOLEANO PROC
-    ; Para caracter a booleano, es FALSE solo si el código ASCII es 0
-    CMP BYTE PTR [caracter], 0
-    JE ES_FALSO
+CHAR_A_BOOL PROC
+    ; Para carácter a booleano, es FALSE solo si el código ASCII es 0
+    CMP BYTE PTR [caracter1], 0
+    JE @CHAR_BOOL_FALSE
     
-    ; Si llegamos aquí, el caracter tiene código ASCII distinto de 0
-    MOV [bool_valor], 1       ; TRUE
-    JMP BOOL_FIN
+    ; Si no es carácter nulo, es TRUE
+    MOV [bool_result], 1
+    JMP @CHAR_BOOL_FIN
     
-ES_FALSO:
-    MOV [bool_valor], 0       ; FALSE
+@CHAR_BOOL_FALSE:
+    MOV [bool_result], 0
     
-BOOL_FIN:
+@CHAR_BOOL_FIN:
     RET
-CHAR_A_BOOLEANO ENDP
+CHAR_A_BOOL ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: CHAR_A_STRING
-; Convierte el caracter a un string de longitud 1
+; Convierte un carácter a string (caracter + terminador)
 ;------------------------------------------------------------
 CHAR_A_STRING PROC
-    ; Para caracter a string, simplemente copiamos el caracter
-    ; y agregamos el terminador
-    MOV AL, [caracter]
-    MOV [string_buffer], AL   ; Primer y único caracter del string
-    MOV BYTE PTR [string_buffer+1], '$' ; Terminador de string
+    ; Para carácter a string, copiamos el carácter al buffer
+    MOV AL, [caracter1]
+    MOV [string_buffer], AL
+    MOV BYTE PTR [string_buffer+1], '$'    ; Terminador
     
     RET
 CHAR_A_STRING ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: CHAR_A_CREATIVO
-; Convierte el caracter a valor de probabilidad (0.0 o 1.0)
+; Convierte un carácter a creativo (0 si nulo, 1 en caso contrario)
 ;------------------------------------------------------------
 CHAR_A_CREATIVO PROC
-    ; Para caracter a creativo (probabilidad):
-    ; Si ASCII=0, entonces 0, en caso contrario 1
-    CMP BYTE PTR [caracter], 0
-    JE PROB_CERO
+    ; Para carácter a creativo (probabilidad)
+    CMP BYTE PTR [caracter1], 0
+    JE @CHAR_PROB_CERO
     
-    ; Si llegamos aquí, el valor es distinto de 0
-    MOV [prob_valor], 1      ; Probabilidad = 1.0
-    JMP PROB_FIN
+    ; Si no es carácter nulo, es 1
+    MOV [prob_valor], 1
+    JMP @CHAR_CREATIVO_FIN
     
-PROB_CERO:
-    MOV [prob_valor], 0      ; Probabilidad = 0.0
+@CHAR_PROB_CERO:
+    MOV [prob_valor], 0
     
-PROB_FIN:
+@CHAR_CREATIVO_FIN:
     RET
 CHAR_A_CREATIVO ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: MOSTRAR_RESULTADOS
-; Muestra el resultado original y todas las conversiones
+; Procedimiento: LEER_CARACTER
+; Lee un carácter desde la entrada estándar
 ;------------------------------------------------------------
-MOSTRAR_RESULTADOS PROC
-    ; Mostramos una nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 1. Mostrar el caracter original
+LEER_CARACTER PROC
+    ; Mostrar mensaje
     MOV AH, 09h
     LEA DX, prompt_char
     INT 21h
     
-    MOV DL, [caracter]      ; Caracter a mostrar
-    MOV AH, 02h             ; Función 2: mostrar caracter
+    ; Leer un carácter
+    MOV AH, 01h
     INT 21h
     
-    ; Nueva línea
+    ; Guardar el carácter
+    MOV [caracter1], AL
+    
+    CALL NUEVA_LINEA
+    
+    RET
+LEER_CARACTER ENDP
+
+;------------------------------------------------------------
+; Procedimiento: LEER_DOS_CARACTERES
+; Lee dos caracteres desde la entrada estándar
+;------------------------------------------------------------
+LEER_DOS_CARACTERES PROC
+    ; Mostrar mensaje
     MOV AH, 09h
-    LEA DX, nueva_lin
+    LEA DX, prompt_chars
     INT 21h
     
-    ; 2. Mostrar conversión a entero (ASCII)
+    ; Leer primer carácter
+    MOV AH, 01h
+    INT 21h
+    MOV [caracter1], AL
+    
+    ; Leer segundo carácter
+    MOV AH, 01h
+    INT 21h
+    MOV [caracter2], AL
+    
+    CALL NUEVA_LINEA
+    
+    RET
+LEER_DOS_CARACTERES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_RESULTADO_BOOL
+; Muestra un resultado booleano como TRUE o FALSE
+;------------------------------------------------------------
+MOSTRAR_RESULTADO_BOOL PROC
+    ; Mostrar "TRUE" o "FALSE" según el resultado
+    CMP BYTE PTR [resultado_bool], 0
+    JE @CHAR_MOSTRAR_RESULT_FALSE
+    
+    LEA DX, valor_true
+    JMP @CHAR_MOSTRAR_RESULT_VALOR
+    
+@CHAR_MOSTRAR_RESULT_FALSE:
+    LEA DX, valor_false
+    
+@CHAR_MOSTRAR_RESULT_VALOR:
+    MOV AH, 09h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    CALL NUEVA_LINEA
+    
+    RET
+MOSTRAR_RESULTADO_BOOL ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_CONVERSIONES
+; Muestra los resultados de todas las conversiones
+;------------------------------------------------------------
+MOSTRAR_CONVERSIONES PROC
+    ; Mostrar el carácter original
+    CALL NUEVA_LINEA
+    MOV AH, 09h
+    LEA DX, prompt_original
+    INT 21h
+    
+    MOV DL, [caracter1]
+    MOV AH, 02h
+    INT 21h
+    
+    ; Mostrar conversión a entero (ASCII)
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_int
     INT 21h
     
-    MOV AX, [entero]
-    CALL MOSTRAR_ENTERO
+    MOV AX, [entero_result]
+    CALL MOSTRAR_NUMERO
     
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 3. Mostrar conversión a flotante
+    ; Mostrar conversión a flotante
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_float
     INT 21h
     
     CALL MOSTRAR_FLOTANTE
     
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 4. Mostrar conversión a booleano
+    ; Mostrar conversión a booleano
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_bool
     INT 21h
     
-    ; Decidir si mostrar "TRUE" o "FALSE"
-    CMP [bool_valor], 0
-    JE MOSTRAR_BOOL_FALSE
+    ; Mostrar "TRUE" o "FALSE"
+    CMP BYTE PTR [bool_result], 0
+    JE @CHAR_MOSTRAR_CONV_FALSE
     
-    MOV AH, 09h
     LEA DX, valor_true
-    INT 21h
-    JMP MOSTRAR_STR
+    JMP @CHAR_MOSTRAR_CONV_VALOR
     
-MOSTRAR_BOOL_FALSE:
-    MOV AH, 09h
+@CHAR_MOSTRAR_CONV_FALSE:
     LEA DX, valor_false
+    
+@CHAR_MOSTRAR_CONV_VALOR:
+    MOV AH, 09h
     INT 21h
     
-MOSTRAR_STR:
-    ; Nueva línea
+    ; Mostrar conversión a string
+    CALL NUEVA_LINEA
     MOV AH, 09h
-    LEA DX, nueva_lin
+    LEA DX, prompt_string
     INT 21h
     
-    ; 5. Mostrar conversión a string
-    MOV AH, 09h
-    LEA DX, prompt_str
-    INT 21h
-    
-    MOV AH, 09h
     LEA DX, string_buffer
     INT 21h
     
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 6. Mostrar conversión a creativo (probabilidad)
+    ; Mostrar conversión a creativo
+    CALL NUEVA_LINEA
     MOV AH, 09h
     LEA DX, prompt_creativo
     INT 21h
     
-    ; Para el tipo creativo de probabilidad mostramos "0.00" o "1.00"
-    MOV DL, [prob_valor]
-    ADD DL, '0'         ; Convertir a carácter
-    MOV AH, 02h         ; Función 2: mostrar carácter
+    ; Mostrar valor creativo como "0.X"
+    MOV DL, '0'
+    MOV AH, 02h
     INT 21h
+    
+    MOV AH, 09h
+    LEA DX, punto
+    INT 21h
+    
+    MOV DL, [prob_valor]
+    ADD DL, '0'
+    MOV AH, 02h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    
+    RET
+MOSTRAR_CONVERSIONES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_NUMERO
+; Muestra un número entero en pantalla
+; Entrada: AX = número a mostrar
+;------------------------------------------------------------
+MOSTRAR_NUMERO PROC
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Caso especial: si el número es cero
+    CMP AX, 0
+    JNE @CHAR_ENTERO_NO_CERO
+    
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h
+    JMP @CHAR_FIN_MOSTRAR_NUMERO
+    
+@CHAR_ENTERO_NO_CERO:
+    ; Convertir a dígitos y mostrar
+    MOV BX, 10
+    XOR CX, CX
+    
+@CHAR_DIV_LOOP:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
+    
+    CMP AX, 0
+    JNE @CHAR_DIV_LOOP
+    
+@CHAR_MOSTRAR_DIGITOS:
+    POP DX
+    ADD DL, '0'
+    MOV AH, 02h
+    INT 21h
+    LOOP @CHAR_MOSTRAR_DIGITOS
+    
+@CHAR_FIN_MOSTRAR_NUMERO:
+    POP DX
+    POP CX
+    POP BX
+    RET
+MOSTRAR_NUMERO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_FLOTANTE
+; Muestra un número flotante
+;------------------------------------------------------------
+MOSTRAR_FLOTANTE PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Mostrar parte entera
+    MOV AX, [float_entero]
+    CALL MOSTRAR_NUMERO
     
     ; Mostrar punto decimal
     MOV AH, 09h
     LEA DX, punto
     INT 21h
     
-    ; Mostrar dos ceros para la parte decimal
+    ; Mostrar parte decimal (siempre 00 en este caso)
     MOV DL, '0'
     MOV AH, 02h
     INT 21h
@@ -274,129 +744,6 @@ MOSTRAR_STR:
     MOV AH, 02h
     INT 21h
     
-    RET
-MOSTRAR_RESULTADOS ENDP
-
-;------------------------------------------------------------
-; Procedimiento: MOSTRAR_ENTERO
-; Muestra un número entero en pantalla
-; Entrada: AX = número a mostrar
-;------------------------------------------------------------
-MOSTRAR_ENTERO PROC
-    ; Guardamos los registros que vamos a modificar
-    PUSH AX
-    PUSH BX
-    PUSH CX
-    PUSH DX
-    
-    ; Verificamos si el número es cero
-    CMP AX, 0
-    JNE ENTERO_NO_CERO
-    
-    ; Si es cero, mostrar '0' y terminar
-    MOV DL, '0'
-    MOV AH, 02h
-    INT 21h
-    JMP FIN_MOSTRAR_ENTERO
-    
-ENTERO_NO_CERO:
-    ; Verificamos si el número es negativo
-    CMP AX, 0
-    JGE ENTERO_POSITIVO
-    
-    ; Si es negativo, mostrar '-' y negar el número
-    PUSH AX
-    MOV DL, '-'
-    MOV AH, 02h
-    INT 21h
-    POP AX
-    NEG AX
-    
-ENTERO_POSITIVO:
-    ; Convertir el número a dígitos usando división por 10
-    MOV BX, 10          ; Divisor = 10
-    XOR CX, CX          ; Contador de dígitos = 0
-    
-DIVISION_LOOP:
-    XOR DX, DX          ; Limpiar DX para división
-    DIV BX              ; AX = AX / 10, DX = resto (dígito)
-    
-    PUSH DX             ; Guardar dígito en la pila
-    INC CX              ; Incrementar contador de dígitos
-    
-    CMP AX, 0           ; ¿Terminamos?
-    JNE DIVISION_LOOP   ; Si no, continuar con la división
-    
-    ; Mostrar los dígitos en orden inverso (de la pila)
-MOSTRAR_DIGITOS:
-    POP DX              ; Obtener dígito de la pila
-    ADD DL, '0'         ; Convertir a carácter ASCII
-    MOV AH, 02h         ; Función 2: mostrar carácter
-    INT 21h             ; Mostrar el dígito
-    LOOP MOSTRAR_DIGITOS ; Repetir para cada dígito
-    
-FIN_MOSTRAR_ENTERO:
-    ; Restaurar registros
-    POP DX
-    POP CX
-    POP BX
-    POP AX
-    RET
-MOSTRAR_ENTERO ENDP
-
-;------------------------------------------------------------
-; Procedimiento: MOSTRAR_FLOTANTE
-; Muestra un número flotante en pantalla
-;------------------------------------------------------------
-MOSTRAR_FLOTANTE PROC
-    ; Guardamos los registros que vamos a modificar
-    PUSH AX
-    PUSH BX
-    PUSH CX
-    PUSH DX
-    
-    ; Mostrar la parte entera
-    MOV AX, [float_entero]
-    CALL MOSTRAR_ENTERO
-    
-    ; Mostrar el punto decimal
-    MOV AH, 09h
-    LEA DX, punto
-    INT 21h
-    
-    ; Verificar si hay dígitos decimales
-    CMP BYTE PTR [dec_digitos], 0
-    JE FLOTANTE_SIN_DECIMALES
-
-    ; Mostrar la parte decimal
-    XOR CH, CH                ; Limpiar la parte alta (CH)
-    MOV CL, [dec_digitos]     ; Cargar el byte en la parte baja (CL)
-
-    ; Si la parte decimal es 0, mostrar todos los dígitos como ceros
-    CMP WORD PTR [float_decimal], 0
-    JNE DECIMALES_NO_CERO
-        
-MOSTRAR_SOLO_CEROS:
-    MOV DL, '0'
-    MOV AH, 02h
-    INT 21h
-    
-    LOOP MOSTRAR_SOLO_CEROS
-    JMP FIN_MOSTRAR_FLOTANTE
-    
-DECIMALES_NO_CERO:
-    ; Si llegamos aquí, tenemos decimales distintos de cero
-    ; (pero para esta conversión siempre son ceros)
-    JMP MOSTRAR_SOLO_CEROS
-    
-FLOTANTE_SIN_DECIMALES:
-    ; Si no hay decimales, mostrar un 0
-    MOV DL, '0'
-    MOV AH, 02h
-    INT 21h
-    
-FIN_MOSTRAR_FLOTANTE:
-    ; Restaurar registros
     POP DX
     POP CX
     POP BX
@@ -404,5 +751,27 @@ FIN_MOSTRAR_FLOTANTE:
     RET
 MOSTRAR_FLOTANTE ENDP
 
+;------------------------------------------------------------
+; Procedimiento: NUEVA_LINEA
+; Muestra un salto de línea
+;------------------------------------------------------------
+NUEVA_LINEA PROC
+    PUSH AX
+    PUSH DX
+    
+    MOV AH, 09h
+    LEA DX, nueva_lin
+    INT 21h
+    
+    POP DX
+    POP AX
+    RET
+NUEVA_LINEA ENDP
+
+SALIR:
+    ; Terminamos el programa y regresamos al sistema operativo
+    MOV AX, 4C00h      ; Función 4Ch de DOS: terminar programa (con código de salida 0)
+    INT 21h            ; Llamamos a la interrupción 21h
+    
 CODIGO ENDS
 END INICIO              ; Indicamos el punto de entrada del programa
