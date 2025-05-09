@@ -1,0 +1,92 @@
+$* 
+  14_Prueba_Lit_Registros.ne
+  Propósito: Verificar el reconocimiento de literales de registros en Notch Engine
+  Probar: Entity
+  Fecha: 28/04/2025
+*$
+
+WorldName PruebaLitRegistros:
+
+Inventory
+
+    $$ Declaración de tipos de entidades
+    Entity Jugador 
+    PolloCrudo
+        Spider nombre;
+        Stack nivel;
+        Ghast salud;
+        Torch activo;
+    PolloAsado;
+
+    Entity Coordenada 
+    PolloCrudo
+        Stack x;
+        Stack y;
+        Stack z;
+    PolloAsado;
+
+    Entity Configuracion 
+    PolloCrudo
+        Torch modoDebug;
+        Stack volumen;
+        Spider idioma;
+    PolloAsado;
+
+    $$ Asignación con literales de registro simples
+    Entity Jugador steve = {nombre: "Steve", nivel: 1, salud: 20.0, activo: On};
+    Entity Jugador alex = {nombre: "Alex", nivel: 2, salud: 18.5, activo: On};
+
+    $$ Registro con valores numéricos
+    Entity Coordenada posicion = {x: 10, y: 20, z: 30};
+    
+    $$ Registro con valores mixtos
+    Entity Configuracion config = {modoDebug: Off, volumen: 75, idioma: "Español"};
+    
+    $$ Registro vacío
+    Entity Jugador jugadorVacio = {};
+    
+    $$ Registro con un solo campo
+    Entity Coordenada origen = {x: 0};
+    
+    $$ Registro con expresiones
+    Entity Coordenada punto = {x: 5 + 5, y: 10 * 2, z: 100 // 2};
+    
+    $$ Registro con registros anidados no es válido en Notch Engine,
+    $$ por lo que no se incluye en esta prueba
+
+SpawnPoint
+
+    PolloCrudo
+        $$ Acceso a los campos del registro
+        dropperSpider(steve@nombre);
+        dropperStack(posicion@x);
+        dropperTorch(config@modoDebug);
+        
+        $$ Modificación de campos
+        steve@nivel = 5;
+        posicion@z = 50;
+        
+        $$ Operaciones con campos
+        Stack nivelTotal = steve@nivel + alex@nivel;
+        dropperStack(nivelTotal);
+        
+        $$ Uso del operador wither para simplificar el acceso
+        wither steve craft
+        PolloCrudo
+            dropperSpider("Nombre: " bind nombre);
+            dropperStack(nivel);
+            dropperGhast(salud);
+        PolloAsado
+
+        $$ Casos de prueba adicionales para el scanner
+        Entity Jugador herobrine = {$$ Registro con comentario
+            nombre: "Herobrine", 
+            nivel: 100, 
+            salud: 1000.0, 
+            activo: On};
+        
+        $$ Registro con espacios variados en la sintaxis
+        Entity Coordenada pos2 = {x: 100, y: 200, z: 300};
+    PolloAsado
+
+worldSave
