@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scanner.mc_scanner import procesar_archivo
+from parser.mc_parser import iniciar_parser
 
 
 def ejecucion():
@@ -63,13 +64,9 @@ def ejecucion():
     #################################################################
     ##                    INICIO PARSER                            ##
     #################################################################
-    # Procesar y obtener tokens
-    tokens = procesar_archivo(archivo_prueba)
+    # Funcionamiento del parser 
+    iniciar_parser(tokens, debug=True)
     
-    # Debug: mostrar primeros 100 tokens
-    print("\nPrimeros 100 tokens para el parser:")
-    for token in tokens[:100]:
-        print(token)
     #################################################################
     #################################################################
 

@@ -9,15 +9,16 @@
  * Reproducción sin fines de lucro permitida
 """
 
+
 # Parte del módulo Gramatica
-from Gramatica import Gramatica
+from .Gramatica import Gramatica
 
 class GTablaFollows:
     """
     Esta clase contiene la tabla de follows
     y los métodos necesarios para acceder a ella
     """
-    
+
     # Tabla de follows
     # Contiene los números de los terminales
     # de los follows de cada no-terminal (filas)

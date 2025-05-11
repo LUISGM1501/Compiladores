@@ -19,7 +19,7 @@ class GNombresTerminales:
     
     # Contiene los nombres de los terminales
     NombresTerminales = [
-"WORLD_NAME",
+		"WORLD_NAME",
 		"BEDROCK",
 		"RESOURCE_PACK",
 		"INVENTORY",

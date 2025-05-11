@@ -13,10 +13,10 @@
 # El equivalente a package Gramatica; en Python sería organizar los archivos
 # en un directorio llamado Gramatica
 
-from GTablaParsing import GTablaParsing
-from GLadosDerechos import GLadosDerechos
-from GNombresTerminales import GNombresTerminales
-from GTablaFollows import GTablaFollows
+from .GTablaParsing import GTablaParsing
+from .GLadosDerechos import GLadosDerechos
+from .GNombresTerminales import GNombresTerminales
+
 
 class Gramatica:
     """
@@ -113,6 +113,8 @@ class Gramatica:
 
     @staticmethod
     def getTablaFollows(numNoTerminal, numColumna):
+
+        from .GTablaFollows import GTablaFollows
         """
         Método getTablaFollows
             Obtiene el número de terminal del follow del no-terminal
