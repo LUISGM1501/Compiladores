@@ -317,7 +317,7 @@ class IntegratedAutomaton:
             '+': 'SUMA',
             '-': 'RESTA',
             '*': 'MULTIPLICACION',
-            '/': 'DIVISION',
+            '//': 'DIVISION',
             '%': 'MODULO',
             '(': 'PARENTESIS_ABRE',
             ')': 'PARENTESIS_CIERRA',
@@ -331,7 +331,12 @@ class IntegratedAutomaton:
             '@': 'ARROBA',
             '<': 'MENOR_QUE',
             '>': 'MAYOR_QUE',
-            '=': 'IGUAL'
+            '=': 'IGUAL', 
+            ':+': 'SUMA_FLOTANTE',
+            ':-': 'RESTA_FLOTANTE',
+            ':*': 'MULTIPLICACION_FLOTANTE',
+            '://': 'DIVISION_FLOTANTE',
+            ':%': 'MODULO_FLOTANTE',
         }
         
         # Mapeo de operadores compuestos
@@ -342,8 +347,6 @@ class IntegratedAutomaton:
             '<=': 'MENOR_IGUAL',
             '->': 'FLECHA',
             '::': 'DOBLE_DOS_PUNTOS',
-            '&&': 'AND_OP',
-            '||': 'OR_OP',
             '++': 'INCREMENTO',
             '--': 'DECREMENTO'
         }
