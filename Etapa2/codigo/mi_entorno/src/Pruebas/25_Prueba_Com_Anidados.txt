@@ -1,0 +1,76 @@
+$* 
+  25_Prueba_Com_Anidados.ne
+  Prueba de comentarios de bloque con contenido complejo
+  Para el analizador léxico de Notch Engine
+
+  
+  A continuación elementos que el analizador debe considerar como texto
+  dentro del comentario y no como tokens independientes:
+  
+  - Palabras reservadas: WorldName Bedrock Inventory SpawnPoint CraftingTable
+  - Operadores: +, -, *, //, %, and, or, not
+  - Identificadores: contador, nombre, valor_x
+  - Literales: "cadena de texto", 'c', 123, 45.67, On, Off
+  - Símbolos: {, }, (, ), [, ], ;, :, @
+  
+  $ $ Esto no es un comentario de línea dentro del bloque
+  
+  Líneas con caracteres especiales:
+  !@#$%^&*()_+-=[]{}|;:'",.<>/?`~
+  
+  Múltiples líneas vacías:
+  
+  
+  
+  Lineas con espacios en blanco:
+           
+  
+  Un código que debería ser ignorado:
+  
+  WorldName PruebaIgnorada:
+  Inventory {
+    Stack contador = 123;
+    Torch activo = On;
+  }
+  SpawnPoint {
+    dropperSpider("Esto será ignorado");
+  }
+  worldSave
+*$
+
+$* Este es un comentario normal *$
+
+$$ Comentario de línea después de un comentario de bloque
+
+WorldName PruebaComentarios:
+
+$* Comentario 
+   multilínea
+   para probar *$
+
+Inventory
+
+  $* Comentario dentro
+     de una sección *$
+  Stack contador = 10; $$ Comentario al final de la línea
+  
+  $* Otro
+     comentario
+     de múltiples
+     líneas *$
+  
+  Spider texto = "Comentario /* falso */ dentro de un string";
+  Rune caracter = '*'; $$ Carácter que podría confundirse con comentario
+
+SpawnPoint
+
+  PolloCrudo
+    $* Comentario con símbolos +, -, *, /, %, <, >, <=, >=, is, isNot
+       y otros caracteres especiales !@#$^&()_=[]{}|;:'",.<>/?`~ *$
+    
+    dropperSpider("Los comentarios son importantes");
+    
+    $$ Comentario que parece tener $* bloque *$ pero es de línea
+  PolloAsado
+
+worldSave
