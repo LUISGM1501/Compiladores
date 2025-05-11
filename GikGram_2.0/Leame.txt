@@ -1,0 +1,80 @@
+VENTAJAS:
+- Es más fácil hacer la documentación en base a una gramática escrita en Excel.
+- Acepta nombres de terminales, no terminales y símbolos semánticos de un tamaño razonable.
+- Es más ordenado manejar la gramática en Excel.
+- Crea tablas para su facilidad a la hora de construir el parser en C/C++ y Java.
+- Funciona en sistemas operativos de 64 bits que soporten ejecutar programas de 32 bits.
+- En un solo programa valida la gramática y genera los archivos.
+- Le avisa sobre los 7 errores de gramática LL(1) y otros errores y advertencias útiles de una manera más precisa.
+
+
+Los 7 errores de gramática LL(1) son:
+   - Un símbolo no está definido.
+   - Un no-terminal no es alcanzable.
+   - La gramática no aterriza.
+   - Falta de factorización.
+   - Recursividad directa por la izquierda.
+   - Recursividad indirecta por la izquierda.
+   - Doble predicción.
+
+
+FORMATO:
+- El archivo de la gramática tiene que tener una hoja llamada "Producciones" para las producciones y otra llamada "Terminales" para los terminales.
+- La hoja con las producciones tiene que contener en la primer columna los no terminales y de la tercera en adelante los lados derechos (la segunda columna es ignorada).
+- Para crear una regla con epsilon no se le ingresa nada, se deja vacía.
+- El no terminal inicial será el que aparezca en la primer fila y columna de la hoja de producciones.
+- La hoja con los terminales tiene que contener en la primer columna todos los terminales (las demás columnas son ignoradas).
+- Los símbolos semánticos se diferencian de los terminales y no terminales porque empiezan con un signo de gato (#).
+- Los terminales, no terminales y símbolos semánticos no pueden contener espacios y sólo puede haber uno de ellos en cada celda.
+- Los nombres de los símbolos semánticos tienen que empezar con una letra y en el resto del nombre sólo pueden contener letras, dígitos y subrayas.
+El programa sólo acepta un argumento, el nombre del archivo de la gramática, si a este no se le pone una extensión el programa le asigna por default la extensión .xlsx.
+Si se le ingresan otros parámetros además del anterior serán ignorados.
+
+
+REQUERIMIENTOS:
+- Win XP/Vista/7 en arquitecturas x86 o x64 (WoW).
+- .Net Framework 3.5.
+- Microsoft Office 2007 (para leer solamente los archivos .xlsx)
+
+
+HISTORIAL DE VERSIONES:
++ GikGram 2.0 - 06/Diciembre/2011 (Último)
+   - CAMBIO MAYOR: ahora la MARCA_DERECHA es tratado como un terminal.
+   - El código generado cumple más estándares de código.
+   - En los encabezados de cada archivo generado está puesta la fecha y hora en que se crearon dichos archivos (además de otros datos útiles),
+     esto facilita llevar un orden de versiones.
+   - Los comentarios contenidos en los archivos de JAVA son más descriptivos.
+   - Crea archivos JAVA independientes para cada estructura mayor de datos (esto soluciona el problema de JAVA de "code too large").
+   - CAMBIO MAYOR: Crea un archivo JAVA que contiene los nombres de los terminales (útil para mostrar errores detallados de compilación).
+   - El código JAVA ahora está contenido en un paquete para una mayor facilidad de incorporación con el proyecto total del compilador.
+   - El código JAVA ahora tiene una mayor abstracción (sólo pueden accesar al archivo Gramatica.java, y sólo es necesario accesar a dicho archivo).
+
++ GikGram 1.8 - 29/Diciembre/2010
+   - Solucionado un error del predict.
+
++ GikGram 1.7 - 08/Julio/2010
+   - Ahora genera la tabla de follows en la que se basa el algoritmo de recuperación de errores.
+   - Muestra un mensaje de error si el nombre de un símbolo semántico no sigue las reglas de un identificador válido de C/C++ y Java.
+   - Ordena los archivos generados en subcarpetas para un mayor orden.
+   - Y otros cambios menores.
+
++ GikGram 1.6 - 03/Abril/2010
+   - Arreglado un error al calcular ciertos follows.
+   - Y otros cambios menores.
+
++ GikGram 1.5 - 31/Marzo/2010
+   - Arreglado un error con la recursividad indirecta por la izquierda (anteriormente un caso no lo hacía completamente bien).
+   - Ahora muestra sólo una advertencia por todos los terminales que no se estén usando (a diferencia de antes que mostraba una advertencia por cada terminal que no se estaba usando).
+   - Los archivos de código C siguen el estilo y los estándares del lenguaje C (aún así es compatible con C++).
+   - Y otros cambios menores.
+
++ GikGram 1.4 - 27/Febrero/2010
+   - Arreglado un error con la doble predicción de la marca derecha (esto ocasionaría problemas en la semántica y generación de código, no en el parser).
+   - Ahora las hojas del libro de Excel pueden estar en cualquier orden pero tienen que llamarse "Producciones" y "Terminales".
+   - Da un mensaje de error más preciso cuando hay un no-terminal llamado igual a un terminal.
+   - Ahora muestra una advertencia si no está usando algún terminal.
+   - Para leer archivos .xls no necesita tener el Office instalado.
+   - Para leer archivos .xlsx necesita el Microsoft Office 2007 instalado pero no necesariamente un componente de ella (por ejemplo no necesita Excel, Word, etc.).
+   - Se eliminó una validación que comprobaba que el .Net Framework 2.0 estuviera instalado.
+   - Es mucho más rápido que la versión anterior.
+   - Y otros cambios menores.
