@@ -143,6 +143,7 @@ class TokenMap:
         "MODULO_FLOTANTE_IGUAL": 131,
         "COERCION": 132,
         "EOF": 133,
+        "DOBLE_DOS_PUNTOS": 134,
         "COMENTARIO": -1  # Token ignorado
     }
 

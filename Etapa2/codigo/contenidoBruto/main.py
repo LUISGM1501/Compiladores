@@ -53,6 +53,9 @@ def ejecucion():
     #################################################################
     # Procesar y obtener tokens
     tokens = procesar_archivo(archivo_prueba)
+    print("\nTokens generados (primeros 10):")
+    for i, token in enumerate(tokens[:10]):
+        print(f"{i}: {token}")
     
     # Debug: mostrar primeros 100 tokens
     print("\nPrimeros 100 tokens para el parser:")
