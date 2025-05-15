@@ -4,7 +4,7 @@
  * Formato:
  * 	no-terminal terminal [ ...terminal]
  *
- * 2025/05/13 20:48:49
+ * 2025/05/14 23:00:38
  *
  * Archivo generado por GikGram 2.0
  *
@@ -18,7 +18,6 @@
 <section> BEDROCK RESOURCE_PACK INVENTORY RECIPE CRAFTING_TABLE SPAWN_POINT 
 <bedrock_section> OBSIDIAN 
 <constant_decl> OBSIDIAN 
-<value> IGUAL 
 <resource_pack_section> ANVIL 
 <type_decl> ANVIL 
 <inventory_section> REF STACK RUNE SPIDER TORCH CHEST BOOK GHAST SHELF ENTITY 

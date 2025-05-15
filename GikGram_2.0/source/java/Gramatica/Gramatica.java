@@ -1,7 +1,7 @@
 /*
  * Gramatica.java
  *
- * 2025/05/13 20:48:49
+ * 2025/05/14 23:00:38
  *
  * Archivo generado por GikGram 2.0
  *
@@ -43,15 +43,15 @@ public abstract class Gramatica
 	public static final int MAX_FOLLOWS = 48;
 
 	/* Constantes con las rutinas semánticas */
-	public static final int init_tsg = 218;
-	public static final int free_tsg = 219;
-	public static final int chk_no_redeclare = 220;
-	public static final int chk_func_start = 221;
-	public static final int chk_func_return = 222;
-	public static final int sw1 = 223;
-	public static final int sw3 = 224;
-	public static final int sw2 = 225;
-	public static final int check_is_procedure = 226;
+	public static final int init_tsg = 217;
+	public static final int free_tsg = 218;
+	public static final int chk_no_redeclare = 219;
+	public static final int chk_func_start = 220;
+	public static final int chk_func_return = 221;
+	public static final int sw1 = 222;
+	public static final int sw3 = 223;
+	public static final int sw2 = 224;
+	public static final int check_is_procedure = 225;
 
 	/**
 	 * Método esTerminal
@@ -74,7 +74,7 @@ public abstract class Gramatica
 	 */
 	public static final boolean esNoTerminal(int numSimbolo)
 	{
-		return ((134 <= numSimbolo) && (numSimbolo <= 217));
+		return ((134 <= numSimbolo) && (numSimbolo <= 216));
 	}
 
 	/**
@@ -87,7 +87,7 @@ public abstract class Gramatica
 	 */
 	public static final boolean esSimboloSemantico(int numSimbolo)
 	{
-		return ((218 <= numSimbolo) && (numSimbolo <= 226));
+		return ((217 <= numSimbolo) && (numSimbolo <= 225));
 	}
 
 	/**

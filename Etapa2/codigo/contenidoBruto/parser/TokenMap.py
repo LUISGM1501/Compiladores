@@ -4,6 +4,7 @@
 * 2025/05/11
 *
 * Mapeo de tokens a códigos numéricos para el parser
+* Contiene mejoras para manejar casos especiales como DOBLE_DOS_PUNTOS
 """
 
 class TokenMap:
@@ -143,9 +144,21 @@ class TokenMap:
         "MODULO_FLOTANTE_IGUAL": 131,
         "COERCION": 132,
         "EOF": 133,
-        "DOBLE_DOS_PUNTOS": 134,
+        "DOBLE_DOS_PUNTOS": 134,  # Importante para manejo de parámetros
         "COMENTARIO": -1  # Token ignorado
     }
+
+    # Manejo inverso para facilitar la depuración y algunos casos especiales
+    REVERSE_MAP = None
+
+    @staticmethod
+    def init_reverse_map():
+        """Inicializa el mapeo inverso para facilitar la consulta por código"""
+        if TokenMap.REVERSE_MAP is None:
+            TokenMap.REVERSE_MAP = {}
+            for token_type, code in TokenMap.MAP.items():
+                if code != -1:  # No incluir tokens ignorados
+                    TokenMap.REVERSE_MAP[code] = token_type
 
     @staticmethod
     def get_token_code(token_type):
@@ -158,4 +171,31 @@ class TokenMap:
         Returns:
             Código numérico del token o -1 si no se encuentra
         """
+        # Caso especial: manejo de aliases para casos clave
+        if token_type.upper() == "IDENTIFICADOR":
+            # Verificar si es uno de los tokens especiales con alias
+            if hasattr(token_type, 'lexema'):
+                lexema = token_type.lexema.lower()
+                if lexema == "pollocrudo":
+                    return 22  # POLLO_CRUDO
+                elif lexema == "polloasado":
+                    return 23  # POLLO_ASADO
+                elif lexema == "worldsave":
+                    return 9   # WORLD_SAVE
+        
+        # Caso normal: buscar en el mapa
         return TokenMap.MAP.get(token_type, -1)
+
+    @staticmethod
+    def get_token_name(token_code):
+        """
+        Obtiene el nombre del tipo de token a partir de su código
+        
+        Args:
+            token_code: Código numérico del token
+            
+        Returns:
+            Nombre del tipo de token o None si no se encuentra
+        """
+        TokenMap.init_reverse_map()
+        return TokenMap.REVERSE_MAP.get(token_code)
