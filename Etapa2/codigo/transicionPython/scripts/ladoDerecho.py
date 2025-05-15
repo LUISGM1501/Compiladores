@@ -4,7 +4,7 @@ def convertir_formato(texto):
 
     for linea in lineas:
         linea = linea.strip().replace('{', '[').replace('}', ']')
-        resultado.append(f"        {linea},")
+        resultado.append(f"        {linea}")
 
     return "\n".join(resultado)
 
