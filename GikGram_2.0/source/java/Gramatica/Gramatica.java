@@ -1,7 +1,7 @@
 /*
  * Gramatica.java
  *
- * 2025/05/14 23:00:38
+ * 2025/05/16 00:04:54
  *
  * Archivo generado por GikGram 2.0
  *
@@ -45,13 +45,12 @@ public abstract class Gramatica
 	/* Constantes con las rutinas semánticas */
 	public static final int init_tsg = 217;
 	public static final int free_tsg = 218;
-	public static final int chk_no_redeclare = 219;
-	public static final int chk_func_start = 220;
-	public static final int chk_func_return = 221;
-	public static final int sw1 = 222;
-	public static final int sw3 = 223;
-	public static final int sw2 = 224;
-	public static final int check_is_procedure = 225;
+	public static final int chk_func_start = 219;
+	public static final int chk_func_return = 220;
+	public static final int sw1 = 221;
+	public static final int sw3 = 222;
+	public static final int sw2 = 223;
+	public static final int check_is_procedure = 224;
 
 	/**
 	 * Método esTerminal
@@ -87,7 +86,7 @@ public abstract class Gramatica
 	 */
 	public static final boolean esSimboloSemantico(int numSimbolo)
 	{
-		return ((217 <= numSimbolo) && (numSimbolo <= 225));
+		return ((217 <= numSimbolo) && (numSimbolo <= 224));
 	}
 
 	/**

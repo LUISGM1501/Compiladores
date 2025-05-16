@@ -1,7 +1,7 @@
 /*
  * Gramatica.h
  *
- * 2025/05/14 23:00:38
+ * 2025/05/16 00:04:54
  *
  * Archivo generado por GikGram 2.0
  *
@@ -23,16 +23,15 @@
 	/* Constantes con las rutinas semánticas */
 	#define init_tsg 217
 	#define free_tsg 218
-	#define chk_no_redeclare 219
-	#define chk_func_start 220
-	#define chk_func_return 221
-	#define sw1 222
-	#define sw3 223
-	#define sw2 224
-	#define check_is_procedure 225
+	#define chk_func_start 219
+	#define chk_func_return 220
+	#define sw1 221
+	#define sw3 222
+	#define sw2 223
+	#define check_is_procedure 224
 
 	/* Prototipos de las tablas */
 	extern const int TablaParsing[83][NO_TERMINAL_INICIAL];
-	extern const int LadosDerechos[220][MAX_LADO_DER];
+	extern const int LadosDerechos[221][MAX_LADO_DER];
 
 #endif /* INC_Gramatica_h_ */

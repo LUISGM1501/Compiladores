@@ -4,7 +4,7 @@
  * Formato:
  * 	no-terminal terminal [ ...terminal]
  *
- * 2025/05/14 23:00:38
+ * 2025/05/16 00:04:54
  *
  * Archivo generado por GikGram 2.0
  *
@@ -25,6 +25,8 @@
 <bedrock_section> OBSIDIAN 
 <bedrock_section> BEDROCK RESOURCE_PACK INVENTORY RECIPE CRAFTING_TABLE SPAWN_POINT WORLD_SAVE 
 <constant_decl> OBSIDIAN 
+<value> CORCHETE_ABRE LLAVE_ABRE NUMERO_ENTERO NUMERO_DECIMAL CADENA CARACTER ON OFF 
+<value> PUNTO_Y_COMA 
 <resource_pack_section> ANVIL 
 <resource_pack_section> BEDROCK RESOURCE_PACK INVENTORY RECIPE CRAFTING_TABLE SPAWN_POINT WORLD_SAVE 
 <type_decl> ANVIL 
@@ -40,7 +42,6 @@
 <recipe_section> BEDROCK RESOURCE_PACK INVENTORY RECIPE CRAFTING_TABLE SPAWN_POINT WORLD_SAVE 
 <prototype> SPELL 
 <prototype> RITUAL 
-<func_prototype_tail> IDENTIFICADOR 
 <proc_prototype_tail> IDENTIFICADOR 
 <crafting_table_section> SPELL RITUAL 
 <crafting_table_section> BEDROCK RESOURCE_PACK INVENTORY RECIPE CRAFTING_TABLE SPAWN_POINT WORLD_SAVE 
