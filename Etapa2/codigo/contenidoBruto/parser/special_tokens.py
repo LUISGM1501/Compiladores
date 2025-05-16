@@ -35,6 +35,9 @@ class SpecialTokens:
         "SPAWN_POINT": 6
     }
     
+    # Lista de tokens que pueden ser valores en declaraciones de constantes
+    LITERAL_TOKENS = ["NUMERO_ENTERO", "NUMERO_DECIMAL", "CADENA", "CARACTER", "ON", "OFF"]
+    
     @staticmethod
     def is_special_identifier(token):
         """
@@ -84,82 +87,54 @@ class SpecialTokens:
             return -1
         
         return SpecialTokens.TOKEN_CODES.get(special_type, -1)
-
-    # Utilidades para manejo de DOBLE_DOS_PUNTOS
-    @staticmethod
-    def handle_double_colon(token, token_history=None):
-        """
-        Determina si un token DOBLE_DOS_PUNTOS debe ser manejado como uno o dos DOS_PUNTOS
-        basado en el contexto (historial de tokens).
-        
-        Args:
-            token: El token DOBLE_DOS_PUNTOS actual
-            token_history: Lista de tokens anteriores para contexto (opcional)
-            
-        Returns:
-            Un valor que indica cómo manejar el token:
-            1 = Tratar como un solo DOS_PUNTOS
-            2 = Tratar como dos DOS_PUNTOS consecutivos
-        """
-        # En nuestro caso, siempre lo manejamos como dos DOS_PUNTOS
-        # Esto podría ser más sofisticado dependiendo del contexto
-        return 2
     
-    # Utilidades para manejo de literales en declaraciones
     @staticmethod
-    def is_declaration_context(token_history):
+    def is_in_constant_declaration_context(token_history):
         """
-        Determina si estamos en un contexto de declaración de variable o constante
+        Determina si estamos en un contexto de declaración de constante
         basado en el historial de tokens.
-        
-        Args:
-            token_history: Lista de tokens anteriores para contexto
-            
-        Returns:
-            True si estamos en un contexto de declaración, False en caso contrario
         """
         if not token_history or len(token_history) < 3:
             return False
         
-        # Verificar patrones comunes de declaración
-        # Ejemplo: STACK contador = ...
-        if token_history[-3].type in ["STACK", "SPIDER", "RUNE", "TORCH", "CHEST", "BOOK", "GHAST", "SHELF", "ENTITY"] and \
-           token_history[-2].type == "IDENTIFICADOR" and \
-           token_history[-1].type == "IGUAL":
-            return True
-            
-        # Ejemplo: Obsidian Stack MAX_VALOR ...
-        if token_history[-3].type == "OBSIDIAN" and \
-           token_history[-2].type in ["STACK", "SPIDER", "RUNE", "TORCH", "CHEST", "BOOK", "GHAST", "SHELF", "ENTITY"] and \
-           token_history[-1].type == "IDENTIFICADOR":
-            return True
+        # Buscar patrones como "Obsidian Stack id"
+        for i in range(len(token_history) - 2):
+            if (token_history[i].type == "OBSIDIAN" and 
+                token_history[i+1].type in ["STACK", "SPIDER", "RUNE", "TORCH", "CHEST", "BOOK", "GHAST", "SHELF", "ENTITY"] and
+                token_history[i+2].type == "IDENTIFICADOR"):
+                return True
         
         return False
+    
     @staticmethod
-    def suggest_correction(token, mensaje_error):
+    def is_literal_token(token_type):
         """
-        Sugiere una corrección basada en un token y un mensaje de error.
+        Verifica si un tipo de token es un literal.
+        """
+        return token_type in SpecialTokens.LITERAL_TOKENS
+    
+    @staticmethod
+    def suggest_correction(token, error_msg):
+        """
+        Sugiere correcciones basadas en errores comunes.
+        """
+        if "PolloCrudo" in error_msg or "POLLO_CRUDO" in error_msg:
+            return "Usa 'PolloCrudo' (con mayúsculas/minúsculas correctas) como palabra clave para abrir un bloque."
         
-        Args:
-            token: El token actual
-            mensaje_error: El mensaje de error actual
+        if "PolloAsado" in error_msg or "POLLO_ASADO" in error_msg:
+            return "Usa 'PolloAsado' (con mayúsculas/minúsculas correctas) como palabra clave para cerrar un bloque."
+        
+        if token and token.type == "IDENTIFICADOR" and token.lexema.lower() in SpecialTokens.SPECIAL_IDENTIFIERS:
+            correct_form = token.lexema.lower()
+            if correct_form == "pollocrudo":
+                correct_form = "PolloCrudo"
+            elif correct_form == "polloasado":
+                correct_form = "PolloAsado"
+            elif correct_form == "worldsave":
+                correct_form = "WorldSave"
+            elif correct_form == "worldname":
+                correct_form = "WorldName"
             
-        Returns:
-            Sugerencia de corrección o None si no hay sugerencia
-        """
-        if token.type == "IDENTIFICADOR":
-            lexema_lower = token.lexema.lower()
-            
-            # Sugerencias para palabras clave comunes
-            if lexema_lower == "pollocrudo":
-                return "Sugerencia: Utilice 'PolloCrudo' como palabra clave, no como identificador."
-            elif lexema_lower == "polloasado":
-                return "Sugerencia: Utilice 'PolloAsado' como palabra clave, no como identificador."
-            elif lexema_lower == "worldsave":
-                return "Sugerencia: Utilice 'worldSave' para terminar el programa."
-                
-        # Sugerencias para errores comunes de sintaxis
-        if "DOS_PUNTOS" in mensaje_error and "esperaba" in mensaje_error:
-            return "Sugerencia: Verifique la sintaxis de declaración, puede faltar un símbolo de puntuación."
+            return f"¿Querías usar '{correct_form}' como palabra clave?"
         
         return None
