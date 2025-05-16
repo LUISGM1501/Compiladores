@@ -172,18 +172,19 @@ class TokenMap:
             Código numérico del token o -1 si no se encuentra
         """
         # Caso especial: manejo de aliases para casos clave
-        if token_type.upper() == "IDENTIFICADOR":
-            # Verificar si es uno de los tokens especiales con alias
-            if hasattr(token_type, 'lexema'):
-                lexema = token_type.lexema.lower()
-                if lexema == "pollocrudo":
-                    return 22  # POLLO_CRUDO
-                elif lexema == "polloasado":
-                    return 23  # POLLO_ASADO
-                elif lexema == "worldsave":
-                    return 9   # WORLD_SAVE
+        if isinstance(token_type, str) and token_type.upper() == "IDENTIFICADOR":
+            # Este chequeo es redundante pero seguro
+            return TokenMap.MAP.get("IDENTIFICADOR", -1)
         
-        # Caso normal: buscar en el mapa
+        if hasattr(token_type, 'type') and token_type.type == "IDENTIFICADOR":
+            lex = token_type.lexema.lower()
+            if lex == "pollocrudo":
+                return TokenMap.MAP["POLLO_CRUDO"]
+            elif lex == "polloasado":
+                return TokenMap.MAP["POLLO_ASADO"]
+            elif lex == "worldsave":
+                return TokenMap.MAP["WORLD_SAVE"]
+        
         return TokenMap.MAP.get(token_type, -1)
 
     @staticmethod

@@ -144,18 +144,17 @@ class Parser:
         """
         tipo_token_actual = self.obtener_tipo_token()
         
-        # Caso especial para PolloCrudo y PolloAsado
-        if terminal_esperado == 22 and tipo_token_actual == 91:  # Si espero POLLO_CRUDO y es identificador
-            if self.token_actual and self.token_actual.lexema.lower() == "pollocrudo":
-                self.imprimir_debug(f"Caso especial: Identificador 'PolloCrudo' reconocido como POLLO_CRUDO", 2)
-                self.avanzar()
-                return True
-                
-        if terminal_esperado == 23 and tipo_token_actual == 91:  # Si espero POLLO_ASADO y es identificador
-            if self.token_actual and self.token_actual.lexema.lower() == "polloasado":
-                self.imprimir_debug(f"Caso especial: Identificador 'PolloAsado' reconocido como POLLO_ASADO", 2)
-                self.avanzar()
-                return True
+        # Caso especial: PolloCrudo como IDENTIFICADOR
+        if terminal_esperado == 22 and self.token_actual.lexema.lower() == "pollocrudo":
+            self.imprimir_debug("Reconocido 'PolloCrudo' como palabra clave", 2)
+            self.avanzar()
+            return True
+
+        # Caso especial: PolloAsado como IDENTIFICADOR
+        if terminal_esperado == 23 and self.token_actual.lexema.lower() == "polloasado":
+            self.imprimir_debug("Reconocido 'PolloAsado' como palabra clave", 2)
+            self.avanzar()
+            return True
         
         # Usar SpecialTokens para verificar si es un identificador especial
         if tipo_token_actual == 91 and self.token_actual and SpecialTokens.is_special_identifier(self.token_actual):
@@ -166,23 +165,15 @@ class Parser:
                 return True
         
         # CASO ESPECIAL 4: Manejo para DOBLE_DOS_PUNTOS -> DOS_PUNTOS DOS_PUNTOS
-        if terminal_esperado == 112 and tipo_token_actual == 134:  # Si esperamos DOS_PUNTOS y encontramos DOBLE_DOS_PUNTOS
-            # Consultar a SpecialTokens para determinar cómo procesar este token
-            modo_procesamiento = SpecialTokens.handle_double_colon(self.token_actual)
-            
-            # Consumir DOBLE_DOS_PUNTOS y configurar un estado para simular que ya se procesaron DOS_PUNTOS
-            self.imprimir_debug(f"Caso especial: DOBLE_DOS_PUNTOS reconocido como DOS_PUNTOS", 2)
+        if terminal_esperado == 112 and tipo_token_actual == 134:
+            self._segundo_dos_puntos_procesado = True
             self.avanzar()
-            
-            if modo_procesamiento == 2:  # Si debe tratarse como dos DOS_PUNTOS
-                self._segundo_dos_puntos_procesado = True
-            
             return True
         
         # Si estamos esperando el segundo DOS_PUNTOS después de un DOBLE_DOS_PUNTOS
         if terminal_esperado == 112 and self._segundo_dos_puntos_procesado:
-            self.imprimir_debug(f"Caso especial: Segundo DOS_PUNTOS simulado de DOBLE_DOS_PUNTOS", 2)
-            self._segundo_dos_puntos_procesado = False  # Limpiar el estado
+            self.imprimir_debug("Procesando segundo DOS_PUNTOS simulado", 2)
+            self._segundo_dos_puntos_procesado = False
             return True
         
         # Manejo para literales en inicialización de variables
@@ -207,6 +198,16 @@ class Parser:
             nombre_actual = f"terminal#{tipo_token_actual}"
         
         self.imprimir_debug(f"Match: esperando {nombre_esperado} ({terminal_esperado}), encontrado {nombre_actual} ({tipo_token_actual})", 2)
+
+        tipo_token_actual = TokenMap.get_token_code(self.token_actual)
+
+        # Forzar redefinición si viene como identificador especial
+        if self.token_actual.type == "IDENTIFICADOR":
+            lex = self.token_actual.lexema.lower()
+            if lex == "pollocrudo":
+                tipo_token_actual = 22
+            elif lex == "polloasado":
+                tipo_token_actual = 23
         
         # Caso normal: comprobar coincidencia exacta
         if tipo_token_actual == terminal_esperado:
@@ -529,6 +530,7 @@ class Parser:
         # Inicializar la pila con el símbolo inicial
         self.stack = []
         self.push(Gramatica.NO_TERMINAL_INICIAL)
+        self.push(Gramatica.MARCA_DERECHA)
         self.imprimir_estado_pila()
         
         try:
@@ -791,7 +793,7 @@ def parser(tokens, debug=False):
     return resultado
 
 # Función para integrarse con el scanner
-def iniciar_parser(tokens, debug=False, nivel_debug=2):
+def iniciar_parser(tokens, debug=False, nivel_debug=3):
     """
     Función para ser llamada desde el main después del scanner
     

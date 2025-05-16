@@ -37,7 +37,14 @@ class SpecialTokens:
     
     # Lista de tokens que pueden ser valores en declaraciones de constantes
     LITERAL_TOKENS = ["NUMERO_ENTERO", "NUMERO_DECIMAL", "CADENA", "CARACTER", "ON", "OFF"]
-    
+
+    @staticmethod
+    def handle_double_colon(token):
+        """
+        Para '::' simular que son dos DOS_PUNTOS.
+        """
+        return 2  # Simula que son dos DOS_PUNTOS
+        
     @staticmethod
     def is_special_identifier(token):
         """
