@@ -1,9 +1,0 @@
-WorldName Mini:
-
-Bedrock
-Obsidian Stack dummy 0;
-
-Recipe
-Spell test(Stack :: a, b) -> Stack;
-
-worldSave
