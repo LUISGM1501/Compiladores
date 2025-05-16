@@ -346,13 +346,23 @@ class IntegratedAutomaton:
             '>=': 'MAYOR_IGUAL',
             '<=': 'MENOR_IGUAL',
             '->': 'FLECHA',
-            '::': 'DOBLE_DOS_PUNTOS',
             '++': 'INCREMENTO',
             '--': 'DECREMENTO'
         }
         
         # Verificar operadores compuestos primero
         if pos + 1 < len(contenido):
+            if contenido[pos] == ':' and contenido[pos + 1] == ':':
+                # Devolver solo el primer ':', el siguiente será escaneado en el próximo llamado
+                return AutomatonResult(
+                    True,
+                    "DOS_PUNTOS",
+                    ":",
+                    None,
+                    pos + 1,
+                    linea,
+                    columna + 1
+                )
             dos_caracteres = contenido[pos] + contenido[pos + 1]
             if dos_caracteres in operadores_compuestos:
                 return AutomatonResult(

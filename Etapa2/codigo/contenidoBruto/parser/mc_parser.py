@@ -72,9 +72,6 @@ class Parser:
         self.debug = debug
         self.nivel_detalle = 2  # Por defecto nivel 2 (importante)
         
-        # Variables para manejo especial de tokens
-        self._segundo_dos_puntos_procesado = False
-        
         # Historial de tokens para análisis de contexto
         self.token_history = []
         self.max_history_size = 5  # Mantener historial de los últimos 5 tokens
@@ -163,18 +160,7 @@ class Parser:
                 self.imprimir_debug(f"Caso especial: Identificador especial '{self.token_actual.lexema}' reconocido como {SpecialTokens.get_special_token_type(self.token_actual)}", 2)
                 self.avanzar()
                 return True
-        
-        # CASO ESPECIAL 4: Manejo para DOBLE_DOS_PUNTOS -> DOS_PUNTOS DOS_PUNTOS
-        if terminal_esperado == 112 and tipo_token_actual == 134:
-            self._segundo_dos_puntos_procesado = True
-            self.avanzar()
-            return True
-        
-        # Si estamos esperando el segundo DOS_PUNTOS después de un DOBLE_DOS_PUNTOS
-        if terminal_esperado == 112 and self._segundo_dos_puntos_procesado:
-            self.imprimir_debug("Procesando segundo DOS_PUNTOS simulado", 2)
-            self._segundo_dos_puntos_procesado = False
-            return True
+
         
         # Manejo para literales en inicialización de variables
         # Usar SpecialTokens para determinar el contexto de declaración

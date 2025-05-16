@@ -1,0 +1,6 @@
+WorldName Mini:
+
+Recipe
+    Spell test(Stack :: a, b) -> Stack;
+
+worldSave
