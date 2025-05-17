@@ -55,6 +55,6 @@ Al ejecutarlo, se generará automáticamente una carpeta llamada `resultados/`.
 ## Recomendaciones Finales
 
 - El cambio de nombre del ejecutable **debe hacerse manualmente**. No se incluyen scripts ni instrucciones automatizadas.
-- Asegúrate de que el archivo final se llame exactamente `main.exe`, sin extensiones adicionales.
+- Asegúrate de que el archivo final se llame exactamente `main`, sin extensiones adicionales.
 
 ---
