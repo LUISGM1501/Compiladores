@@ -678,7 +678,7 @@ class Parser:
                     return len(self.errores) == 0
                 else:
                     # Suprimir silenciosamente el error de tokens extra al final
-                    self.imprimir_debug("Detectados tokens extra al final, pero ignorando error", 1)
+                    # self.imprimir_debug("Detectados tokens extra al final, pero ignorando error", 1)
                     return len(self.errores) == 0  # Solo consideramos otros errores
             else:
                 # Suprimir silenciosamente el error de pila no vacía
