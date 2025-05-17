@@ -35,11 +35,10 @@ Para ejecutar el scanner correctamente, sigue los siguientes pasos:
 2. **Identifica el archivo llamado `main.OMITIDO`**.  
    Este archivo es el ejecutable del scanner, pero debe ser renombrado para poder utilizarse.
 
-3. **Renombra el archivo a mano**, eliminando la extensión `.OMITIDO` y agregando la extension '.exe'.  
-   El nombre final del archivo debe quedar como: **`main.exe`**
+3. **Renombra el archivo a mano**, eliminando la extensión `.OMITIDO`  
+   El nombre final del archivo debe quedar como: **`main`**
 
-
-4. **Ejecuta el archivo `main.exe`** desde un entorno compatible.  
+4. **Ejecuta el archivo `main`** desde un entorno compatible.  
 Al ejecutarlo, se generará automáticamente una carpeta llamada `resultados/`.
 
 5. **Dentro de la carpeta `resultados/` encontrarás un archivo HTML** que muestra los resultados del análisis léxico realizado por el scanner.
@@ -47,6 +46,9 @@ Al ejecutarlo, se generará automáticamente una carpeta llamada `resultados/`.
 6. **Visualización de resultados Scanner:**  Para visualizar el archivo HTML correctamente, se recomienda usar un navegador web o un entorno como **Live Server** en Visual Studio Code, que permite renderizar contenido HTML de forma local.
 
 7. **Visualización de resultados Parser:** Para visualizar los resultados del parser se dejo activada la version de debug en el ejecutable, por lo que solo debe de hacer una lectura de los logs. 
+
+**Comando para ejecutar el archivo:** ./main
+
 
 ---
 

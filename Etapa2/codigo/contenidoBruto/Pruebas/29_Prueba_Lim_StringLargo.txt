@@ -1,0 +1,46 @@
+$* 
+  Prueba_Lim_StringLargo.ne
+  Propósito: Verificar strings extremadamente largos para probar los límites del analizador léxico
+  Fecha: 28/04/2025
+*$
+
+WorldName PruebaStringsLargos:
+
+Inventory
+
+  $$ String corto para comparación
+  Spider string_normal = "Este es un string normal";
+  
+  $$ String largo (aproximadamente 500 caracteres)
+  Spider string_largo = "Este es un string extremadamente largo para probar cómo maneja el analizador léxico los tokens de gran tamaño. El propósito es verificar si el buffer del analizador puede manejar correctamente cadenas que exceden el tamaño típico. En Minecraft, los jugadores pueden construir estructuras enormes y elaboradas, similar a cómo este string se extiende más allá de los límites normales. Las cadenas largas son útiles para almacenar textos extensos como descripciones, historias, o mensajes de diálogo en juegos. Este string sigue creciendo para asegurar que supere los límites habituales de procesamiento del analizador léxico.";
+  
+  $$ String muy largo (aproximadamente 1000 caracteres)
+  Spider string_muy_largo = "Este string es aún más largo que el anterior, llegando a aproximadamente mil caracteres para poner realmente a prueba los límites del analizador léxico. En el desarrollo de compiladores, es importante verificar cómo responde el sistema ante casos extremos. Los buffers mal dimensionados podrían causar desbordamientos o truncamientos inesperados. En el mundo de Minecraft, esto sería comparable a construir una megaestructura que se extiende hasta los límites permitidos del mundo. Es crucial que el compilador maneje correctamente estos casos límite, ya que en aplicaciones reales, los usuarios pueden introducir textos extremadamente largos, como documentación, logs detallados, o incluso código generado automáticamente. Este string continúa creciendo, añadiendo más y más caracteres para asegurar que pruebe adecuadamente la capacidad del buffer del analizador léxico. Una implementación robusta debería ser capaz de manejar este token sin problemas, reconociéndolo correctamente como un único string literal, sin importar su longitud. El tamaño máximo debería estar limitado únicamente por la memoria disponible en el sistema, no por limitaciones arbitrarias en el diseño del analizador léxico. Este string sigue y sigue, añadiendo más palabras y caracteres, para garantizar que realmente ponga a prueba los límites del analizador.";
+  
+  $$ String con caracteres especiales y secuencias de escape
+  Spider string_con_escapes = "Este string incluye secuencias de escape como: \n nueva línea, \t tabulación, \" comillas dobles, \\ barra invertida, y otros caracteres especiales como !@#$%^&*()_+-={}[]|:;<>,.?/~`";
+  
+  $$ String con múltiples líneas usando secuencias de escape
+  Spider string_multilinea = "Línea 1\nLínea 2\nLínea 3\nLínea 4\nLínea 5\nLínea 6\nLínea 7\nLínea 8\nLínea 9\nLínea 10\nLínea 11\nLínea 12\nLínea 13\nLínea 14\nLínea 15\nLínea 16\nLínea 17\nLínea 18\nLínea 19\nLínea 20";
+  
+  $$ String con símbolos del lenguaje que podrían confundir al analizador
+  Spider string_simbolos = "Este string contiene símbolos que son tokens en Notch Engine: +, -, *, //, %, :+, :-, :*, :%, ://, @, [], {}, {: :}, {/ /}, >>. También incluye palabras reservadas como WorldName, Inventory, SpawnPoint, craft, respawn, soulsand, magma, etc.";
+  
+  $$ String extremadamente largo (aproximadamente 2000 caracteres)
+  Spider string_extremo = "Este string es extremadamente largo AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, superando los dos mil caracteres para realmente llevar al límite la capacidad del analizador léxico. En el desarrollo de compiladores e intérpretes, es fundamental probar cómo maneja el sistema casos extremos como este. Cualquier limitación no prevista en el diseño podría manifestarse al procesar tokens de este tamaño. En Minecraft, esto sería equivalente a construir una estructura colosal que se extiende por miles de bloques en todas direcciones, poniendo a prueba los límites del motor del juego. Los analizadores léxicos deben estar preparados para manejar tokens de cualquier longitud razonable, ya que en aplicaciones del mundo real, los usuarios pueden necesitar procesar textos extremadamente largos. Ejemplos incluyen el procesamiento de documentos completos, archivos de configuración extensos, o incluso código generado automáticamente que puede extenderse por miles de líneas. Este string sigue creciendo, añadiendo más y más palabras y caracteres, para asegurar que realmente ponga a prueba los límites del buffer del analizador. Una implementación robusta debería manejar este token sin problemas, reconociéndolo correctamente como un único string literal completo, sin importar su tamaño. El tamaño máximo debería estar limitado únicamente por la memoria disponible en el sistema, no por limitaciones arbitrarias en el diseño del analizador. Este string continúa expandiéndose, añadiendo más contenido para garantizar que supere cualquier buffer de tamaño fijo que pueda haber sido implementado. Es importante también verificar que el rendimiento del analizador no se degrade exponencialmente con tokens muy grandes, lo que podría indicar algoritmos ineficientes. En el contexto de Notch Engine, inspirado en Minecraft, este string sería como un libro dentro del juego con una historia increíblemente detallada que se extiende por múltiples páginas. El analizador léxico debe procesar este token de manera eficiente, reconociéndolo como un único string literal y no fragmentándolo incorrectamente en múltiples tokens. Este string sigue creciendo, agregando más y más caracteres, para asegurar que realmente ponga a prueba los límites del analizador léxico. Continúa expandiéndose, como un mundo de Minecraft que se genera infinitamente, añadiendo más palabras y frases para llegar a una longitud verdaderamente extrema. Este string sigue y sigue y sigue, desafiando las capacidades del analizador, probando su robustez y eficiencia al manejar casos extremos como este.";
+
+SpawnPoint
+
+  PolloCrudo
+    dropperSpider("Prueba de strings largos completada");
+    
+    $$ Usando strings en expresiones
+    Stack longitud = #(string_largo);
+    dropperStack(longitud);
+    
+    $$ Extrayendo partes de strings largos
+    Spider subcadena = from string_largo ## 0 ## 50;
+    dropperSpider(subcadena);
+  PolloAsado
+
+worldSave
