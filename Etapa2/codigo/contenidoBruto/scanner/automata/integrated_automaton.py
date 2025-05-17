@@ -287,6 +287,27 @@ class IntegratedAutomaton:
                 columna + 1
             )
         
+        # Palabras clave especiales adicionales que no están en PALABRAS_RESERVADAS
+        special_keywords = {
+            "pollocrudo": "POLLO_CRUDO",
+            "polloasado": "POLLO_ASADO",
+            "worldsave": "WORLD_SAVE",
+            "worldname": "WORLD_NAME"
+        }
+        
+        # Verificar primero las palabras clave especiales
+        if lexema.lower() in special_keywords:
+            tipo = special_keywords[lexema.lower()]
+            return AutomatonResult(
+                True,
+                tipo,
+                lexema,
+                None,
+                current_pos,
+                linea,
+                current_col
+            )
+        
         # Verificar si es palabra reservada
         if lexema.lower() in PALABRAS_RESERVADAS:
             tipo = PALABRAS_RESERVADAS[lexema.lower()]
