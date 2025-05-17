@@ -32,7 +32,7 @@ Para ejecutar el scanner correctamente, sigue los siguientes pasos:
 
 1. **Ubica la carpeta `pruebas/`** dentro del repositorio del proyecto.
 
-2. **Identifica el archivo llamado `MC_Scanner.OMITIDO`**.  
+2. **Identifica el archivo llamado `main.OMITIDO`**.  
    Este archivo es el ejecutable del scanner, pero debe ser renombrado para poder utilizarse.
 
 3. **Renombra el archivo a mano**, eliminando la extensión `.OMITIDO` y agregando la extension '.exe'.  
