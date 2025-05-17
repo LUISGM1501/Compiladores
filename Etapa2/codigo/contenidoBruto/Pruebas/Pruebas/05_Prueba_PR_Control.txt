@@ -1,0 +1,96 @@
+$* 
+  Prueba_PR_Control.ne
+  Propósito: Verificar reconocimiento de palabras de control de flujo
+  Probar: Entity, PolloCrudo, PolloAsado, Punto, SpawnPoint, Inventory, WorldName
+  Fecha: 28/04/2025
+*$
+
+$$ Prueba de palabras reservadas de control de flujo en NotchEngine
+$$ Verificando: repeater, craft, target, hit, miss, jukebox, disc, silence, 
+$$ spawner, exhausted, walk, set, to, step, wither
+
+WorldName PruebaControl:
+
+Inventory
+
+    $$ Variables para las pruebas
+    Stack contador = 0;
+    Stack opcion = 2;
+    Torch condicion = On;
+    Stack iterador = 0;
+    
+    Entity Punto 
+    PolloCrudo
+        Stack x;
+        Stack y;
+    PolloAsado;
+    
+    Entity Punto coordenada;
+
+SpawnPoint
+
+    PolloCrudo
+        $$ 1. Prueba de repeater (while) con craft
+        dropperSpider("Prueba de repeater:");
+        contador = 5;
+        repeater contador > 0 craft
+        PolloCrudo
+            dropperStack(contador);
+            magma contador;
+        PolloAsado
+        
+        $$ 2. Prueba de target (if) con hit y miss
+        dropperSpider("Prueba de target con hit y miss:");
+        target condicion craft hit
+        PolloCrudo
+            dropperSpider("Condición es verdadera");
+        PolloAsado
+        miss
+        PolloCrudo
+            dropperSpider("Condición es falsa");
+        PolloAsado
+        
+        $$ 3. Prueba de jukebox (switch) con disc y silence
+        dropperSpider("Prueba de jukebox con disc y silence:");
+        jukebox opcion craft
+        disc 1:
+        PolloCrudo
+            dropperSpider("Opción 1 seleccionada");
+        PolloAsado
+        disc 2:
+        PolloCrudo
+            dropperSpider("Opción 2 seleccionada");
+        PolloAsado
+        silence:
+        PolloCrudo
+            dropperSpider("Ninguna opción válida seleccionada");
+        PolloAsado
+        
+        $$ 4. Prueba de spawner (do-while) con exhausted
+        dropperSpider("Prueba de spawner con exhausted:");
+        contador = 0;
+        spawner
+        PolloCrudo
+            soulsand contador;
+            dropperStack(contador);
+        PolloAsado
+        exhausted contador >= 3;
+        
+        $$ 5. Prueba de walk (for) con set, to, step
+        dropperSpider("Prueba de walk con set, to, step:");
+        walk i set 0 to 10 step 2 craft
+        PolloCrudo
+            dropperStack(i);
+        PolloAsado
+        
+        $$ 6. Prueba de wither (with)
+        dropperSpider("Prueba de wither:");
+        coordenada@x = 10;
+        coordenada@y = 20;
+        wither coordenada craft
+        PolloCrudo
+            dropperSpider("Coordenadas: (" bind x bind ", " bind y bind ")");
+        PolloAsado
+    PolloAsado
+
+worldSave
