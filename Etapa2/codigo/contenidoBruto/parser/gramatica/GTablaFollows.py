@@ -1,12 +1,12 @@
 """
- * GTablaFollows.py
- *
- * 2025/05/11 13:08:11
- *
- * Archivo generado por GikGram 2.0
- *
- * Copyright © Olminsky 2011 Derechos reservados
- * Reproducción sin fines de lucro permitida
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: GTablaFollows.py
+
+Breve Descripcion: Tabla de follows generado por GikGram, traducido
+por los estudiantes.
 """
 
 

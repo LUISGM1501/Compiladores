@@ -1,5 +1,11 @@
 """
-Autómata integrado para el scanner MC
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: integrated_automaton.py
+
+Breve Descripcion: Automatas necesarios para el proceso de tokenizacion
 """
 
 class AutomatonResult:

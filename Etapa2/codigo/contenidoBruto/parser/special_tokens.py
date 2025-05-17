@@ -1,11 +1,14 @@
 """
-* special_tokens.py
-*
-* 2025/05/11
-*
-* Manejador de casos especiales de tokens para el parser de Notch-Engine
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: special_tokens.py
+
+Breve Descripcion: Manejador de casos especiales de tokens para el parser de Notch-Engine
 * Especialmente útil para manejar PolloCrudo/PolloAsado y otros identificadores especiales
 """
+
 
 class SpecialTokens:
     """

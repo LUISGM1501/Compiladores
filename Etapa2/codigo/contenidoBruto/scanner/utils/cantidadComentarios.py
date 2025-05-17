@@ -1,3 +1,13 @@
+"""
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: cantidadComentarios.py
+
+Breve Descripcion: funciones para el manejo de comentarios
+"""
+
 def contar_comentarios_linea(texto):
     """
     Cuenta la cantidad de comentarios de línea que comienzan con '$$'.

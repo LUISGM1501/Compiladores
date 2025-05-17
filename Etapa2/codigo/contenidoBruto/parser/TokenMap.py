@@ -1,10 +1,12 @@
 """
-* TokenMap.py
-*
-* 2025/05/11
-*
-* Mapeo de tokens a códigos numéricos para el parser
-* Contiene mejoras para manejar casos especiales como DOBLE_DOS_PUNTOS
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: TokenMap.y
+
+Breve Descripcion: mapeo de tokens con numeros para ser procesados por la 
+tabla de parsing. 
 """
 
 class TokenMap:

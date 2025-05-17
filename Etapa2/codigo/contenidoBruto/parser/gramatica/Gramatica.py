@@ -1,12 +1,12 @@
 """
- * Gramatica.py
- *
- * 2025/05/11 13:08:11
- *
- * Archivo generado por GikGram 2.0
- *
- * Copyright © Olminsky 2011 Derechos reservados
- * Reproducción sin fines de lucro permitida
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: Gramatica.py
+
+Breve Descripcion: Archivo principal de gramatica generado por GikGram, traducido
+por los estudiantes.
 """
 
 # Módulo equivalente al paquete Java

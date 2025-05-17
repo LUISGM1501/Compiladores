@@ -1,4 +1,14 @@
-# /Etapa1/codigo/contenidoBruto/muroLadrillos/generarMuroLadrillos.py
+"""
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: generarMuroLadrillos.py
+
+Breve Descripcion: Encargado de generar el muro de ladrillos
+con los lexemas del programa. 
+"""
+
 def generarLadrillos(contenido, estadisticaToken, lineasPrograma, numeroCaracteresEntrada, 
                     numeroComentariosLinea, numeroComentariosBloque, cantidadErrores):
     """

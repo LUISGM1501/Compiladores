@@ -1,5 +1,11 @@
 """
-Definición de tokens y palabras reservadas para el lenguaje MC - Versión optimizada
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: tokens.py
+
+Breve Descripcion: tokens disponibles para el scanner
 """
 
 from enum import Enum, auto

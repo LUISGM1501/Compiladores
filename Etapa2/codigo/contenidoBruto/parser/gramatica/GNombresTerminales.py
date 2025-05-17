@@ -1,12 +1,12 @@
 """
- * GNombresTerminales.py
- *
- * 2025/05/11 13:08:11
- *
- * Archivo generado por GikGram 2.0
- *
- * Copyright © Olminsky 2011 Derechos reservados
- * Reproducción sin fines de lucro permitida
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: GNombresTerminales.py
+
+Breve Descripcion: Nombres de terminales generado por GikGram, traducido
+por los estudiantes.
 """
 
 # Parte del módulo Gramatica

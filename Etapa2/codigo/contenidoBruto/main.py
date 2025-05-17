@@ -1,5 +1,11 @@
 """
-MC Scanner - Versión optimizada
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: main.py
+
+Breve Descripcion: Archivo de gestion principal
 """
 
 import sys

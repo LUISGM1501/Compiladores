@@ -1,10 +1,11 @@
 """
-* mc_parser.py
-*
-* 2025/05/11
-*
-* Implementación del analizador sintáctico (parser) basado en la gramática generada
-* con mejoras para manejar casos especiales y recuperación de errores
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: mc_parser
+
+Breve Descripcion: Encargado del manejo del parser.
 """
 
 from .gramatica.Gramatica import Gramatica

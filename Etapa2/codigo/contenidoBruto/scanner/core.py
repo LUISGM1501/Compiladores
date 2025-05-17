@@ -1,6 +1,11 @@
-# Archivo: /scanner/core.py
 """
-Núcleo optimizado del scanner para el lenguaje MC
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: core.py
+
+Breve Descripcion: Encargado de llevar acabo el procesamiento del scanner
 """
 
 from .tokens import Token, PALABRAS_RESERVADAS, TokenCategory

@@ -1,5 +1,11 @@
 """
-MC Scanner - Versión optimizada
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: mc_scanner.py
+
+Breve Descripcion: orquestador scanner
 """
 
 import sys
