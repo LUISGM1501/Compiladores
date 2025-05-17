@@ -39,7 +39,7 @@ Para ejecutar el scanner correctamente, sigue los siguientes pasos:
    El nombre final del archivo debe quedar como: **`main.exe`**
 
 
-4. **Ejecuta el archivo `main.exex`** desde un entorno compatible.  
+4. **Ejecuta el archivo `main.exe`** desde un entorno compatible.  
 Al ejecutarlo, se generará automáticamente una carpeta llamada `resultados/`.
 
 5. **Dentro de la carpeta `resultados/` encontrarás un archivo HTML** que muestra los resultados del análisis léxico realizado por el scanner.
