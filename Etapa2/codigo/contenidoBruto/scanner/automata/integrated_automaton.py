@@ -332,6 +332,7 @@ class IntegratedAutomaton:
             '<': 'MENOR_QUE',
             '>': 'MAYOR_QUE',
             '=': 'IGUAL', 
+            '/': 'BARRA',
             ':+': 'SUMA_FLOTANTE',
             ':-': 'RESTA_FLOTANTE',
             ':*': 'MULTIPLICACION_FLOTANTE',

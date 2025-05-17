@@ -118,6 +118,14 @@ class Parser:
             self.imprimir_debug("Token actual: EOF", 2)
             return Gramatica.MARCA_DERECHA  # Token de fin de archivo
         
+        # Caso especial para identificadores que son palabras reservadas especiales
+        if self.token_actual.type == "IDENTIFICADOR":
+            lex = self.token_actual.lexema.lower()
+            if lex == "pollocrudo":
+                return 22  # POLLO_CRUDO
+            elif lex == "polloasado":
+                return 23  # POLLO_ASADO
+        
         token_type = self.token_actual.type
         token_code = TokenMap.get_token_code(token_type)
         
