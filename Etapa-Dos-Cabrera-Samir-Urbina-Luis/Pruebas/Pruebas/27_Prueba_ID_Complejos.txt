@@ -1,0 +1,98 @@
+$* 
+  Prueba_ID_Complejos.ne
+  Propósito: Verificar identificadores complejos (con guiones bajos, números)
+  Fecha: 28/04/2025
+*$
+
+WorldName PruebaIdentificadoresComplejos:
+
+Bedrock
+
+  Obsidian Stack MAX_LEVEL 100;
+  Obsidian Stack MIN_LEVEL 1;
+  Obsidian Spider GAME_TITLE "Notch Engine";
+  Obsidian Spider VERSION_1_0 "v1.0";
+
+Inventory
+
+  $$ Identificadores con guiones bajos
+  Stack player_level;
+  Stack enemy_count;
+  Stack max_health;
+  Stack min_damage;
+  Stack current_position_x;
+  
+  $$ Identificadores con números
+  Stack counter1;
+  Stack item2;
+  Stack level3d;
+  Stack position2d;
+  Stack player1_health;
+  
+  $$ Identificadores mixtos con guiones bajos y números
+  Stack item_1;
+  Stack player_2_score;
+  Stack enemy_level_3;
+  Stack position_x_1;
+  Stack inventory_slot_5;
+  
+  $$ Identificadores que comienzan con guión bajo
+  Stack _temp;
+  Stack _internal_counter;
+  Stack _system_value;
+  Stack _player_data;
+  
+  $$ Identificadores largos
+  Stack very_long_variable_name_with_many_words;
+  Spider extremely_long_message_text_that_describes_something_in_detail;
+  Torch is_player_currently_in_creative_mode_with_flight_enabled;
+  
+  $$ Combinaciones variadas
+  Stack player5_current_health_max_100;
+  Stack enemy_3d_position_coordinate_x_12;
+  Rune player_initial_1;
+  Spider user_5_name;
+
+CraftingTable
+
+  Spell calculate_total_damage(Stack :: base_damage, critical_multiplier; Torch :: is_headshot) -> Stack
+  PolloCrudo
+    Stack total_damage;
+    total_damage = base_damage * critical_multiplier;
+    
+    target is_headshot craft hit
+    PolloCrudo
+      total_damage = total_damage * 2;
+    PolloAsado
+    
+    respawn total_damage;
+  PolloAsado
+  
+  Ritual display_player_stats(Spider :: player_name; Stack level_1, health_points_100)
+  PolloCrudo
+    dropperSpider("Player: " bind player_name);
+    dropperSpider("Level: " bind level_1);
+    dropperSpider("Health: " bind health_points_100);
+  PolloAsado
+
+SpawnPoint
+
+  PolloCrudo
+    $$ Uso de identificadores complejos
+    Stack player1_health = 100;
+    Stack enemy_count_5 = 10;
+    Spider main_player_name = "Steve_123";
+    
+    $$ Asignaciones y operaciones
+    player1_health = player1_health - 20;
+    enemy_count_5 = calculate_total_damage(10, 2, On);
+    
+    $$ Llamada a procedimiento
+    ender_pearl display_player_stats(main_player_name, 5, player1_health);
+    
+    $$ Variables con guiones bajos múltiples
+    Stack ___special_value = 42;
+    dropperStack(___special_value);
+  PolloAsado
+
+worldSave

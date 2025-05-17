@@ -1,0 +1,133 @@
+$* 
+  19_Prueba_Op_Comparacion.ne
+  Propósito: Verificar el reconocimiento de operadores de comparación en Notch Engine
+  Probar: =, !=, <, >, <=, >=, is, isNot
+  Fecha: 28/04/2025
+*$
+
+WorldName PruebaOpComparacion:
+
+Inventory
+
+    Stack a = 10;
+    Stack b = 5;
+    Torch resultado;
+    
+    Ghast x = 3.5;
+    Ghast y = 2.75;
+    
+    Spider cadena1 = "abc";
+    Spider cadena2 = "def";
+    
+    Rune char1 = 'A';
+    Rune char2 = 'B';
+    
+    Torch bool1 = On;
+    Torch bool2 = Off;
+
+SpawnPoint
+
+    PolloCrudo
+        $$ Pruebas con operador menor que (<)
+        resultado = a < b;
+        dropperSpider("a < b: " bind resultado);
+        
+        resultado = x < y;
+        dropperSpider("x < y: " bind resultado);
+        
+        resultado = cadena1 < cadena2;
+        dropperSpider("cadena1 < cadena2: " bind resultado);
+        
+        resultado = char1 < char2;
+        dropperSpider("char1 < char2: " bind resultado);
+        
+        $$ Pruebas con operador mayor que (>)
+        resultado = a > b;
+        dropperSpider("a > b: " bind resultado);
+        
+        resultado = x > y;
+        dropperSpider("x > y: " bind resultado);
+        
+        $$ Pruebas con operador menor o igual que (<=)
+        resultado = a <= b;
+        dropperSpider("a <= b: " bind resultado);
+        
+        resultado = x <= y;
+        dropperSpider("x <= y: " bind resultado);
+        
+        $$ Pruebas con operador mayor o igual que (>=)
+        resultado = a >= b;
+        dropperSpider("a >= b: " bind resultado);
+        
+        resultado = x >= y;
+        dropperSpider("x >= y: " bind resultado);
+        
+        $$ Pruebas con operador igual a (is)
+        resultado = a is b;
+        dropperSpider("a is b: " bind resultado);
+        
+        resultado = x is y;
+        dropperSpider("x is y: " bind resultado);
+        
+        resultado = cadena1 is cadena2;
+        dropperSpider("cadena1 is cadena2: " bind resultado);
+        
+        resultado = bool1 is bool2;
+        dropperSpider("bool1 is bool2: " bind resultado);
+        
+        $$ Pruebas con operador distinto de (isNot)
+        resultado = a isNot b;
+        dropperSpider("a isNot b: " bind resultado);
+        
+        resultado = x isNot y;
+        dropperSpider("x isNot y: " bind resultado);
+        
+        resultado = cadena1 isNot cadena2;
+        dropperSpider("cadena1 isNot cadena2: " bind resultado);
+        
+        resultado = bool1 isNot bool2;
+        dropperSpider("bool1 isNot bool2: " bind resultado);
+        
+        $$ Casos especiales para probar el scanner
+        
+        $$ Operadores sin espacios
+        resultado = a<b;
+        resultado = a>b;
+        resultado = a<=b;
+        resultado = a>=b;
+        resultado = aisb;  $$ Este caso debería ser un identificador, no un operador
+        resultado = a is b;
+        resultado = aisNotb;  $$ Este caso debería ser un identificador, no un operador
+        resultado = a isNot b;
+        
+        $$ Operadores con espacios variados
+        resultado = a <  b;
+        resultado = a  > b;
+        resultado = a<=  b;
+        resultado = a  >= b;
+        resultado = a  is  b;
+        resultado = a  isNot  b;
+        
+        $$ Operaciones de comparación en expresiones condicionales
+        target a < b craft hit
+        PolloCrudo
+            dropperSpider("a es menor que b");
+        PolloAsado
+        
+        repeater x > y craft
+        PolloCrudo
+            dropperSpider("x es mayor que y");
+        PolloAsado
+        
+        $$ Operaciones de comparación con expresiones
+        resultado = (a + b) > (x :+ y);
+        resultado = a * 2 <= b * 3;
+        resultado = (a // 2) is (b // 1);
+        resultado = bind(cadena1, cadena2) isNot "abcdef";
+        
+        $$ Operador 'is' y 'isNot' en diferentes contextos (verificar scanner)
+        Spider islandia = "país"; $$ Identificador que comienza con 'is'
+        Stack isNotacion = 42;    $$ Identificador que comienza con 'isNot'
+    PolloAsado
+
+worldSave
