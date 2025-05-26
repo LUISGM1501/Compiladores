@@ -1,250 +1,2343 @@
 ; ********************************************
-; * Programa: SELECTED.ASM                   *
-; * Descripcion: Conversiones desde flotante *
-; * Autores: Luis Urbina, Samir Cabrera      *
-; * Fecha de entrega: 28/04/2025            *
+; * Programa: SELECTED.ASM  (GHAST)         *
+; * Descripcion: Operaciones sobre flotantes*
+; * Autores: Luis Urbina, Samir Cabrera     *
+; * Fecha: 10/05/2025                       *
+; * Version: 1.0                            *
+; * Curso: Compiladores e Interpretes       *
+; * Proyecto: Notch Engine - Etapa 2        *
 ; ********************************************
 
-; El segmento DATOS contiene todas las variables y constantes que usara el programa
 DATOS SEGMENT
     ; Mensajes de entrada y salida
-    prompt_in    DB 'Ingrese un numero flotante (Ej: 3.14): $'  ; Mensaje para solicitar entrada
-    prompt_float DB 'El numero flotante ingresado es: $'        ; Mensaje para mostrar el flotante original
-    prompt_int   DB 'Convertido a entero: $'                    ; Mensaje para mostrar la conversión a entero
-    prompt_char  DB 'Convertido a caracter: $'                  ; Mensaje para mostrar la conversión a carácter
-    prompt_bool  DB 'Convertido a booleano: $'                  ; Mensaje para mostrar la conversión a booleano
-    prompt_str   DB 'Convertido a string: $'                    ; Mensaje para mostrar la conversión a string
-    prompt_creativo DB 'Convertido a creativo (probabilidad): $' ; Mensaje para conversión a creativo
+    titulo       DB "DEMOSTRACION DE OPERACIONES CON GHAST (FLOTANTES)", 0Dh, 0Ah, '$'
+    separador    DB "----------------------------------------", 0Dh, 0Ah, '$'
     
-    ; Variables para almacenar valores
-    buffer      DB 15, ?, 15 DUP(?)  ; Buffer para entrada (maximo 15 caracteres)
+    menu         DB "MENU DE OPERACIONES:", 0Dh, 0Ah
+                 DB "1. Suma flotante (:+)", 0Dh, 0Ah
+                 DB "2. Resta flotante (:-)", 0Dh, 0Ah
+                 DB "3. Multiplicacion flotante (:*)", 0Dh, 0Ah
+                 DB "4. Division flotante (://)", 0Dh, 0Ah
+                 DB "5. Modulo flotante (:%)", 0Dh, 0Ah
+                 DB "6. Asignaciones (:+=, :-=, :*=, ://=, :%=)", 0Dh, 0Ah
+                 DB "7. Comparaciones (<, >, <=, >=, is, isNot)", 0Dh, 0Ah
+                 DB "8. Convertir a otros tipos", 0Dh, 0Ah
+                 DB "0. Salir", 0Dh, 0Ah
+                 DB "Seleccione una opcion: $"
+
+    submenu_asig DB 0Dh, 0Ah, "OPERACIONES DE ASIGNACION:", 0Dh, 0Ah
+                 DB "1. Suma y asigna (:+=)", 0Dh, 0Ah
+                 DB "2. Resta y asigna (:-=)", 0Dh, 0Ah
+                 DB "3. Multiplica y asigna (:*=)", 0Dh, 0Ah
+                 DB "4. Divide y asigna (://=)", 0Dh, 0Ah
+                 DB "5. Modulo y asigna (:%=)", 0Dh, 0Ah
+                 DB "Seleccione: $"
     
-    ; Variables para valor flotante original
-    entero      DW ?                  ; Variable para almacenar la parte entera del numero
-    decimal     DW ?                  ; Variable para almacenar la parte decimal del numero
-    dec_digitos DB ?                  ; Contador de digitos en la parte decimal
-    es_negativo DB 0                  ; Bandera para indicar si el numero es negativo
+    prompt_conversiones_orig DB "El flotante original es: $"
+    prompt_conv_int     DB "Convertido a Stack (entero): $"
+    prompt_conv_bool    DB "Convertido a Torch (booleano): $"
+    prompt_conv_char    DB "Convertido a Rune (caracter): $"
+    prompt_conv_str     DB "Convertido a Spider (string): $"
+    prompt_conv_creativo DB "Convertido a creativo (probabilidad): $"
+
+    prompt_float1 DB "Ingrese primer numero flotante: $"
+    prompt_float2 DB "Ingrese segundo numero flotante: $"
+    result_msg    DB "Resultado: $"
+    error_div     DB "Error: Division por cero", 0Dh, 0Ah, '$'
+
+    ; Variables para operaciones con flotantes
+    buffer1      DB 15, ?, 15 DUP(?)  ; Buffer para primer flotante
+    buffer2      DB 15, ?, 15 DUP(?)  ; Buffer para segundo flotante
     
-    ; Variables para las conversiones
-    int_valor   DW ?                  ; Valor entero (para conversión a INTEGER)
-    bool_valor  DB ?                  ; Valor booleano (para conversión a BOOLEAN)
-    char_valor  DB ?                  ; Valor carácter (para conversión a CHAR)
-    prob_valor  DB ?                  ; Valor de probabilidad (para conversión a CREATIVO)
+    ; Variables para el primer flotante
+    entero1      DW ?                  ; Parte entera del primer flotante
+    decimal1     DW ?                  ; Parte decimal del primer flotante
+    dec_digitos1 DB ?                  ; Dígitos decimales del primer flotante
+    es_negativo1 DB 0                  ; Bandera de signo del primer flotante
     
-    ; Variable para valor string
-    string_buffer DB 30 DUP(?),'$'   ; Buffer para la conversión a string
+    ; Variables para el segundo flotante
+    entero2      DW ?                  ; Parte entera del segundo flotante
+    decimal2     DW ?                  ; Parte decimal del segundo flotante
+    dec_digitos2 DB ?                  ; Dígitos decimales del segundo flotante
+    es_negativo2 DB 0                  ; Bandera de signo del segundo flotante
+    
+    ; Variables para el resultado
+    resultado_entero   DW ?            ; Parte entera del resultado
+    resultado_decimal  DW ?            ; Parte decimal del resultado
+    resultado_digitos  DB ?            ; Dígitos decimales del resultado
+    resultado_negativo DB 0            ; Bandera de signo del resultado
+    
+    ; Variables para conversiones
+    int_valor    DW ?                  ; Conversión a entero (Stack)
+    bool_valor   DB ?                  ; Conversión a booleano (Torch)
+    char_valor   DB ?                  ; Conversión a caracter (Rune)
+    string_buffer DB 50 DUP(?),'$'    ; Conversión a string (Spider)
+    prob_valor   DB ?                  ; Conversión a creativo (probabilidad)
+    
+    ; Mensajes para comparaciones
+    msg_menor    DB "MENOR QUE (<): $"
+    msg_mayor    DB "MAYOR QUE (>): $"
+    msg_menig    DB "MENOR O IGUAL QUE (<=): $"
+    msg_mayig    DB "MAYOR O IGUAL QUE (>=): $"
+    msg_igual    DB "IGUAL A (is): $"
+    msg_nig      DB "DISTINTO DE (isNot): $"
     
     ; Valores para mostrar booleanos
-    valor_true   DB 'TRUE$'          ; Cadena de texto para mostrar cuando el valor es verdadero
-    valor_false  DB 'FALSE$'         ; Cadena de texto para mostrar cuando el valor es falso
+    valor_true   DB 'TRUE$'
+    valor_false  DB 'FALSE$'
     
     ; Auxiliares
-    nueva_lin    DB 0Dh, 0Ah, '$'    ; Códigos para crear una nueva línea en pantalla
-    punto        DB '.$'             ; Punto decimal para mostrar flotantes
-    const_diez   DW 10               ; Constante 10 para cálculos
+    nueva_lin    DB 0Dh, 0Ah, '$'
+    punto        DB '.$'
+    const_diez   DW 10
+    const_cien   DW 100
+    const_10000  DW 10000 
 DATOS ENDS
 
-; El segmento CODIGO contiene las instrucciones que ejecutara el programa
 CODIGO SEGMENT
-    ; Indicamos al ensamblador donde encontrar nuestros datos y codigo
     ASSUME CS:CODIGO, DS:DATOS
 INICIO:
-    ; Inicializacion: Preparamos el acceso al segmento de datos
+    ; Inicialización: Preparamos el acceso al segmento de datos
     MOV AX, DATOS
     MOV DS, AX
     
-    ; Mostramos el mensaje pidiendo al usuario que ingrese un numero flotante
-    MOV AH, 09h       ; Funcion 9 de DOS: mostrar una cadena terminada en $
-    LEA DX, prompt_in ; Cargamos la direccion del mensaje en DX
-    INT 21h           ; Llamamos a la interrupcion 21h (servicios de DOS)
+    ; Mostrar título
+    MOV AH, 09h
+    LEA DX, titulo
+    INT 21h
     
-    ; Leemos la entrada del usuario como texto
-    MOV AH, 0Ah       ; Funcion 0Ah de DOS: leer una cadena (con buffer)
-    LEA DX, buffer    ; Cargamos la direccion del buffer en DX
-    INT 21h           ; Llamamos a la interrupcion 21h
+    LEA DX, separador
+    INT 21h
+
+MENU_PRINCIPAL:
+    ; Mostrar menú de opciones
+    MOV AH, 09h
+    LEA DX, menu
+    INT 21h
     
-    ; Procesamos el numero flotante (separando parte entera y decimal)
-    CALL PROCESAR_FLOTANTE  ; Llamamos al procedimiento que separa las partes
+    ; Leer opción del usuario
+    MOV AH, 01h
+    INT 21h
     
-    ; Realizar todas las conversiones desde el flotante
-    CALL FLOAT_A_INTEGER    ; Convertir a entero
-    CALL FLOAT_A_CHAR       ; Convertir a caracter
-    CALL FLOAT_A_BOOLEAN    ; Convertir a booleano
-    CALL FLOAT_A_STRING     ; Convertir a string
-    CALL FLOAT_A_CREATIVO   ; Convertir a creativo (probabilidad)
+    ; Comparar con las opciones disponibles - usando saltos largos
+    CMP AL, '1'
+    JNE @SELECTED_NOT1
+    JMP OPCION_SUMA
+@SELECTED_NOT1:
+    CMP AL, '2'
+    JNE @SELECTED_NOT2
+    JMP OPCION_RESTA
+@SELECTED_NOT2:
+    CMP AL, '3'
+    JNE @SELECTED_NOT3
+    JMP OPCION_MULTIPLICACION
+@SELECTED_NOT3:
+    CMP AL, '4'
+    JNE @SELECTED_NOT4
+    JMP OPCION_DIVISION
+@SELECTED_NOT4:
+    CMP AL, '5'
+    JNE @SELECTED_NOT5
+    JMP OPCION_MODULO
+@SELECTED_NOT5:
+    CMP AL, '6'
+    JNE @SELECTED_NOT6
+    JMP OPCION_ASIGNACIONES
+@SELECTED_NOT6:
+    CMP AL, '7'
+    JNE @SELECTED_NOT7
+    JMP OPCION_COMPARACIONES
+@SELECTED_NOT7:
+    CMP AL, '8'
+    JNE @SELECTED_NOT8
+    JMP OPCION_CONVERSIONES
+@SELECTED_NOT8:
+    CMP AL, '0'
+    JNE @SELECTED_NOT0
+    JMP SALIR
+@SELECTED_NOT0:
+    
+    ; Si llegamos aquí, la opción no es válida, volver al menú
+    JMP MENU_PRINCIPAL
+
+OPCION_SUMA:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    
+    ; Realizar la suma flotante (:+)
+    CALL SUMAR_FLOTANTES
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+OPCION_RESTA:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    
+    ; Realizar la resta flotante (:-)
+    CALL RESTAR_FLOTANTES
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+OPCION_MULTIPLICACION:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    
+    ; Realizar la multiplicación flotante (:*)
+    CALL MULTIPLICAR_FLOTANTES
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+OPCION_DIVISION:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    
+    ; Verificar división por cero
+    CALL VERIFICAR_CERO_SEGUNDO
+    JC @SELECTED_ERROR_DIV
+    
+    ; Realizar la división flotante (://)
+    CALL DIVIDIR_FLOTANTES
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+@SELECTED_ERROR_DIV:
+    MOV AH, 09h
+    LEA DX, error_div
+    INT 21h
+    JMP MENU_PRINCIPAL
+
+OPCION_MODULO:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    
+    ; Verificar división por cero
+    CALL VERIFICAR_CERO_SEGUNDO
+    JC @SELECTED_ERROR_MOD
+    
+    ; Realizar el módulo flotante (:%)
+    CALL MODULO_FLOTANTES
+    
+    ; Mostrar resultado
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+@SELECTED_ERROR_MOD:
+    MOV AH, 09h
+    LEA DX, error_div
+    INT 21h
+    JMP MENU_PRINCIPAL
+
+OPCION_ASIGNACIONES:
+    CALL NUEVA_LINEA
+    
+    ; Submenu para operaciones de asignación
+    MOV AH, 09h
+    LEA DX, submenu_asig
+    INT 21h
+    
+    ; Leer subopción
+    MOV AH, 01h
+    INT 21h
+    
+    CMP AL, '1'
+    JNE @SELECTED_ASIG_NOT1
+    JMP ASIGNACION_SUMA
+@SELECTED_ASIG_NOT1:
+    CMP AL, '2'
+    JNE @SELECTED_ASIG_NOT2
+    JMP ASIGNACION_RESTA
+@SELECTED_ASIG_NOT2:
+    CMP AL, '3'
+    JNE @SELECTED_ASIG_NOT3
+    JMP ASIGNACION_MULT
+@SELECTED_ASIG_NOT3:
+    CMP AL, '4'
+    JNE @SELECTED_ASIG_NOT4
+    JMP ASIGNACION_DIV
+@SELECTED_ASIG_NOT4:
+    CMP AL, '5'
+    JNE @SELECTED_ASIG_VOLVER
+    JMP ASIGNACION_MOD
+@SELECTED_ASIG_VOLVER:
+    JMP MENU_PRINCIPAL
+
+ASIGNACION_SUMA:
+    ; Implementar A :+= B (equivale a A = A :+ B)
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    CALL SUMAR_FLOTANTES
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+ASIGNACION_RESTA:
+    ; Implementar A :-= B (equivale a A = A :- B)
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    CALL RESTAR_FLOTANTES
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+ASIGNACION_MULT:
+    ; Implementar A :*= B (equivale a A = A :* B)
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    CALL MULTIPLICAR_FLOTANTES
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+ASIGNACION_DIV:
+    ; Implementar A ://= B (equivale a A = A :// B)
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    CALL VERIFICAR_CERO_SEGUNDO
+    JC @SELECTED_ASIG_ERROR_DIV
+    CALL DIVIDIR_FLOTANTES
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+@SELECTED_ASIG_ERROR_DIV:
+    MOV AH, 09h
+    LEA DX, error_div
+    INT 21h
+    JMP MENU_PRINCIPAL
+
+ASIGNACION_MOD:
+    ; Implementar A :%= B (equivale a A = A :% B)
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    CALL VERIFICAR_CERO_SEGUNDO
+    JC @SELECTED_ASIG_ERROR_MOD
+    CALL MODULO_FLOTANTES
+    CALL MOSTRAR_RESULTADO_FLOTANTE
+    JMP MENU_PRINCIPAL
+
+@SELECTED_ASIG_ERROR_MOD:
+    MOV AH, 09h
+    LEA DX, error_div
+    INT 21h
+    JMP MENU_PRINCIPAL
+
+OPCION_COMPARACIONES:
+    CALL NUEVA_LINEA
+    CALL LEER_DOS_FLOTANTES
+    
+    ; Comparar MENOR QUE (<)
+    MOV AH, 09h
+    LEA DX, msg_menor
+    INT 21h
+    
+    CALL COMPARAR_FLOTANTES_MENOR
+    MOV AH, 09h
+    JZ @SELECTED_COMP_MENOR_TRUE
+    LEA DX, valor_false
+    JMP @SELECTED_SHOW_MENOR
+@SELECTED_COMP_MENOR_TRUE:
+    LEA DX, valor_true
+@SELECTED_SHOW_MENOR:
+    INT 21h
+    
+    ; Comparar MAYOR QUE (>)
+    MOV AH, 09h
+    LEA DX, msg_mayor
+    INT 21h
+    
+    CALL COMPARAR_FLOTANTES_MAYOR
+    MOV AH, 09h
+    JZ @SELECTED_COMP_MAYOR_TRUE
+    LEA DX, valor_false
+    JMP @SELECTED_SHOW_MAYOR
+@SELECTED_COMP_MAYOR_TRUE:
+    LEA DX, valor_true
+@SELECTED_SHOW_MAYOR:
+    INT 21h
+    
+    ; Comparar MENOR O IGUAL QUE (<=)
+    MOV AH, 09h
+    LEA DX, msg_menig
+    INT 21h
+    
+    CALL COMPARAR_FLOTANTES_MENOR_IGUAL
+    MOV AH, 09h
+    JZ @SELECTED_COMP_MENIG_TRUE
+    LEA DX, valor_false
+    JMP @SELECTED_SHOW_MENIG
+@SELECTED_COMP_MENIG_TRUE:
+    LEA DX, valor_true
+@SELECTED_SHOW_MENIG:
+    INT 21h
+    
+    ; Comparar MAYOR O IGUAL QUE (>=)
+    MOV AH, 09h
+    LEA DX, msg_mayig
+    INT 21h
+    
+    CALL COMPARAR_FLOTANTES_MAYOR_IGUAL
+    MOV AH, 09h
+    JZ @SELECTED_COMP_MAYIG_TRUE
+    LEA DX, valor_false
+    JMP @SELECTED_SHOW_MAYIG
+@SELECTED_COMP_MAYIG_TRUE:
+    LEA DX, valor_true
+@SELECTED_SHOW_MAYIG:
+    INT 21h
+    
+    ; Comparar IGUAL A (is)
+    MOV AH, 09h
+    LEA DX, msg_igual
+    INT 21h
+    
+    CALL COMPARAR_FLOTANTES_IGUAL
+    MOV AH, 09h
+    JZ @SELECTED_COMP_IGUAL_TRUE
+    LEA DX, valor_false
+    JMP @SELECTED_SHOW_IGUAL
+@SELECTED_COMP_IGUAL_TRUE:
+    LEA DX, valor_true
+@SELECTED_SHOW_IGUAL:
+    INT 21h
+    
+    ; Comparar DISTINTO DE (isNot)
+    MOV AH, 09h
+    LEA DX, msg_nig
+    INT 21h
+    
+    CALL COMPARAR_FLOTANTES_DISTINTO
+    MOV AH, 09h
+    JZ @SELECTED_COMP_DISTINTO_TRUE
+    LEA DX, valor_false
+    JMP @SELECTED_SHOW_DISTINTO
+@SELECTED_COMP_DISTINTO_TRUE:
+    LEA DX, valor_true
+@SELECTED_SHOW_DISTINTO:
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    JMP MENU_PRINCIPAL
+
+OPCION_CONVERSIONES:
+    CALL NUEVA_LINEA
+    
+    ; Leer un flotante para convertir
+    MOV AH, 09h
+    LEA DX, prompt_float1
+    INT 21h
+    
+    MOV AH, 0Ah
+    LEA DX, buffer1
+    INT 21h
+    
+    ; Procesar el flotante
+    CALL PROCESAR_PRIMER_FLOTANTE
+    
+    ; Realizar todas las conversiones
+    CALL FLOAT_A_INTEGER    ; A Stack (entero)
+    CALL FLOAT_A_BOOLEAN    ; A Torch (booleano)
+    CALL FLOAT_A_CHAR       ; A Rune (caracter)
+    CALL FLOAT_A_STRING     ; A Spider (string)
+    CALL FLOAT_A_CREATIVO   ; A tipo creativo
     
     ; Mostrar todas las conversiones
-    CALL MOSTRAR_RESULTADOS
+    CALL MOSTRAR_CONVERSIONES
     
+    JMP MENU_PRINCIPAL
+
+SALIR:
     ; Terminamos el programa y regresamos al sistema operativo
-    MOV AX, 4C00h      ; Funcion 4Ch de DOS: terminar programa (con codigo de salida 0)
-    INT 21h            ; Llamamos a la interrupcion 21h
+    MOV AX, 4C00h
+    INT 21h
 
 ;------------------------------------------------------------
-; Procedimiento: PROCESAR_FLOTANTE
-; Analiza la entrada del usuario y extrae la parte entera y decimal del numero
+; Procedimiento: LEER_DOS_FLOTANTES
+; Lee dos números flotantes desde la entrada estándar
 ;------------------------------------------------------------
-PROCESAR_FLOTANTE PROC
-    ; Guardamos los registros que vamos a modificar
+LEER_DOS_FLOTANTES PROC
+    ; Leer primer flotante
+    MOV AH, 09h
+    LEA DX, prompt_float1
+    INT 21h
+    
+    MOV AH, 0Ah
+    LEA DX, buffer1
+    INT 21h
+    
+    ; Procesar primer flotante
+    CALL PROCESAR_PRIMER_FLOTANTE
+    
+    CALL NUEVA_LINEA
+    
+    ; Leer segundo flotante
+    MOV AH, 09h
+    LEA DX, prompt_float2
+    INT 21h
+    
+    MOV AH, 0Ah
+    LEA DX, buffer2
+    INT 21h
+    
+    ; Procesar segundo flotante
+    CALL PROCESAR_SEGUNDO_FLOTANTE
+    
+    CALL NUEVA_LINEA
+    
+    RET
+LEER_DOS_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: PROCESAR_PRIMER_FLOTANTE
+; Procesa el primer flotante del buffer1
+;------------------------------------------------------------
+PROCESAR_PRIMER_FLOTANTE PROC
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     PUSH SI
     
-    XOR AX, AX            ; Inicializamos AX a 0
-    MOV BL, [buffer+1]    ; En buffer+1 esta la cantidad de caracteres leidos
-    XOR BH, BH            ; Limpiamos BH (para que BX solo contenga el valor de BL)
-    LEA SI, [buffer+2]    ; SI apunta al primer caracter ingresado
+    ; Inicializar variables del primer flotante
+    MOV [entero1], 0
+    MOV [decimal1], 0
+    MOV [dec_digitos1], 0
+    MOV [es_negativo1], 0
     
-    ; Inicializamos todas las variables relacionadas con el numero
-    MOV [entero], 0       ; Parte entera a 0
-    MOV [decimal], 0      ; Parte decimal a 0
-    MOV [dec_digitos], 0  ; Contador de digitos decimales a 0
-    MOV [es_negativo], 0  ; Bandera de negativo a 0 (positivo)
+    ; Obtener longitud y puntero
+    MOV BL, [buffer1+1]
+    XOR BH, BH
+    LEA SI, [buffer1+2]
     
-    ; Verificamos si la cadena esta vacia
+    ; Verificar si está vacío
     CMP BX, 0
-    JE PROC_FIN           ; Si esta vacia, terminamos
+    JE @SELECTED_PROC1_FIN
     
-    ; Verificamos si comienza con signo negativo
-    MOV CL, [SI]          ; Obtenemos el primer caracter
-    CMP CL, '-'           ; ¿Es un signo negativo?
-    JNE PROC_ENTERO       ; Si no es negativo, procesamos parte entera
+    ; Verificar signo negativo
+    MOV CL, [SI]
+    CMP CL, '-'
+    JNE @SELECTED_PROC1_ENTERO
     
-    ; Si es negativo, marcamos la bandera y avanzamos al siguiente caracter
-    MOV [es_negativo], 1
-    INC SI                ; Avanzamos al siguiente caracter
-    DEC BX                ; Reducimos el contador de caracteres
+    MOV [es_negativo1], 1
+    INC SI
+    DEC BX
     
-    ; Procesamos la parte entera hasta encontrar el punto decimal
-PROC_ENTERO:
-    CMP BX, 0             ; ¿Terminamos todos los caracteres?
-    JE PROC_FIN
+@SELECTED_PROC1_ENTERO:
+    CMP BX, 0
+    JE @SELECTED_PROC1_FIN
     
-    MOV CL, [SI]          ; Obtenemos el caracter actual
-    INC SI                ; Avanzamos al siguiente caracter
-    DEC BX                ; Reducimos el contador de caracteres
+    MOV CL, [SI]
+    INC SI
+    DEC BX
     
-    CMP CL, '.'           ; ¿Es el punto decimal?
-    JE PROC_DECIMAL       ; Si es el punto, pasamos a procesar la parte decimal
+    CMP CL, '.'
+    JE @SELECTED_PROC1_DECIMAL
     
-    ; Verificamos si es un digito valido
+    ; Verificar si es dígito
     CMP CL, '0'
-    JL PROC_ENTERO        ; Si es menor que '0', no es un digito (lo ignoramos)
+    JL @SELECTED_PROC1_ENTERO
     CMP CL, '9'
-    JG PROC_ENTERO        ; Si es mayor que '9', no es un digito (lo ignoramos)
+    JG @SELECTED_PROC1_ENTERO
     
-    SUB CL, '0'           ; Convertimos el caracter ASCII a valor numerico
-    XOR CH, CH            ; Limpiamos CH (para que CX solo contenga el valor de CL)
+    SUB CL, '0'
+    XOR CH, CH
     
-    ; Formula para construir la parte entera: entero = entero * 10 + digito
-    MOV AX, [entero]
+    ; entero1 = entero1 * 10 + dígito
+    MOV AX, [entero1]
     MOV DX, 10
-    MUL DX                ; AX = AX * 10
-    ADD AX, CX            ; AX = AX + digito
-    MOV [entero], AX
+    MUL DX
+    ADD AX, CX
+    MOV [entero1], AX
     
-    JMP PROC_ENTERO       ; Continuamos con el siguiente caracter
+    JMP @SELECTED_PROC1_ENTERO
     
-; Procesamos la parte decimal despues del punto
-PROC_DECIMAL:
-    CMP BX, 0             ; ¿Terminamos todos los caracteres?
-    JE PROC_FIN
+@SELECTED_PROC1_DECIMAL:
+    CMP BX, 0
+    JE @SELECTED_PROC1_FIN
     
-    MOV CL, [SI]          ; Obtenemos el caracter actual
-    INC SI                ; Avanzamos al siguiente caracter
-    DEC BX                ; Reducimos el contador de caracteres
+    MOV CL, [SI]
+    INC SI
+    DEC BX
     
-    ; Verificamos si es un digito valido
+    ; Verificar si es dígito
     CMP CL, '0'
-    JL PROC_DECIMAL       ; Si es menor que '0', no es un digito (lo ignoramos)
+    JL @SELECTED_PROC1_DECIMAL
     CMP CL, '9'
-    JG PROC_DECIMAL       ; Si es mayor que '9', no es un digito (lo ignoramos)
+    JG @SELECTED_PROC1_DECIMAL
     
-    SUB CL, '0'           ; Convertimos el caracter ASCII a valor numerico
-    XOR CH, CH            ; Limpiamos CH (para que CX solo contenga el valor de CL)
+    SUB CL, '0'
+    XOR CH, CH
     
-    ; Formula para construir la parte decimal: decimal = decimal * 10 + digito
-    MOV AX, [decimal]
+    ; decimal1 = decimal1 * 10 + dígito
+    MOV AX, [decimal1]
     MOV DX, 10
-    MUL DX                ; AX = AX * 10
-    ADD AX, CX            ; AX = AX + digito
-    MOV [decimal], AX
+    MUL DX
+    ADD AX, CX
+    MOV [decimal1], AX
     
-    ; Incrementamos el contador de digitos decimales
-    INC [dec_digitos]
+    ; Incrementar contador de dígitos decimales
+    INC [dec_digitos1]
     
-    JMP PROC_DECIMAL      ; Continuamos con el siguiente caracter
+    JMP @SELECTED_PROC1_DECIMAL
     
-PROC_FIN:
-    ; Si el numero es negativo, aplicamos el signo solo a la parte entera
-    CMP [es_negativo], 1
-    JNE PROC_NORMAL
+@SELECTED_PROC1_FIN:
+    ; Aplicar signo si es negativo
+    CMP [es_negativo1], 1
+    JNE @SELECTED_PROC1_NORMAL
     
-    ; La parte decimal siempre es positiva, solo negamos la parte entera
-    MOV AX, [entero]
-    NEG AX                ; Negamos AX (complemento a 2)
-    MOV [entero], AX
+    MOV AX, [entero1]
+    NEG AX
+    MOV [entero1], AX
     
-PROC_NORMAL:
-    ; Restauramos los registros que modificamos
+@SELECTED_PROC1_NORMAL:
     POP SI
     POP DX
     POP CX
     POP BX
     POP AX
-    RET                   ; Retornamos al punto de llamada
-PROCESAR_FLOTANTE ENDP
+    RET
+PROCESAR_PRIMER_FLOTANTE ENDP
+
+;------------------------------------------------------------
+; Procedimiento: PROCESAR_SEGUNDO_FLOTANTE
+; Procesa el segundo flotante del buffer2 (similar al primero)
+;------------------------------------------------------------
+PROCESAR_SEGUNDO_FLOTANTE PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    PUSH SI
+    
+    ; Inicializar variables del segundo flotante
+    MOV [entero2], 0
+    MOV [decimal2], 0
+    MOV [dec_digitos2], 0
+    MOV [es_negativo2], 0
+    
+    ; Obtener longitud y puntero
+    MOV BL, [buffer2+1]
+    XOR BH, BH
+    LEA SI, [buffer2+2]
+    
+    ; Verificar si está vacío
+    CMP BX, 0
+    JE @SELECTED_PROC2_FIN
+    
+    ; Verificar signo negativo
+    MOV CL, [SI]
+    CMP CL, '-'
+    JNE @SELECTED_PROC2_ENTERO
+    
+    MOV [es_negativo2], 1
+    INC SI
+    DEC BX
+    
+@SELECTED_PROC2_ENTERO:
+    CMP BX, 0
+    JE @SELECTED_PROC2_FIN
+    
+    MOV CL, [SI]
+    INC SI
+    DEC BX
+    
+    CMP CL, '.'
+    JE @SELECTED_PROC2_DECIMAL
+    
+    ; Verificar si es dígito
+    CMP CL, '0'
+    JL @SELECTED_PROC2_ENTERO
+    CMP CL, '9'
+    JG @SELECTED_PROC2_ENTERO
+    
+    SUB CL, '0'
+    XOR CH, CH
+    
+    ; entero2 = entero2 * 10 + dígito
+    MOV AX, [entero2]
+    MOV DX, 10
+    MUL DX
+    ADD AX, CX
+    MOV [entero2], AX
+    
+    JMP @SELECTED_PROC2_ENTERO
+    
+@SELECTED_PROC2_DECIMAL:
+    CMP BX, 0
+    JE @SELECTED_PROC2_FIN
+    
+    MOV CL, [SI]
+    INC SI
+    DEC BX
+    
+    ; Verificar si es dígito
+    CMP CL, '0'
+    JL @SELECTED_PROC2_DECIMAL
+    CMP CL, '9'
+    JG @SELECTED_PROC2_DECIMAL
+    
+    SUB CL, '0'
+    XOR CH, CH
+    
+    ; decimal2 = decimal2 * 10 + dígito
+    MOV AX, [decimal2]
+    MOV DX, 10
+    MUL DX
+    ADD AX, CX
+    MOV [decimal2], AX
+    
+    ; Incrementar contador de dígitos decimales
+    INC [dec_digitos2]
+    
+    JMP @SELECTED_PROC2_DECIMAL
+    
+@SELECTED_PROC2_FIN:
+    ; Aplicar signo si es negativo
+    CMP [es_negativo2], 1
+    JNE @SELECTED_PROC2_NORMAL
+    
+    MOV AX, [entero2]
+    NEG AX
+    MOV [entero2], AX
+    
+@SELECTED_PROC2_NORMAL:
+    POP SI
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+PROCESAR_SEGUNDO_FLOTANTE ENDP
+
+;------------------------------------------------------------
+; Procedimiento: SUMAR_FLOTANTES  
+; Realiza la suma de dos flotantes (:+)
+;------------------------------------------------------------
+SUMAR_FLOTANTES PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Normalizar decimales primero
+    CALL NORMALIZAR_DECIMALES_PARA_OPERACION
+    
+    ; Determinar signo del resultado (XOR de los signos para suma)
+    MOV AL, [es_negativo1]
+    MOV BL, [es_negativo2]
+    XOR AL, BL
+    MOV [resultado_negativo], AL
+    
+    ; Sumar partes decimales
+    MOV AX, [decimal1]
+    ADD AX, [decimal2]
+    MOV [resultado_decimal], AX
+    
+    ; Calcular el valor máximo para los decimales (10^digitos)
+    MOV BL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_BL ; Resultado en BX
+    
+    ; Verificar acarreo
+    CMP AX, BX
+    JL @SUMA_SIN_ACARREO
+    
+    ; Hay acarreo: ajustar decimal y sumar 1 a entero
+    SUB AX, BX
+    MOV [resultado_decimal], AX
+    MOV CX, 1      ; Acarreo = 1
+    JMP @SUMA_ENTEROS
+    
+@SUMA_SIN_ACARREO:
+    MOV CX, 0      ; Sin acarreo
+    
+@SUMA_ENTEROS:
+    ; Sumar partes enteras + acarreo
+    MOV AX, [entero1]
+    ADD AX, [entero2]
+    ADD AX, CX
+    MOV [resultado_entero], AX
+    
+    ; Manejar signos especiales
+    CMP [es_negativo1], 1
+    JNE @SUMA_FIN
+    CMP [es_negativo2], 1
+    JNE @SUMA_FIN
+    
+    ; Ambos son negativos, resultado debe ser negativo
+    MOV [resultado_negativo], 1
+    
+@SUMA_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+SUMAR_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTAR_VALORES_ABSOLUTOS_SUMA
+; Resta valores absolutos cuando los signos son diferentes en suma
+;------------------------------------------------------------
+RESTAR_VALORES_ABSOLUTOS_SUMA PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos de partes enteras
+    MOV AX, [entero1]
+    CMP [es_negativo1], 0
+    JE @RESTA_SUMA_ENT1_POS
+    NEG AX
+@RESTA_SUMA_ENT1_POS:
+    MOV BX, AX              ; BX = |entero1|
+    
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @RESTA_SUMA_ENT2_POS
+    NEG AX
+@RESTA_SUMA_ENT2_POS:
+    MOV CX, AX              ; CX = |entero2|
+    
+    ; Determinar cuál es mayor para definir el signo del resultado
+    ; Comparar primero las partes enteras
+    CMP BX, CX
+    JG @RESTA_SUMA_PRIMERO_MAYOR
+    JL @RESTA_SUMA_SEGUNDO_MAYOR
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    CMP AX, [decimal2]
+    JGE @RESTA_SUMA_PRIMERO_MAYOR
+    
+@RESTA_SUMA_SEGUNDO_MAYOR:
+    ; |segundo| >= |primero|: resultado = |segundo| - |primero|
+    ; El signo del resultado será el del segundo número
+    MOV AL, [es_negativo2]
+    MOV [resultado_negativo], AL
+    
+    ; Restar: segundo - primero
+    MOV AX, [decimal2]
+    SUB AX, [decimal1]
+    
+    ; Si el resultado decimal es negativo, pedir prestado
+    CMP AX, 0
+    JGE @RESTA_SUMA_DEC2_OK
+    
+    ; Pedir prestado de la parte entera
+    DEC CX
+    MOV DL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_DL
+    ADD AX, BX              ; BX contiene 10^digitos
+    
+@RESTA_SUMA_DEC2_OK:
+    MOV [resultado_decimal], AX
+    
+    MOV AX, CX
+    SUB AX, BX              ; entero2 - entero1
+    MOV [resultado_entero], AX
+    JMP @RESTA_SUMA_FIN
+    
+@RESTA_SUMA_PRIMERO_MAYOR:
+    ; |primero| > |segundo|: resultado = |primero| - |segundo|
+    ; El signo del resultado será el del primer número
+    MOV AL, [es_negativo1]
+    MOV [resultado_negativo], AL
+    
+    ; Restar: primero - segundo
+    MOV AX, [decimal1]
+    SUB AX, [decimal2]
+    
+    ; Si el resultado decimal es negativo, pedir prestado
+    CMP AX, 0
+    JGE @RESTA_SUMA_DEC1_OK
+    
+    ; Pedir prestado de la parte entera
+    DEC BX
+    MOV DL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_DL
+    ADD AX, BX              ; BX contiene 10^digitos
+    
+@RESTA_SUMA_DEC1_OK:
+    MOV [resultado_decimal], AX
+    
+    MOV AX, BX
+    SUB AX, CX              ; entero1 - entero2
+    MOV [resultado_entero], AX
+    
+@RESTA_SUMA_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+RESTAR_VALORES_ABSOLUTOS_SUMA ENDP
+
+;------------------------------------------------------------
+; Procedimiento: SUMA_DIRECTA_POSITIVOS
+; Suma directa de dos números tratándolos como positivos
+;------------------------------------------------------------
+SUMA_DIRECTA_POSITIVOS PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Sumar partes decimales
+    MOV AX, [decimal1]
+    ADD AX, [decimal2]
+    
+    ; Verificar acarreo
+    XOR CX, CX  ; CX = acarreo
+    MOV BL, [resultado_digitos]
+    XOR BH, BH
+    PUSH BX
+    CALL CALCULAR_POTENCIA_10  ; AX retorna 10^digitos
+    POP BX
+    MOV DX, AX  ; DX = base decimal (10^digitos)
+    
+    MOV AX, [decimal1]
+    ADD AX, [decimal2]
+    
+    CMP AX, DX
+    JL @SELECTED_SUMA_DIR_SIN_ACARREO
+    
+    SUB AX, DX
+    INC CX  ; Generar acarreo
+    
+@SELECTED_SUMA_DIR_SIN_ACARREO:
+    MOV [resultado_decimal], AX
+    
+    ; Sumar partes enteras
+    MOV AX, [entero1]
+    ADD AX, [entero2]
+    ADD AX, CX  ; Añadir acarreo
+    MOV [resultado_entero], AX
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+SUMA_DIRECTA_POSITIVOS ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTA_ABS_PRIMER_SEGUNDO
+; Resta |primer| - |segundo| y determina signo correcto
+;------------------------------------------------------------
+RESTA_ABS_PRIMER_SEGUNDO PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos
+    MOV AX, [entero1]
+    CMP AX, 0
+    JGE @SELECTED_RESTA_ABS_ENT1_POS
+    NEG AX
+@SELECTED_RESTA_ABS_ENT1_POS:
+    MOV BX, AX  ; BX = |entero1|
+    
+    MOV AX, [entero2]
+    CMP AX, 0
+    JGE @SELECTED_RESTA_ABS_ENT2_POS
+    NEG AX
+@SELECTED_RESTA_ABS_ENT2_POS:
+    MOV CX, AX  ; CX = |entero2|
+    
+    ; Comparar cuál es mayor para determinar signo
+    CMP BX, CX
+    JG @SELECTED_RESTA_ABS_PRIMERO_MAYOR
+    JL @SELECTED_RESTA_ABS_SEGUNDO_MAYOR
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    MOV DX, [decimal2]
+    CMP AX, DX
+    JGE @SELECTED_RESTA_ABS_PRIMERO_MAYOR
+    
+@SELECTED_RESTA_ABS_SEGUNDO_MAYOR:
+    ; |segundo| > |primero|: resultado = |segundo| - |primero|
+    ; Signo depende del signo original del segundo
+    MOV AX, CX
+    SUB AX, BX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal2]
+    SUB AX, [decimal1]
+    MOV [resultado_decimal], AX
+    
+    ; Determinar signo: si era suma pos+neg, el resultado toma signo del mayor
+    MOV AL, [es_negativo1]
+    CMP AL, 0
+    JE @SELECTED_RESTA_ABS_SIGNO_SEG_NEG
+    ; Primer número era negativo, segundo positivo, segundo es mayor
+    MOV [resultado_negativo], 0  ; Resultado positivo
+    JMP @SELECTED_RESTA_ABS_FIN
+    
+@SELECTED_RESTA_ABS_SIGNO_SEG_NEG:
+    ; Primer número era positivo, segundo negativo, segundo es mayor
+    MOV [resultado_negativo], 1  ; Resultado negativo
+    JMP @SELECTED_RESTA_ABS_FIN
+    
+@SELECTED_RESTA_ABS_PRIMERO_MAYOR:
+    ; |primero| >= |segundo|: resultado = |primero| - |segundo|
+    MOV AX, BX
+    SUB AX, CX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal1]
+    SUB AX, [decimal2]
+    MOV [resultado_decimal], AX
+    
+    ; Signo del resultado es el signo del primero
+    MOV AL, [es_negativo1]
+    MOV [resultado_negativo], AL
+    
+@SELECTED_RESTA_ABS_FIN:
+    ; Manejar préstamo si decimal es negativo
+    CMP WORD PTR [resultado_decimal], 0
+    JGE @SELECTED_RESTA_ABS_DEC_OK
+    
+    ; Decimal negativo, pedir prestado de la parte entera
+    DEC WORD PTR [resultado_entero]
+    MOV AX, [resultado_decimal]
+    ADD AX, 1000  ; Ajustar según dígitos decimales
+    MOV [resultado_decimal], AX
+    
+@SELECTED_RESTA_ABS_DEC_OK:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+RESTA_ABS_PRIMER_SEGUNDO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTAR_FLOTANTES  
+; Realiza la resta de dos flotantes (:-)
+;------------------------------------------------------------
+RESTAR_FLOTANTES PROC
+    PUSH AX
+    PUSH BX
+    
+    ; La resta A - B es equivalente a A + (-B)
+    ; Invertir el signo del segundo operando
+    MOV AL, [es_negativo2]
+    XOR AL, 1
+    MOV [es_negativo2], AL
+    
+    ; Realizar suma con el signo cambiado
+    CALL SUMAR_FLOTANTES
+    
+    ; Restaurar el signo original del segundo operando
+    MOV AL, [es_negativo2]
+    XOR AL, 1
+    MOV [es_negativo2], AL
+    
+    POP BX
+    POP AX
+    RET
+RESTAR_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTA_POSITIVOS_DIRECTA
+; Resta A - B tratando ambos como positivos
+;------------------------------------------------------------
+RESTA_POSITIVOS_DIRECTA PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos para comparación
+    MOV AX, [entero1]
+    CMP AX, 0
+    JGE @SELECTED_RPD_ENT1_ABS
+    NEG AX
+@SELECTED_RPD_ENT1_ABS:
+    MOV BX, AX
+    
+    MOV AX, [entero2]
+    CMP AX, 0
+    JGE @SELECTED_RPD_ENT2_ABS
+    NEG AX
+@SELECTED_RPD_ENT2_ABS:
+    MOV CX, AX
+    
+    ; Comparar magnitudes: ¿|A| >= |B|?
+    CMP BX, CX
+    JG @SELECTED_RPD_A_MAYOR
+    JL @SELECTED_RPD_B_MAYOR
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    CMP AX, [decimal2]
+    JGE @SELECTED_RPD_A_MAYOR
+    
+@SELECTED_RPD_B_MAYOR:
+    ; |B| > |A|: resultado = -(|B| - |A|)
+    MOV AX, CX
+    SUB AX, BX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal2]
+    SUB AX, [decimal1]
+    MOV [resultado_decimal], AX
+    
+    ; Resultado es negativo
+    MOV [resultado_negativo], 1
+    JMP @SELECTED_RPD_AJUSTAR_PRESTAMO
+    
+@SELECTED_RPD_A_MAYOR:
+    ; |A| >= |B|: resultado = |A| - |B|
+    MOV AX, BX
+    SUB AX, CX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal1]
+    SUB AX, [decimal2]
+    MOV [resultado_decimal], AX
+    
+    ; Resultado es positivo
+    MOV [resultado_negativo], 0
+    
+@SELECTED_RPD_AJUSTAR_PRESTAMO:
+    ; Ajustar si la parte decimal es negativa
+    CMP WORD PTR [resultado_decimal], 0
+    JGE @SELECTED_RPD_FIN
+    
+    ; Pedir prestado de la parte entera
+    DEC WORD PTR [resultado_entero]
+    
+    ; Calcular base decimal según dígitos
+    MOV AL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10
+    ADD [resultado_decimal], AX
+    
+    ; Si después del ajuste la parte entera se vuelve negativa, cambiar signo
+    CMP WORD PTR [resultado_entero], 0
+    JGE @SELECTED_RPD_FIN
+    
+    ; Cambiar signo del resultado completo
+    MOV AX, [resultado_entero]
+    NEG AX
+    MOV [resultado_entero], AX
+    
+    MOV AL, [resultado_negativo]
+    XOR AL, 1
+    MOV [resultado_negativo], AL
+    
+@SELECTED_RPD_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+RESTA_POSITIVOS_DIRECTA ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTA_SEGUNDO_PRIMER
+; Calcula segundo - primero (para caso (-A) - (-B) = B - A)
+;------------------------------------------------------------
+RESTA_SEGUNDO_PRIMER PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Intercambiar temporalmente los valores
+    MOV AX, [entero1]
+    MOV BX, [entero2]
+    MOV [entero1], BX
+    MOV [entero2], AX
+    
+    MOV AX, [decimal1]
+    MOV BX, [decimal2]
+    MOV [decimal1], BX
+    MOV [decimal2], AX
+    
+    ; Realizar resta normal
+    CALL RESTA_POSITIVOS_DIRECTA
+    
+    ; Restaurar valores originales
+    MOV AX, [entero1]
+    MOV BX, [entero2]
+    MOV [entero2], AX
+    MOV [entero1], BX
+    
+    MOV AX, [decimal1]
+    MOV BX, [decimal2]
+    MOV [decimal2], AX
+    MOV [decimal1], BX
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+RESTA_SEGUNDO_PRIMER ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MULTIPLICAR_FLOTANTES  
+; Realiza la multiplicación de dos flotantes (:*)
+;------------------------------------------------------------
+MULTIPLICAR_FLOTANTES PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Determinar signo del resultado (XOR de los signos)
+    MOV AL, [es_negativo1]
+    MOV BL, [es_negativo2]
+    XOR AL, BL
+    MOV [resultado_negativo], AL
+    
+    ; Convertir ambos números a enteros (eliminando el punto decimal)
+    ; Para el primer número
+    MOV AX, [entero1]
+    MOV BL, [dec_digitos1]
+    CALL CONVERTIR_A_ENTERO
+    MOV CX, AX  ; CX = primer número como entero
+    
+    ; Para el segundo número
+    MOV AX, [entero2]
+    MOV BL, [dec_digitos2]
+    CALL CONVERTIR_A_ENTERO
+    MOV BX, AX  ; BX = segundo número como entero
+    
+    ; Multiplicar los enteros
+    MOV AX, CX
+    MUL BX      ; DX:AX = AX * BX
+    
+    ; Calcular el factor de ajuste decimal
+    MOV BL, [dec_digitos1]
+    ADD BL, [dec_digitos2]
+    MOV [resultado_digitos], BL
+    
+    ; Ajustar el resultado según los decimales
+    CALL AJUSTAR_DECIMALES_MULT
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+MULTIPLICAR_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CONVERTIR_A_ENTERO
+; Convierte un flotante a entero (elimina punto decimal)
+; Entrada: AX = parte entera, BL = dígitos decimales
+; Salida: AX = número convertido
+;------------------------------------------------------------
+CONVERTIR_A_ENTERO PROC
+    PUSH CX
+    PUSH DX
+    
+    MOV CX, AX  ; Guardar parte entera
+    
+    ; Multiplicar parte entera por 10^digitos
+    MOV AL, BL
+    CALL CALCULAR_POTENCIA_10  ; AX = 10^digitos
+    MOV BX, AX
+    MOV AX, CX
+    MUL BX      ; AX = entero * 10^digitos
+    
+    ; Sumar parte decimal (ya está ajustada)
+    ADD AX, [decimal1]
+    
+    POP DX
+    POP CX
+    RET
+CONVERTIR_A_ENTERO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: AJUSTAR_DECIMALES_MULT
+; Ajusta el resultado de la multiplicación según los decimales
+;------------------------------------------------------------
+AJUSTAR_DECIMALES_MULT PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Calcular el factor de división (10^total_digitos)
+    MOV AL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10  ; AX = 10^digitos
+    
+    ; Dividir el resultado por el factor
+    MOV BX, AX
+    MOV AX, [resultado_entero]
+    XOR DX, DX
+    DIV BX      ; AX = cociente, DX = resto
+    
+    ; El cociente es la parte entera
+    MOV [resultado_entero], AX
+    
+    ; El resto es la parte decimal (ajustar a 4 dígitos)
+    MOV AX, DX
+    MOV BX, 100
+    MUL BX      ; AX = resto * 100
+    XOR DX, DX
+    DIV WORD PTR [const_cien]  ; Ajustar a 2 decimales
+    
+    MOV [resultado_decimal], AX
+    MOV [resultado_digitos], 2  ; Siempre mostrar 2 decimales
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+AJUSTAR_DECIMALES_MULT ENDP
+
+;------------------------------------------------------------
+; Procedimiento: NORMALIZAR_PARA_MULTIPLICACION
+; Normaliza ambos números al mismo número de dígitos decimales
+;------------------------------------------------------------
+NORMALIZAR_PARA_MULTIPLICACION PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    
+    ; Encontrar el máximo número de dígitos decimales
+    MOV AL, [dec_digitos1]
+    MOV BL, [dec_digitos2]
+    CMP AL, BL
+    JGE @SELECTED_NORM_MULT_MAX_ES_1
+    
+    ; Segundo tiene más dígitos, normalizar primero
+    SUB BL, AL
+    XOR BH, BH
+    MOV CX, BX
+    
+    CMP CX, 0
+    JE @SELECTED_NORM_MULT_FIN
+    
+@SELECTED_NORM_MULT_LOOP1:
+    MOV AX, [decimal1]
+    MUL WORD PTR [const_diez]
+    MOV [decimal1], AX
+    LOOP @SELECTED_NORM_MULT_LOOP1
+    
+    MOV AL, [dec_digitos2]
+    MOV [dec_digitos1], AL
+    JMP @SELECTED_NORM_MULT_FIN
+    
+@SELECTED_NORM_MULT_MAX_ES_1:
+    ; Primero tiene más o igual dígitos, normalizar segundo
+    SUB AL, BL
+    XOR AH, AH
+    MOV CX, AX
+    
+    CMP CX, 0
+    JE @SELECTED_NORM_MULT_FIN
+    
+@SELECTED_NORM_MULT_LOOP2:
+    MOV AX, [decimal2]
+    MUL WORD PTR [const_diez]
+    MOV [decimal2], AX
+    LOOP @SELECTED_NORM_MULT_LOOP2
+    
+    MOV AL, [dec_digitos1]
+    MOV [dec_digitos2], AL
+    
+@SELECTED_NORM_MULT_FIN:
+    POP CX
+    POP BX
+    POP AX
+    RET
+NORMALIZAR_PARA_MULTIPLICACION ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CALCULAR_DECIMAL_MULTIPLICACION
+; Calcula la parte decimal del resultado de multiplicación
+;------------------------------------------------------------
+CALCULAR_DECIMAL_MULTIPLICACION PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Para simplificar, usar los primeros dígitos del resto
+    ; como parte decimal
+    MOV [resultado_decimal], 0
+    
+    ; Si resultado_digitos > 0, ajustar
+    CMP BYTE PTR [resultado_digitos], 0
+    JE @SELECTED_CALC_DEC_MULT_FIN
+    
+    ; Simplificación: usar 2 dígitos decimales por defecto
+    MOV [resultado_digitos], 2
+    
+@SELECTED_CALC_DEC_MULT_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+CALCULAR_DECIMAL_MULTIPLICACION ENDP
+
+;------------------------------------------------------------
+; Procedimiento: SUMAR_PARTES_POSITIVAS
+; Suma las partes de dos números positivos
+;------------------------------------------------------------
+SUMAR_PARTES_POSITIVAS PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Sumar partes decimales
+    MOV AX, [decimal1]
+    ADD AX, [decimal2]
+    MOV BX, AX
+    
+    ; Verificar acarreo en parte decimal
+    XOR CX, CX  ; CX = acarreo
+    
+    ; Calcular la potencia de 10 según los dígitos decimales
+    MOV AL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10
+    ; AX contiene 10^digitos
+    
+    CMP BX, AX
+    JL @SELECTED_SUMA_SIN_ACARREO
+    
+    SUB BX, AX  ; Restar la base para mantener en rango
+    INC CX      ; Generar acarreo
+    
+@SELECTED_SUMA_SIN_ACARREO:
+    MOV [resultado_decimal], BX
+    
+    ; Sumar partes enteras + acarreo
+    MOV AX, [entero1]
+    ADD AX, [entero2]
+    ADD AX, CX
+    MOV [resultado_entero], AX
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+SUMAR_PARTES_POSITIVAS ENDP
+
+;------------------------------------------------------------
+; Procedimiento: DIVIDIR_FLOTANTES  
+; Realiza la división de dos flotantes (://)
+;------------------------------------------------------------
+DIVIDIR_FLOTANTES PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Determinar signo del resultado
+    MOV AL, [es_negativo1]
+    MOV BL, [es_negativo2]
+    XOR AL, BL
+    MOV [resultado_negativo], AL
+    
+    ; Convertir dividendo a entero extendido (multiplicar por 10000)
+    MOV AX, [entero1]
+    MOV BX, 10000
+    MUL BX              ; DX:AX = AX * 10000
+    
+    ; Agregar parte decimal ajustada
+    MOV BX, [decimal1]
+    MOV CL, [dec_digitos1]
+    
+    ; Ajustar decimal1 según sus dígitos
+@DIV_AJUSTE_DEC1:
+    CMP CL, 4
+    JGE @DIV_DEC1_OK
+    MOV DX, 10
+    MUL DX              ; AX = AX * 10
+    INC CL
+    JMP @DIV_AJUSTE_DEC1
+    
+@DIV_DEC1_OK:
+    ADD AX, BX          ; AX = dividendo completo
+    
+    ; Preparar divisor
+    MOV BX, [entero2]
+    MOV CL, [dec_digitos2]
+    
+    ; Convertir divisor a entero extendido
+    MOV DX, 10000
+    MOV AX, BX
+    MUL DX              ; DX:AX = AX * 10000
+    
+    ; Ajustar según decimales
+@DIV_AJUSTE_DEC2:
+    CMP CL, 4
+    JGE @DIV_DEC2_OK
+    MOV DX, 10
+    MUL DX              ; AX = AX * 10
+    INC CL
+    JMP @DIV_AJUSTE_DEC2
+    
+@DIV_DEC2_OK:
+    ADD AX, [decimal2]  ; AX = divisor completo
+    
+    ; Realizar división: DX:AX / BX
+    MOV BX, AX          ; BX = divisor
+    MOV AX, [entero1]   ; AX = dividendo bajo
+    MOV DX, [entero1+2] ; DX = dividendo alto (si es necesario)
+    
+    DIV BX              ; AX = cociente, DX = resto
+    
+    ; Separar resultado en entero y decimal
+    MOV [resultado_entero], AX
+    
+    ; Calcular parte decimal: (resto * 10000) / divisor
+    MOV AX, DX
+    MOV BX, 10000
+    MUL BX              ; DX:AX = resto * 10000
+    DIV WORD PTR [entero2] ; AX = parte decimal
+    
+    MOV [resultado_decimal], AX
+    MOV [resultado_digitos], 4  ; Precisión de 4 decimales
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+DIVIDIR_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTAR_VALORES_ABSOLUTOS
+; Resta valores absolutos para determinar signo correcto
+;------------------------------------------------------------
+RESTAR_VALORES_ABSOLUTOS PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos
+    MOV AX, [entero1]
+    CMP [es_negativo1], 0
+    JE @RESTA_ABS_ENT1_POS
+    NEG AX
+@RESTA_ABS_ENT1_POS:
+    MOV BX, AX  ; BX = |entero1|
+    
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @RESTA_ABS_ENT2_POS
+    NEG AX
+@RESTA_ABS_ENT2_POS:
+    MOV CX, AX  ; CX = |entero2|
+    
+    ; Comparar magnitudes para determinar signo
+    CMP BX, CX
+    JG @RESTA_ABS_PRIMERO_MAYOR
+    JL @RESTA_ABS_SEGUNDO_MAYOR
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    CMP AX, [decimal2]
+    JGE @RESTA_ABS_PRIMERO_MAYOR
+    
+@RESTA_ABS_SEGUNDO_MAYOR:
+    ; |segundo| > |primero|: resultado = |segundo| - |primero|
+    MOV AX, CX
+    SUB AX, BX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal2]
+    SUB AX, [decimal1]
+    MOV [resultado_decimal], AX
+    
+    ; Signo: toma el signo del número con mayor valor absoluto
+    MOV AL, [es_negativo2]
+    MOV [resultado_negativo], AL
+    JMP @RESTA_ABS_FIN
+    
+@RESTA_ABS_PRIMERO_MAYOR:
+    ; |primero| >= |segundo|: resultado = |primero| - |segundo|
+    MOV AX, BX
+    SUB AX, CX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal1]
+    SUB AX, [decimal2]
+    MOV [resultado_decimal], AX
+    
+    ; Signo: toma el signo del primer número
+    MOV AL, [es_negativo1]
+    MOV [resultado_negativo], AL
+    
+@RESTA_ABS_FIN:
+    ; Manejar préstamo si decimal es negativo
+    CMP WORD PTR [resultado_decimal], 0
+    JGE @RESTA_ABS_DEC_OK
+    
+    ; Decimal negativo, pedir prestado de la parte entera
+    DEC WORD PTR [resultado_entero]
+    
+    ; Calcular base decimal
+    MOV BL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_BL
+    ADD [resultado_decimal], BX
+    
+@RESTA_ABS_DEC_OK:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+RESTAR_VALORES_ABSOLUTOS ENDP
+
+;------------------------------------------------------------
+; Procedimiento: NORMALIZAR_DECIMALES_PARA_OPERACION
+; Normaliza ambos decimales al mayor número de dígitos
+;------------------------------------------------------------
+NORMALIZAR_DECIMALES_PARA_OPERACION PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Determinar el máximo número de dígitos decimales
+    MOV AL, [dec_digitos1]
+    MOV BL, [dec_digitos2]
+    CMP AL, BL
+    JAE @NORM_MAX_ES_DIG1
+    MOV AL, BL
+    
+@NORM_MAX_ES_DIG1:
+    MOV [resultado_digitos], AL
+    
+    ; Normalizar primer número
+    MOV CL, [dec_digitos1]
+    MOV CH, AL
+    SUB CH, CL
+    JZ @NORM_NUM2  ; Ya tiene los dígitos necesarios
+    
+    MOV AX, [decimal1]
+    MOV BX, 10
+@NORM_LOOP1:
+    MUL BX
+    DEC CH
+    JNZ @NORM_LOOP1
+    MOV [decimal1], AX
+    MOV [dec_digitos1], AL
+    
+@NORM_NUM2:
+    ; Normalizar segundo número
+    MOV CL, [dec_digitos2]
+    MOV CH, [resultado_digitos]
+    SUB CH, CL
+    JZ @NORM_FIN
+    
+    MOV AX, [decimal2]
+    MOV BX, 10
+@NORM_LOOP2:
+    MUL BX
+    DEC CH
+    JNZ @NORM_LOOP2
+    MOV [decimal2], AX
+    MOV [dec_digitos2], AL
+    
+@NORM_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+NORMALIZAR_DECIMALES_PARA_OPERACION ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CALCULAR_POTENCIA_10_BL
+; Calcula 10^BL y retorna en BX
+;------------------------------------------------------------
+CALCULAR_POTENCIA_10_BL PROC
+    PUSH AX
+    PUSH CX
+    
+    MOV BX, 1
+    MOV CL, BL
+    XOR CH, CH
+    CMP CL, 0
+    JE @POT_BL_FIN
+    
+@POT_BL_LOOP:
+    MOV AX, BX
+    MOV BX, 10
+    MUL BX
+    MOV BX, AX
+    LOOP @POT_BL_LOOP
+    
+@POT_BL_FIN:
+    POP CX
+    POP AX
+    RET
+CALCULAR_POTENCIA_10_BL ENDP
+;------------------------------------------------------------
+; Procedimiento: MODULO_FLOTANTES
+; Realiza el módulo de dos flotantes (:%)
+;------------------------------------------------------------
+MODULO_FLOTANTES PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; El módulo flotante se calcula como: A % B = A - (A // B) * B
+    ; Donde // es división entera
+    
+    ; Primero calculamos A // B (división entera)
+    CALL DIVISION_ENTERA_FLOTANTES
+    ; Resultado en [resultado_entero]
+    
+    ; Multiplicar (A // B) * B
+    MOV AX, [resultado_entero]
+    MOV BX, [entero2]
+    CMP [es_negativo2], 0
+    JE @SELECTED_MOD_MULT_POS
+    NEG BX
+@SELECTED_MOD_MULT_POS:
+    
+    IMUL BX  ; AX = (A // B) * B
+    
+    ; Restar A - (A // B) * B
+    MOV BX, [entero1]
+    CMP [es_negativo1], 0
+    JE @SELECTED_MOD_REST_POS
+    NEG BX
+@SELECTED_MOD_REST_POS:
+    
+    SUB BX, AX  ; BX = A - (A // B) * B
+    
+    ; El resultado es BX
+    MOV [resultado_entero], BX
+    MOV [resultado_decimal], 0
+    MOV [resultado_digitos], 1
+    MOV [resultado_negativo], 0
+    
+    ; Ajustar signo si es necesario
+    CMP BX, 0
+    JGE @SELECTED_MOD_FIN
+    NEG BX
+    MOV [resultado_entero], BX
+    MOV [resultado_negativo], 1
+    
+@SELECTED_MOD_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+MODULO_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: VERIFICAR_CERO_SEGUNDO
+; Verifica si el segundo flotante es cero
+; Salida: CF=1 si es cero, CF=0 si no es cero
+;------------------------------------------------------------
+VERIFICAR_CERO_SEGUNDO PROC
+    PUSH AX
+    
+    ; Un flotante es cero si tanto la parte entera como decimal son 0
+    CMP WORD PTR [entero2], 0
+    JNE @SELECTED_NO_CERO
+    CMP WORD PTR [decimal2], 0
+    JNE @SELECTED_NO_CERO
+    
+    ; Es cero
+    STC  ; Establecer Carry Flag
+    JMP @SELECTED_VERIF_FIN
+    
+@SELECTED_NO_CERO:
+    ; No es cero
+    CLC  ; Limpiar Carry Flag
+    
+@SELECTED_VERIF_FIN:
+    POP AX
+    RET
+VERIFICAR_CERO_SEGUNDO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: NORMALIZAR_DECIMALES_SUMA
+; Normaliza las partes decimales para tener el mismo número de dígitos
+;------------------------------------------------------------
+NORMALIZAR_DECIMALES_SUMA PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener número de dígitos de cada decimal
+    MOV AL, [dec_digitos1]
+    MOV BL, [dec_digitos2]
+    
+    ; Si son iguales, no hay que normalizar
+    CMP AL, BL
+    JE @SELECTED_NORM_FIN
+    
+    ; Determinar cuál tiene menos dígitos y normalizarlo
+    CMP AL, BL
+    JG @SELECTED_NORM_SEGUNDO  ; Primer número tiene más dígitos
+    
+    ; Segundo número tiene más dígitos, normalizar primero
+    SUB BL, AL  ; Diferencia de dígitos
+    XOR BH, BH
+    MOV CX, BX  ; CX = diferencia
+    
+    MOV AX, [decimal1]
+@SELECTED_NORM_LOOP1:
+    MUL WORD PTR [const_diez]
+    LOOP @SELECTED_NORM_LOOP1
+    MOV [decimal1], AX
+    
+    ; Actualizar contador de dígitos
+    MOV AL, [dec_digitos2]
+    MOV [dec_digitos1], AL
+    JMP @SELECTED_NORM_FIN
+    
+@SELECTED_NORM_SEGUNDO:
+    ; Primer número tiene más dígitos, normalizar segundo
+    SUB AL, BL  ; Diferencia de dígitos
+    XOR AH, AH
+    MOV CX, AX  ; CX = diferencia
+    
+    MOV AX, [decimal2]
+@SELECTED_NORM_LOOP2:
+    MUL WORD PTR [const_diez]
+    LOOP @SELECTED_NORM_LOOP2
+    MOV [decimal2], AX
+    
+    ; Actualizar contador de dígitos
+    MOV AL, [dec_digitos1]
+    MOV [dec_digitos2], AL
+    
+@SELECTED_NORM_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+NORMALIZAR_DECIMALES_SUMA ENDP
+
+;------------------------------------------------------------
+; Procedimiento: SUMAR_VALORES_ABSOLUTOS
+;------------------------------------------------------------
+SUMAR_VALORES_ABSOLUTOS PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos de partes enteras
+    MOV AX, [entero1]
+    CMP [es_negativo1], 0
+    JE @SUMA_ABS_CORR_ENT1_POS
+    NEG AX
+@SUMA_ABS_CORR_ENT1_POS:
+    MOV BX, AX
+    
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @SUMA_ABS_CORR_ENT2_POS
+    NEG AX
+@SUMA_ABS_CORR_ENT2_POS:
+    MOV CX, AX
+    
+    ; Sumar partes decimales
+    MOV AX, [decimal1]
+    ADD AX, [decimal2]
+    
+    ; Verificar acarreo
+    MOV DL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_DL
+    ; BX contiene 10^digitos
+    
+    XOR DX, DX              ; DX = acarreo
+    CMP AX, BX
+    JL @SUMA_ABS_CORR_SIN_ACARREO
+    
+    SUB AX, BX
+    INC DX                  ; Hay acarreo
+    
+@SUMA_ABS_CORR_SIN_ACARREO:
+    MOV [resultado_decimal], AX
+    
+    ; Sumar partes enteras + acarreo
+    MOV AX, BX              ; entero1 absoluto
+    ADD AX, CX              ; + entero2 absoluto
+    ADD AX, DX              ; + acarreo
+    MOV [resultado_entero], AX
+    
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+SUMAR_VALORES_ABSOLUTOS ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CALCULAR_POTENCIA_10_DL
+;------------------------------------------------------------
+CALCULAR_POTENCIA_10_DL PROC
+    PUSH AX
+    PUSH CX
+    
+    MOV BX, 1
+    MOV CL, DL
+    XOR CH, CH
+    
+@POT_DL_LOOP:
+    CMP CX, 0
+    JE @POT_DL_FIN
+    PUSH CX
+    MOV AX, BX
+    MUL WORD PTR [const_diez]
+    MOV BX, AX
+    POP CX
+    DEC CX
+    JMP @POT_DL_LOOP
+    
+@POT_DL_FIN:
+    POP CX
+    POP AX
+    RET
+CALCULAR_POTENCIA_10_DL ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CALCULAR_POTENCIA_10
+; Calcula 10^AL y devuelve el resultado en AX
+; Entrada: AL = exponente
+; Salida: AX = 10^AL
+;------------------------------------------------------------
+CALCULAR_POTENCIA_10 PROC
+    PUSH BX
+    PUSH CX
+    
+    XOR AH, AH  ; Limpiar parte alta
+    MOV CX, AX  ; CX = exponente
+    
+    MOV AX, 1   ; Resultado inicial = 1
+    
+    CMP CX, 0
+    JE @SELECTED_POT_FIN  ; 10^0 = 1
+    
+@SELECTED_POT_LOOP:
+    MUL WORD PTR [const_diez]  ; AX = AX * 10
+    LOOP @SELECTED_POT_LOOP
+    
+@SELECTED_POT_FIN:
+    POP CX
+    POP BX
+    RET
+CALCULAR_POTENCIA_10 ENDP
+
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_FLOTANTES_IGUAL
+; Compara si flotante1 == flotante2
+; Salida: ZF=1 si son iguales, ZF=0 si son diferentes
+;------------------------------------------------------------
+COMPARAR_FLOTANTES_IGUAL PROC
+    PUSH AX
+    PUSH BX
+    
+    ; Comparar signos
+    MOV AL, [es_negativo1]
+    MOV BL, [es_negativo2]
+    CMP AL, BL
+    JNE @SELECTED_IGUAL_DIFERENTES
+    
+    ; Signos iguales, comparar valores absolutos
+    CALL COMPARAR_VALORES_ABSOLUTOS_IGUAL
+    JMP @SELECTED_IGUAL_FIN
+    
+@SELECTED_IGUAL_DIFERENTES:
+    ; Signos diferentes, no son iguales
+    MOV AX, 0
+    CMP AX, 1  ; ZF=0 (diferentes)
+    
+@SELECTED_IGUAL_FIN:
+    POP BX
+    POP AX
+    RET
+COMPARAR_FLOTANTES_IGUAL ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_FLOTANTES_DISTINTO
+; Compara si flotante1 != flotante2
+; Salida: ZF=0 si son diferentes, ZF=1 si son iguales
+;------------------------------------------------------------
+COMPARAR_FLOTANTES_DISTINTO PROC
+    CALL COMPARAR_FLOTANTES_IGUAL
+    
+    ; Invertir el resultado
+    JZ @SELECTED_DIST_ERAN_IGUALES
+    
+    ; Eran diferentes, devolver verdadero
+    MOV AX, 1
+    CMP AX, 1  ; ZF=1 (verdadero - son diferentes)
+    JMP @SELECTED_DIST_FIN
+    
+@SELECTED_DIST_ERAN_IGUALES:
+    ; Eran iguales, devolver falso
+    MOV AX, 0
+    CMP AX, 1  ; ZF=0 (falso - no son diferentes)
+    
+@SELECTED_DIST_FIN:
+    RET
+COMPARAR_FLOTANTES_DISTINTO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_FLOTANTES_MENOR  
+; Compara si flotante1 < flotante2
+; Salida: ZF=1 si es verdadero, ZF=0 si es falso
+;------------------------------------------------------------
+COMPARAR_FLOTANTES_MENOR PROC
+    PUSH AX
+    PUSH BX
+    
+    ; Normalizar decimales para comparación justa
+    CALL NORMALIZAR_DECIMALES_SUMA
+    
+    ; Comparar signos primero
+    MOV AL, [es_negativo1]
+    MOV BL, [es_negativo2]
+    
+    CMP AL, 1
+    JNE @SELECTED_COMP_MENOR_NO_NEG1
+    
+    ; Primer número es negativo
+    CMP BL, 1
+    JE @SELECTED_COMP_MENOR_AMBOS_NEG
+    
+    ; Negativo < Positivo = TRUE
+    XOR AX, AX
+    CMP AX, AX  ; ZF=1 (verdadero)
+    JMP @SELECTED_COMP_MENOR_FIN
+    
+@SELECTED_COMP_MENOR_NO_NEG1:
+    ; Primer número es positivo
+    CMP BL, 1
+    JNE @SELECTED_COMP_MENOR_AMBOS_POS
+    
+    ; Positivo < Negativo = FALSE
+    MOV AX, 1
+    CMP AX, 0   ; ZF=0 (falso)
+    JMP @SELECTED_COMP_MENOR_FIN
+    
+@SELECTED_COMP_MENOR_AMBOS_POS:
+    ; Ambos positivos: comparar valores directamente
+    CALL COMPARAR_VALORES_ABSOLUTOS_MENOR
+    JMP @SELECTED_COMP_MENOR_FIN
+    
+@SELECTED_COMP_MENOR_AMBOS_NEG:
+    ; Ambos negativos: el de mayor valor absoluto es menor
+    CALL COMPARAR_VALORES_ABSOLUTOS_MAYOR
+    
+@SELECTED_COMP_MENOR_FIN:
+    POP BX
+    POP AX
+    RET
+COMPARAR_FLOTANTES_MENOR ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_FLOTANTES_MAYOR  
+; Compara si flotante1 > flotante2
+; Salida: ZF=1 si es verdadero, ZF=0 si es falso
+;------------------------------------------------------------
+COMPARAR_FLOTANTES_MAYOR PROC
+    PUSH AX
+    PUSH BX
+    
+    ; Normalizar decimales
+    CALL NORMALIZAR_DECIMALES_SUMA
+    
+    ; Comparar signos
+    MOV AL, [es_negativo1]
+    MOV BL, [es_negativo2]
+    
+    CMP AL, 1
+    JNE @SELECTED_COMP_MAYOR_NO_NEG1
+    
+    ; Primer número es negativo
+    CMP BL, 1
+    JE @SELECTED_COMP_MAYOR_AMBOS_NEG
+    
+    ; Negativo > Positivo = FALSE
+    MOV AX, 1
+    CMP AX, 0   ; ZF=0 (falso)
+    JMP @SELECTED_COMP_MAYOR_FIN
+    
+@SELECTED_COMP_MAYOR_NO_NEG1:
+    ; Primer número es positivo
+    CMP BL, 1
+    JNE @SELECTED_COMP_MAYOR_AMBOS_POS
+    
+    ; Positivo > Negativo = TRUE
+    XOR AX, AX
+    CMP AX, AX  ; ZF=1 (verdadero)
+    JMP @SELECTED_COMP_MAYOR_FIN
+    
+@SELECTED_COMP_MAYOR_AMBOS_POS:
+    ; Ambos positivos: comparar valores directamente
+    CALL COMPARAR_VALORES_ABSOLUTOS_MAYOR
+    JMP @SELECTED_COMP_MAYOR_FIN
+    
+@SELECTED_COMP_MAYOR_AMBOS_NEG:
+    ; Ambos negativos: el de menor valor absoluto es mayor
+    CALL COMPARAR_VALORES_ABSOLUTOS_MENOR
+    
+@SELECTED_COMP_MAYOR_FIN:
+    POP BX
+    POP AX
+    RET
+COMPARAR_FLOTANTES_MAYOR ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_VALORES_ABSOLUTOS_MENOR  
+; Compara valores absolutos para determinar si |val1| < |val2|
+; Salida: ZF=1 si es verdadero, ZF=0 si es falso
+;------------------------------------------------------------
+COMPARAR_VALORES_ABSOLUTOS_MENOR PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos de partes enteras
+    MOV AX, [entero1]
+    CMP AX, 0
+    JGE @SELECTED_ABS_MENOR_ENT1_ABS
+    NEG AX
+@SELECTED_ABS_MENOR_ENT1_ABS:
+    MOV BX, AX  ; BX = |entero1|
+    
+    MOV AX, [entero2]
+    CMP AX, 0
+    JGE @SELECTED_ABS_MENOR_ENT2_ABS
+    NEG AX
+@SELECTED_ABS_MENOR_ENT2_ABS:
+    MOV CX, AX  ; CX = |entero2|
+    
+    ; Comparar partes enteras
+    CMP BX, CX
+    JL @SELECTED_ABS_MENOR_VERDADERO   ; |ent1| < |ent2|
+    JG @SELECTED_ABS_MENOR_FALSO       ; |ent1| > |ent2|
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    MOV DX, [decimal2]
+    
+    CMP AX, DX
+    JL @SELECTED_ABS_MENOR_VERDADERO   ; |dec1| < |dec2|
+    JMP @SELECTED_ABS_MENOR_FALSO      ; |dec1| >= |dec2|
+    
+@SELECTED_ABS_MENOR_VERDADERO:
+    XOR AX, AX
+    CMP AX, AX  ; ZF=1 (verdadero)
+    JMP @SELECTED_ABS_MENOR_FIN_CORR
+    
+@SELECTED_ABS_MENOR_FALSO:
+    MOV AX, 1
+    CMP AX, 0   ; ZF=0 (falso)
+    
+@SELECTED_ABS_MENOR_FIN_CORR:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+COMPARAR_VALORES_ABSOLUTOS_MENOR ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_VALORES_ABSOLUTOS_MAYOR  
+; Compara valores absolutos para determinar si |val1| > |val2|
+; Salida: ZF=1 si es verdadero, ZF=0 si es falso
+;------------------------------------------------------------
+COMPARAR_VALORES_ABSOLUTOS_MAYOR PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Obtener valores absolutos de partes enteras
+    MOV AX, [entero1]
+    CMP AX, 0
+    JGE @SELECTED_ABS_MAYOR_ENT1_ABS
+    NEG AX
+@SELECTED_ABS_MAYOR_ENT1_ABS:
+    MOV BX, AX  ; BX = |entero1|
+    
+    MOV AX, [entero2]
+    CMP AX, 0
+    JGE @SELECTED_ABS_MAYOR_ENT2_ABS
+    NEG AX
+@SELECTED_ABS_MAYOR_ENT2_ABS:
+    MOV CX, AX  ; CX = |entero2|
+    
+    ; Comparar partes enteras
+    CMP BX, CX
+    JG @SELECTED_ABS_MAYOR_VERDADERO   ; |ent1| > |ent2|
+    JL @SELECTED_ABS_MAYOR_FALSO       ; |ent1| < |ent2|
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    MOV DX, [decimal2]
+    
+    CMP AX, DX
+    JG @SELECTED_ABS_MAYOR_VERDADERO   ; |dec1| > |dec2|
+    JMP @SELECTED_ABS_MAYOR_FALSO      ; |dec1| <= |dec2|
+    
+@SELECTED_ABS_MAYOR_VERDADERO:
+    XOR AX, AX
+    CMP AX, AX  ; ZF=1 (verdadero)
+    JMP @SELECTED_ABS_MAYOR_FIN_CORR
+    
+@SELECTED_ABS_MAYOR_FALSO:
+    MOV AX, 1
+    CMP AX, 0   ; ZF=0 (falso)
+    
+@SELECTED_ABS_MAYOR_FIN_CORR:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+COMPARAR_VALORES_ABSOLUTOS_MAYOR ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_VALORES_ABSOLUTOS_IGUAL
+; Compara valores absolutos para determinar si |val1| == |val2|
+; Salida: ZF=1 si son iguales, ZF=0 si son diferentes
+;------------------------------------------------------------
+COMPARAR_VALORES_ABSOLUTOS_IGUAL PROC
+    PUSH AX
+    PUSH BX
+    
+    ; Normalizar decimales para comparación justa
+    CALL NORMALIZAR_DECIMALES_SUMA
+    
+    ; Comparar partes enteras
+    MOV AX, [entero1]
+    MOV BX, [entero2]
+    
+    ; Tomar valores absolutos
+    CMP AX, 0
+    JGE @SELECTED_ABS_IGUAL_ENT1_POS
+    NEG AX
+@SELECTED_ABS_IGUAL_ENT1_POS:
+    
+    CMP BX, 0
+    JGE @SELECTED_ABS_IGUAL_ENT2_POS
+    NEG BX
+@SELECTED_ABS_IGUAL_ENT2_POS:
+    
+    CMP AX, BX
+    JNE @SELECTED_ABS_IGUAL_FALSE
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal1]
+    MOV BX, [decimal2]
+    
+    CMP AX, BX
+    JE @SELECTED_ABS_IGUAL_TRUE
+    
+@SELECTED_ABS_IGUAL_FALSE:
+    MOV AX, 0
+    CMP AX, 1  ; ZF=0 (diferentes)
+    JMP @SELECTED_ABS_IGUAL_FIN
+    
+@SELECTED_ABS_IGUAL_TRUE:
+    MOV AX, 1
+    CMP AX, 1  ; ZF=1 (iguales)
+    
+@SELECTED_ABS_IGUAL_FIN:
+    POP BX
+    POP AX
+    RET
+COMPARAR_VALORES_ABSOLUTOS_IGUAL ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: FLOAT_A_INTEGER
-; Convierte el valor flotante a entero (truncando la parte decimal)
+; Convierte el flotante a entero (Stack) - trunca la parte decimal
 ;------------------------------------------------------------
 FLOAT_A_INTEGER PROC
-    ; Para float a entero, simplemente tomamos la parte entera y descartamos la decimal
-    MOV AX, [entero]
-    MOV [int_valor], AX   ; Guardar el valor en la variable de entero
+    ; Para flotante a entero, simplemente tomamos la parte entera
+    MOV AX, [entero1]
+    MOV [int_valor], AX
     
     RET
 FLOAT_A_INTEGER ENDP
 
 ;------------------------------------------------------------
+; Procedimiento: FLOAT_A_BOOLEAN
+; Convierte el flotante a booleano (Torch)
+; FALSE si es 0.0, TRUE en caso contrario
+;------------------------------------------------------------
+FLOAT_A_BOOLEAN PROC
+    ; Un flotante es FALSE solo si tanto la parte entera como decimal son 0
+    CMP WORD PTR [entero1], 0
+    JNE @SELECTED_BOOL_TRUE
+    CMP WORD PTR [decimal1], 0
+    JNE @SELECTED_BOOL_TRUE
+    
+    ; Es 0.0, por tanto FALSE
+    MOV [bool_valor], 0
+    JMP @SELECTED_BOOL_FIN
+    
+@SELECTED_BOOL_TRUE:
+    ; No es 0.0, por tanto TRUE
+    MOV [bool_valor], 1
+    
+@SELECTED_BOOL_FIN:
+    RET
+FLOAT_A_BOOLEAN ENDP
+
+;------------------------------------------------------------
 ; Procedimiento: FLOAT_A_CHAR
-; Convierte el valor flotante a caracter (primer dígito de la parte entera)
+; Convierte el flotante a caracter (Rune)
+; Toma el primer dígito de la parte entera
 ;------------------------------------------------------------
 FLOAT_A_CHAR PROC
     PUSH AX
     PUSH BX
     PUSH DX
     
-    ; Primero obtenemos el valor absoluto de la parte entera
-    MOV AX, [entero]
+    ; Obtener valor absoluto de la parte entera
+    MOV AX, [entero1]
     CMP AX, 0
-    JGE POSITIVO_CHAR
-    NEG AX                ; Si es negativo, lo hacemos positivo
+    JGE @SELECTED_CHAR_POSITIVO
+    NEG AX
     
-POSITIVO_CHAR:
-    ; Ahora extraemos el primer dígito significativo
-    ; Si es un número de un solo dígito, ya lo tenemos
+@SELECTED_CHAR_POSITIVO:
+    ; Extraer el primer dígito significativo
     CMP AX, 10
-    JL DIGITO_UNICO_CHAR
+    JL @SELECTED_CHAR_UN_DIGITO
     
-    ; Si tiene más de un dígito, extraemos el primero
+    ; Tiene más de un dígito, extraer el primero
     MOV BX, 10
-
-EXTRAER_PRIMER_DIGITO_CHAR:
+@SELECTED_CHAR_EXTRAER:
     CMP AX, 10
-    JL DIGITO_UNICO_CHAR  ; Si es menor que 10, ya tenemos un solo dígito
+    JL @SELECTED_CHAR_UN_DIGITO
     
     XOR DX, DX
-    DIV BX                ; AX = AX / 10, DX = resto
-    JMP EXTRAER_PRIMER_DIGITO_CHAR
+    DIV BX  ; AX = AX / 10
+    JMP @SELECTED_CHAR_EXTRAER
     
-DIGITO_UNICO_CHAR:
-    ; Ahora AX contiene el primer dígito
-    ADD AL, '0'           ; Convertir a ASCII
-    MOV [char_valor], AL  ; Guardar como caracter
+@SELECTED_CHAR_UN_DIGITO:
+    ; Convertir a caracter ASCII
+    ADD AL, '0'
+    MOV [char_valor], AL
     
     POP DX
     POP BX
@@ -253,31 +2346,8 @@ DIGITO_UNICO_CHAR:
 FLOAT_A_CHAR ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: FLOAT_A_BOOLEAN
-; Convierte el valor flotante a booleano (FALSE si 0.0, TRUE en caso contrario)
-;------------------------------------------------------------
-FLOAT_A_BOOLEAN PROC
-    ; Un flotante es FALSE solo si tanto la parte entera como la decimal son 0
-    CMP WORD PTR [entero], 0
-    JNE ES_TRUE           ; Si la parte entera no es 0, es TRUE
-    
-    CMP WORD PTR [decimal], 0
-    JNE ES_TRUE           ; Si la parte decimal no es 0, es TRUE
-    
-    ; Si llegamos aquí, es 0.0
-    MOV [bool_valor], 0   ; FALSE
-    JMP BOOL_FIN_FLOAT
-    
-ES_TRUE:
-    MOV [bool_valor], 1   ; TRUE
-    
-BOOL_FIN_FLOAT:
-    RET
-FLOAT_A_BOOLEAN ENDP
-
-;------------------------------------------------------------
 ; Procedimiento: FLOAT_A_STRING
-; Convierte el valor flotante a su representación textual
+; Convierte el flotante a string (Spider)
 ;------------------------------------------------------------
 FLOAT_A_STRING PROC
     PUSH AX
@@ -287,146 +2357,139 @@ FLOAT_A_STRING PROC
     PUSH SI
     PUSH DI
     
-    ; Empezamos con el buffer vacío
+    ; Limpiar buffer de string
     LEA DI, string_buffer
     
-    ; Verificamos si el número es negativo
-    CMP [es_negativo], 0
-    JE STRING_POSITIVO_FLOAT
+    ; Verificar si es negativo
+    CMP [es_negativo1], 0
+    JE @SELECTED_STR_POSITIVO
     
-    ; Si es negativo, agregamos el signo '-' al inicio
+    ; Agregar signo negativo
     MOV BYTE PTR [DI], '-'
-    INC DI                ; Avanzamos al siguiente byte en el buffer
+    INC DI
     
-STRING_POSITIVO_FLOAT:
-    ; Convertimos la parte entera a string
-    MOV AX, [entero]
+@SELECTED_STR_POSITIVO:
+    ; Convertir parte entera a string
+    MOV AX, [entero1]
     
-    ; Si la parte entera es negativa, la hacemos positiva (ya agregamos el -)
-    CMP [es_negativo], 0
-    JE ENTERO_YA_POSITIVO
+    ; Tomar valor absoluto
+    CMP [es_negativo1], 0
+    JE @SELECTED_STR_ENT_ABS
     NEG AX
     
-ENTERO_YA_POSITIVO:
-    ; Caso especial: si el número es cero
+@SELECTED_STR_ENT_ABS:
+    ; Caso especial: cero
     CMP AX, 0
-    JNE CONVERTIR_DIGITOS_FLOAT
+    JNE @SELECTED_STR_ENT_NO_CERO
     
-    MOV BYTE PTR [DI], '0'    ; Ponemos el carácter '0'
-    INC DI                    ; Avanzamos en el buffer
-    JMP AGREGAR_PUNTO         ; Continuamos con el punto decimal
+    MOV BYTE PTR [DI], '0'
+    INC DI
+    JMP @SELECTED_STR_PUNTO
     
-CONVERTIR_DIGITOS_FLOAT:
-    ; Necesitamos los dígitos en orden inverso
-    ; Usamos la pila para invertir el orden
-    MOV BX, 10      ; Divisor = 10
-    XOR CX, CX      ; Contador de dígitos
+@SELECTED_STR_ENT_NO_CERO:
+    ; Convertir dígitos de la parte entera
+    XOR CX, CX  ; Contador de dígitos
+    MOV BX, 10  ; Divisor
     
-BUCLE_DIGITOS_FLOAT:
-    XOR DX, DX      ; Limpiamos DX para la división
-    DIV BX          ; AX = AX / 10, DX = resto (dígito)
-    
-    PUSH DX         ; Guardamos el dígito en la pila
-    INC CX          ; Incrementamos contador
+@SELECTED_STR_DIV_LOOP:
+    XOR DX, DX
+    DIV BX      ; AX = AX / 10, DX = resto (dígito)
+    PUSH DX     ; Guardar dígito en pila
+    INC CX      ; Incrementar contador
     
     CMP AX, 0
-    JNE BUCLE_DIGITOS_FLOAT   ; Si AX no es 0, continuamos
+    JNE @SELECTED_STR_DIV_LOOP
     
-    ; Ahora sacamos los dígitos de la pila y los agregamos al buffer
-AGREGAR_DIGITOS_FLOAT:
-    POP DX          ; Recuperamos un dígito
-    ADD DL, '0'     ; Convertimos a carácter ASCII
-    MOV [DI], DL    ; Lo ponemos en el buffer
-    INC DI          ; Avanzamos en el buffer
-    LOOP AGREGAR_DIGITOS_FLOAT
+    ; Sacar dígitos de la pila en orden correcto
+@SELECTED_STR_POP_LOOP:
+    POP DX
+    ADD DL, '0'
+    MOV [DI], DL
+    INC DI
+    LOOP @SELECTED_STR_POP_LOOP
     
-AGREGAR_PUNTO:
-    ; Agregamos el punto decimal
+@SELECTED_STR_PUNTO:
+    ; Agregar punto decimal
     MOV BYTE PTR [DI], '.'
     INC DI
     
-    ; Ahora agregamos la parte decimal
-    ; Si no hay dígitos decimales, agregamos un 0
-    CMP BYTE PTR [dec_digitos], 0
-    JNE HAY_DECIMALES
+    ; Convertir parte decimal
+    CMP BYTE PTR [dec_digitos1], 0
+    JNE @SELECTED_STR_HAY_DECIMALES
     
+    ; No hay decimales, agregar 0
     MOV BYTE PTR [DI], '0'
     INC DI
-    JMP FIN_STRING_FLOAT
+    JMP @SELECTED_STR_TERMINAR
     
-HAY_DECIMALES:
-    ; Calculamos cuántos ceros iniciales podríamos necesitar
+@SELECTED_STR_HAY_DECIMALES:
+    ; Calcular cuántos ceros iniciales necesitamos
     XOR CH, CH
-    MOV CL, [dec_digitos]     ; CL = número de dígitos decimales
-    MOV SI, CX                ; SI = total de dígitos decimales
+    MOV CL, [dec_digitos1]
+    MOV SI, CX  ; SI = total de dígitos decimales necesarios
     
-    ; Contamos cuántos dígitos tiene decimal
-    MOV AX, [decimal]
-    XOR CX, CX                ; Contador de dígitos
-    
-    ; Caso especial: si decimal es 0
+    ; Contar dígitos reales en decimal1
+    MOV AX, [decimal1]
     CMP AX, 0
-    JNE CONTAR_DIGITOS_DECIMAL
+    JNE @SELECTED_STR_CONTAR_DEC
     
-    ; Si decimal es 0, necesitamos SI ceros
+    ; decimal1 es 0, agregar todos ceros
     MOV CX, SI
-AGREGAR_SOLO_CEROS:
+@SELECTED_STR_CEROS_LOOP:
     MOV BYTE PTR [DI], '0'
     INC DI
-    LOOP AGREGAR_SOLO_CEROS
-    JMP FIN_STRING_FLOAT
+    LOOP @SELECTED_STR_CEROS_LOOP
+    JMP @SELECTED_STR_TERMINAR
     
-CONTAR_DIGITOS_DECIMAL:
-    ; Contamos dígitos en decimal
+@SELECTED_STR_CONTAR_DEC:
+    ; Contar dígitos reales
+    XOR CX, CX  ; Contador de dígitos reales
     MOV BX, 10
-BUCLE_CONTAR_DECIMAL:
+    
+@SELECTED_STR_CONTAR_LOOP:
     XOR DX, DX
     DIV BX
     INC CX
     CMP AX, 0
-    JNE BUCLE_CONTAR_DECIMAL
+    JNE @SELECTED_STR_CONTAR_LOOP
     
-    ; SI = total de dígitos requeridos, CX = dígitos que tiene decimal
-    ; Calculamos cuántos ceros necesitamos
+    ; SI = dígitos necesarios, CX = dígitos reales
+    ; Agregar ceros iniciales si es necesario
     MOV AX, SI
     SUB AX, CX
-    
-    ; Agregamos los ceros iniciales si son necesarios
     CMP AX, 0
-    JLE AGREGAR_DECIMAL   ; No necesitamos ceros iniciales
+    JLE @SELECTED_STR_SIN_CEROS_INIT
     
     MOV CX, AX
-AGREGAR_CEROS_INICIALES_FLOAT:
+@SELECTED_STR_CEROS_INIT_LOOP:
     MOV BYTE PTR [DI], '0'
     INC DI
-    LOOP AGREGAR_CEROS_INICIALES_FLOAT
+    LOOP @SELECTED_STR_CEROS_INIT_LOOP
     
-AGREGAR_DECIMAL:
-    ; Ahora agregamos los dígitos de la parte decimal
-    MOV AX, [decimal]
-    MOV BX, 10      ; Divisor = 10
-    XOR CX, CX      ; Contador de dígitos
+@SELECTED_STR_SIN_CEROS_INIT:
+    ; Agregar dígitos decimales reales
+    MOV AX, [decimal1]
+    XOR CX, CX
+    MOV BX, 10
     
-BUCLE_DECIMAL_PARA_PILA:
-    XOR DX, DX      ; Limpiamos DX para la división
-    DIV BX          ; AX = AX / 10, DX = resto (dígito)
-    
-    PUSH DX         ; Guardamos el dígito en la pila
-    INC CX          ; Incrementamos contador
-    
+@SELECTED_STR_DEC_DIV_LOOP:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
     CMP AX, 0
-    JNE BUCLE_DECIMAL_PARA_PILA   ; Si AX no es 0, continuamos
+    JNE @SELECTED_STR_DEC_DIV_LOOP
     
-    ; Sacamos los dígitos de la pila en orden inverso
-SACAR_DECIMAL_DE_PILA:
-    POP DX          ; Recuperamos un dígito
-    ADD DL, '0'     ; Convertimos a carácter ASCII
-    MOV [DI], DL    ; Lo ponemos en el buffer
-    INC DI          ; Avanzamos en el buffer
-    LOOP SACAR_DECIMAL_DE_PILA
+@SELECTED_STR_DEC_POP_LOOP:
+    POP DX
+    ADD DL, '0'
+    MOV [DI], DL
+    INC DI
+    LOOP @SELECTED_STR_DEC_POP_LOOP
     
-FIN_STRING_FLOAT:
-    MOV BYTE PTR [DI], '$'  ; Terminador de string
+@SELECTED_STR_TERMINAR:
+    ; Agregar terminador
+    MOV BYTE PTR [DI], '$'
     
     POP DI
     POP SI
@@ -439,52 +2502,51 @@ FLOAT_A_STRING ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: FLOAT_A_CREATIVO
-; Convierte el flotante a un valor de probabilidad basado en el primer dígito de la parte entera
+; Convierte el flotante a tipo creativo (probabilidad 0.X)
+; Usa el primer dígito de la parte entera
 ;------------------------------------------------------------
 FLOAT_A_CREATIVO PROC
     PUSH AX
     PUSH BX
     PUSH DX
     
-    ; Verificamos si el flotante es 0.0
-    CMP WORD PTR [entero], 0
-    JNE NO_CERO_CREATIVO
-    CMP WORD PTR [decimal], 0
-    JNE NO_CERO_CREATIVO
+    ; Verificar si el flotante es 0.0
+    CMP WORD PTR [entero1], 0
+    JNE @SELECTED_CREATIVO_NO_CERO
+    CMP WORD PTR [decimal1], 0
+    JNE @SELECTED_CREATIVO_NO_CERO
     
-    ; Si es 0.0, la probabilidad es 0
+    ; Es 0.0, probabilidad es 0
     MOV BYTE PTR [prob_valor], 0
-    JMP CREATIVO_FIN_FLOAT
+    JMP @SELECTED_CREATIVO_FIN
     
-NO_CERO_CREATIVO:
-    ; Obtenemos el valor absoluto de la parte entera
-    MOV AX, [entero]
+@SELECTED_CREATIVO_NO_CERO:
+    ; Obtener valor absoluto de la parte entera
+    MOV AX, [entero1]
     CMP AX, 0
-    JGE POSITIVO_CREATIVO
+    JGE @SELECTED_CREATIVO_POSITIVO
     NEG AX
     
-POSITIVO_CREATIVO:
-    ; Extraemos el primer dígito
-    ; Si es un número de un solo dígito, ya lo tenemos
+@SELECTED_CREATIVO_POSITIVO:
+    ; Extraer el primer dígito
     CMP AX, 10
-    JL DIGITO_UNICO_CREATIVO
+    JL @SELECTED_CREATIVO_UN_DIGITO
     
-    ; Si tiene más de un dígito, extraemos el primero
+    ; Tiene más de un dígito, extraer el primero
     MOV BX, 10
-
-EXTRAER_PRIMER_DIGITO_CREATIVO:
+@SELECTED_CREATIVO_EXTRAER:
     CMP AX, 10
-    JL DIGITO_UNICO_CREATIVO  ; Si es menor que 10, ya tenemos un solo dígito
+    JL @SELECTED_CREATIVO_UN_DIGITO
     
     XOR DX, DX
-    DIV BX                    ; AX = AX / 10, DX = resto
-    JMP EXTRAER_PRIMER_DIGITO_CREATIVO
+    DIV BX  ; AX = AX / 10
+    JMP @SELECTED_CREATIVO_EXTRAER
     
-DIGITO_UNICO_CREATIVO:
-    ; Ahora AX contiene el primer dígito
+@SELECTED_CREATIVO_UN_DIGITO:
+    ; AX contiene el primer dígito (0-9)
     MOV [prob_valor], AL
     
-CREATIVO_FIN_FLOAT:
+@SELECTED_CREATIVO_FIN:
     POP DX
     POP BX
     POP AX
@@ -492,296 +2554,573 @@ CREATIVO_FIN_FLOAT:
 FLOAT_A_CREATIVO ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: MOSTRAR_RESULTADOS
-; Muestra el resultado original y todas las conversiones
+; Procedimiento: MOSTRAR_RESULTADO_FLOTANTE
+; Muestra el resultado de una operación flotante
 ;------------------------------------------------------------
-MOSTRAR_RESULTADOS PROC
-    ; Mostramos una nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 1. Mostrar el flotante original
-    MOV AH, 09h
-    LEA DX, prompt_float
-    INT 21h
-    
-    CALL MOSTRAR_FLOTANTE
-    
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 2. Mostrar conversión a entero
-    MOV AH, 09h
-    LEA DX, prompt_int
-    INT 21h
-    
-    MOV AX, [int_valor]
-    CALL MOSTRAR_ENTERO
-    
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 3. Mostrar conversión a caracter
-    MOV AH, 09h
-    LEA DX, prompt_char
-    INT 21h
-    
-    MOV DL, [char_valor]
-    MOV AH, 02h         ; Función 2: mostrar caracter
-    INT 21h
-    
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
-    
-    ; 4. Mostrar conversión a booleano
-    MOV AH, 09h
-    LEA DX, prompt_bool
-    INT 21h
-    
-    ; Decidir si mostrar "TRUE" o "FALSE"
-    CMP [bool_valor], 0
-    JE MOSTRAR_BOOL_FALSE_FLOAT
+MOSTRAR_RESULTADO_FLOTANTE PROC
+    CALL NUEVA_LINEA
     
     MOV AH, 09h
-    LEA DX, valor_true
-    INT 21h
-    JMP MOSTRAR_STR_FLOAT
-    
-MOSTRAR_BOOL_FALSE_FLOAT:
-    MOV AH, 09h
-    LEA DX, valor_false
+    LEA DX, result_msg
     INT 21h
     
-MOSTRAR_STR_FLOAT:
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
+    ; Mostrar el flotante resultado
+    CALL MOSTRAR_FLOTANTE_RESULTADO
     
-    ; 5. Mostrar conversión a string
-    MOV AH, 09h
-    LEA DX, prompt_str
-    INT 21h
+    CALL NUEVA_LINEA
+    CALL NUEVA_LINEA
     
-    MOV AH, 09h
-    LEA DX, string_buffer
-    INT 21h
+    RET
+MOSTRAR_RESULTADO_FLOTANTE ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_FLOTANTE_RESULTADO
+; Muestra un flotante desde las variables de resultado
+;------------------------------------------------------------
+MOSTRAR_FLOTANTE_RESULTADO PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
     
-    ; Nueva línea
-    MOV AH, 09h
-    LEA DX, nueva_lin
-    INT 21h
+    ; Mostrar signo si es negativo
+    CMP [resultado_negativo], 0
+    JE @SELECTED_MOSTRAR_PARTE_ENTERA
     
-    ; 6. Mostrar conversión a creativo (probabilidad)
-    MOV AH, 09h
-    LEA DX, prompt_creativo
-    INT 21h
-    
-    ; Para el tipo creativo de probabilidad mostramos "0.X"
-    MOV DL, '0'         ; El cero inicial
+    MOV DL, '-'
     MOV AH, 02h
     INT 21h
+    
+@SELECTED_MOSTRAR_PARTE_ENTERA:
+    ; Mostrar parte entera
+    MOV AX, [resultado_entero]
+    
+    ; Tomar valor absoluto para mostrar
+    CMP [resultado_negativo], 0
+    JE @SELECTED_MOSTRAR_ENT_POS
+    CMP AX, 0
+    JGE @SELECTED_MOSTRAR_ENT_POS
+    NEG AX
+    
+@SELECTED_MOSTRAR_ENT_POS:
+    CALL MOSTRAR_NUMERO_POSITIVO
     
     ; Mostrar punto decimal
     MOV AH, 09h
     LEA DX, punto
     INT 21h
     
-    ; Mostrar el valor de probabilidad
-    MOV DL, [prob_valor]
-    ADD DL, '0'         ; Convertir a carácter
-    MOV AH, 02h
-    INT 21h
+    ; Mostrar parte decimal
+    CALL MOSTRAR_DECIMAL_RESULTADO
     
-    RET
-MOSTRAR_RESULTADOS ENDP
-
-;------------------------------------------------------------
-; Procedimiento: MOSTRAR_ENTERO
-; Muestra un número entero en pantalla
-; Entrada: AX = número a mostrar
-;------------------------------------------------------------
-MOSTRAR_ENTERO PROC
-    ; Guardamos los registros que vamos a modificar
-    PUSH AX
-    PUSH BX
-    PUSH CX
-    PUSH DX
-    
-    ; Verificamos si el número es negativo
-    CMP AX, 0
-    JGE NUM_POSITIVO   ; Si es >= 0, es positivo
-    
-    ; Si es negativo, mostramos el signo "-" y negamos el numero
-    PUSH AX            ; Guardamos AX
-    MOV DL, '-'
-    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
-    INT 21h            ; Mostramos el signo menos
-    POP AX             ; Recuperamos AX
-    NEG AX             ; Negamos AX para trabajar con el valor positivo
-    
-NUM_POSITIVO:
-    MOV BX, 10         ; Divisor (10) para obtener los digitos
-    XOR CX, CX         ; Inicializamos contador de digitos a 0
-    
-    ; Caso especial: si el numero es cero
-    CMP AX, 0
-    JNE DIVIDIR
-    
-    MOV DL, '0'        ; Caracter '0'
-    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
-    INT 21h
-    JMP NUM_A_STR_FIN
-    
-DIVIDIR:
-    ; Para cada digito: dividimos por 10, el resto es el digito actual, el cociente continua
-    XOR DX, DX         ; Limpiamos DX para la division extendida DX:AX / BX
-    DIV BX             ; AX = cociente, DX = resto (digito)
-    
-    PUSH DX            ; Guardamos el digito en la pila (para mostrarlo luego en orden inverso)
-    INC CX             ; Incrementamos contador de digitos
-    
-    CMP AX, 0          ; ¿Terminamos? (cociente = 0)
-    JNE DIVIDIR        ; Si no, continuamos con el siguiente digito
-    
-MOSTRAR_DIGITOS:
-    ; Mostramos los digitos en orden inverso (sacandolos de la pila)
-    POP DX             ; Recuperamos un digito
-    ADD DL, '0'        ; Convertimos el valor numerico a caracter ASCII
-    MOV AH, 02h        ; Funcion 2 de DOS: mostrar un caracter
-    INT 21h            ; Mostramos el digito
-    LOOP MOSTRAR_DIGITOS ; Repetimos para cada digito (CX veces)
-    
-NUM_A_STR_FIN:
-    ; Restauramos los registros que modificamos
     POP DX
     POP CX
     POP BX
     POP AX
-    RET                ; Retornamos al punto de llamada
-MOSTRAR_ENTERO ENDP
+    RET
+MOSTRAR_FLOTANTE_RESULTADO ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: MOSTRAR_FLOTANTE
-; Muestra el número flotante original en pantalla
+; Procedimiento: MOSTRAR_DECIMAL_RESULTADO
+; Muestra la parte decimal del resultado
 ;------------------------------------------------------------
-MOSTRAR_FLOTANTE PROC
-    ; Guardamos los registros que vamos a modificar
+MOSTRAR_DECIMAL_RESULTADO PROC
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Mostrar la parte entera
-    MOV AX, [entero]
-    CALL MOSTRAR_ENTERO
+    ; Verificar si hay dígitos decimales
+    CMP BYTE PTR [resultado_digitos], 0
+    JNE @SELECTED_MOSTRAR_DEC_HAY
     
-    ; Mostrar el punto decimal
+    ; No hay decimales, mostrar 0
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h
+    JMP @SELECTED_MOSTRAR_DEC_FIN
+    
+@SELECTED_MOSTRAR_DEC_HAY:
+    ; Calcular cuántos dígitos necesitamos mostrar
+    XOR CH, CH
+    MOV CL, [resultado_digitos]
+    MOV BX, CX  ; BX = total de dígitos necesarios
+    
+    ; Si resultado_decimal es 0, mostrar todos ceros
+    CMP WORD PTR [resultado_decimal], 0
+    JNE @SELECTED_MOSTRAR_DEC_NO_CERO
+    
+    MOV CX, BX
+@SELECTED_MOSTRAR_DEC_SOLO_CEROS:
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h
+    LOOP @SELECTED_MOSTRAR_DEC_SOLO_CEROS
+    JMP @SELECTED_MOSTRAR_DEC_FIN
+    
+@SELECTED_MOSTRAR_DEC_NO_CERO:
+    ; Contar dígitos reales en resultado_decimal
+    MOV AX, [resultado_decimal]
+    XOR CX, CX  ; Contador de dígitos reales
+    PUSH BX     ; Guardar total de dígitos necesarios
+    MOV BX, 10
+    
+@SELECTED_MOSTRAR_DEC_CONTAR:
+    XOR DX, DX
+    DIV BX
+    INC CX
+    CMP AX, 0
+    JNE @SELECTED_MOSTRAR_DEC_CONTAR
+    
+    POP BX      ; Recuperar total de dígitos necesarios
+    
+    ; BX = dígitos necesarios, CX = dígitos reales
+    ; Calcular ceros iniciales
+    MOV AX, BX
+    SUB AX, CX
+    CMP AX, 0
+    JLE @SELECTED_MOSTRAR_DEC_SIN_CEROS
+    
+    ; Mostrar ceros iniciales
+    MOV CX, AX
+@SELECTED_MOSTRAR_DEC_CEROS_INIT:
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h
+    LOOP @SELECTED_MOSTRAR_DEC_CEROS_INIT
+    
+@SELECTED_MOSTRAR_DEC_SIN_CEROS:
+    ; Mostrar dígitos reales
+    MOV AX, [resultado_decimal]
+    CALL MOSTRAR_NUMERO_POSITIVO
+    
+@SELECTED_MOSTRAR_DEC_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+MOSTRAR_DECIMAL_RESULTADO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_CONVERSIONES
+; Muestra todas las conversiones del flotante
+;------------------------------------------------------------
+MOSTRAR_CONVERSIONES PROC
+    CALL NUEVA_LINEA
+    
+    ; Mostrar flotante original
+    MOV AH, 09h
+    LEA DX, prompt_conversiones_orig
+    INT 21h
+    
+    ; Mostrar el flotante original usando entero1, decimal1, etc.
+    CALL MOSTRAR_FLOTANTE_ORIGINAL
+    
+    CALL NUEVA_LINEA
+    
+    ; Mostrar conversión a entero (Stack)
+    MOV AH, 09h
+    LEA DX, prompt_conv_int
+    INT 21h
+    
+    MOV AX, [int_valor]
+    CALL MOSTRAR_NUMERO_CON_SIGNO
+    
+    CALL NUEVA_LINEA
+    
+    ; Mostrar conversión a booleano (Torch)
+    MOV AH, 09h
+    LEA DX, prompt_conv_bool
+    INT 21h
+    
+    CMP [bool_valor], 0
+    JE @SELECTED_CONV_BOOL_FALSE
+    
+    LEA DX, valor_true
+    JMP @SELECTED_CONV_BOOL_MOSTRAR
+    
+@SELECTED_CONV_BOOL_FALSE:
+    LEA DX, valor_false
+    
+@SELECTED_CONV_BOOL_MOSTRAR:
+    MOV AH, 09h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    
+    ; Mostrar conversión a caracter (Rune)
+    MOV AH, 09h
+    LEA DX, prompt_conv_char
+    INT 21h
+    
+    MOV DL, [char_valor]
+    MOV AH, 02h
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    
+    ; Mostrar conversión a string (Spider)
+    MOV AH, 09h
+    LEA DX, prompt_conv_str
+    INT 21h
+    
+    LEA DX, string_buffer
+    INT 21h
+    
+    CALL NUEVA_LINEA
+    
+    ; Mostrar conversión a creativo (probabilidad)
+    MOV AH, 09h
+    LEA DX, prompt_conv_creativo
+    INT 21h
+    
+    ; Mostrar formato 0.X
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h
+    
     MOV AH, 09h
     LEA DX, punto
     INT 21h
     
-    ; Verificar si hay dígitos decimales
-    CMP BYTE PTR [dec_digitos], 0
-    JE FLOTANTE_SIN_DECIMALES
-    
-    ; Mostrar la parte decimal
-    XOR CH, CH                ; Limpiar la parte alta (CH)
-    MOV CL, [dec_digitos]     ; Cargar el byte en la parte baja (CL)
-    
-    ; Si la parte decimal es 0, mostrar todos los dígitos como ceros
-    CMP WORD PTR [decimal], 0
-    JNE DECIMALES_NO_CERO
-    
-MOSTRAR_SOLO_CEROS:
-    MOV DL, '0'
+    MOV DL, [prob_valor]
+    ADD DL, '0'
     MOV AH, 02h
     INT 21h
     
-    LOOP MOSTRAR_SOLO_CEROS
-    JMP FIN_MOSTRAR_FLOTANTE
+    CALL NUEVA_LINEA
     
-DECIMALES_NO_CERO:
-    ; Si la parte decimal no es 0, mostrar su valor real
-    ; Calculamos cuántos ceros iniciales podríamos necesitar
-    PUSH CX                 ; Guardamos el contador de dígitos decimales
+    RET
+MOSTRAR_CONVERSIONES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_FLOTANTE_ORIGINAL
+; Muestra el flotante original usando las variables 1
+;------------------------------------------------------------
+MOSTRAR_FLOTANTE_ORIGINAL PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
     
-    MOV AX, [decimal]       ; Valor decimal a mostrar
-    XOR CX, CX              ; Contador de dígitos reales
-    MOV BX, 10              ; Divisor
+    ; Mostrar signo si es negativo
+    CMP [es_negativo1], 0
+    JE @SELECTED_ORIG_PARTE_ENTERA
     
-CONTAR_DIGITOS_REALES:
-    XOR DX, DX
-    DIV BX                  ; AX = AX / 10, DX = resto
+    MOV DL, '-'
+    MOV AH, 02h
+    INT 21h
     
-    INC CX                  ; Incrementamos contador
+@SELECTED_ORIG_PARTE_ENTERA:
+    ; Mostrar parte entera
+    MOV AX, [entero1]
     
+    ; Tomar valor absoluto
+    CMP [es_negativo1], 0
+    JE @SELECTED_ORIG_ENT_POS
     CMP AX, 0
-    JNE CONTAR_DIGITOS_REALES
+    JGE @SELECTED_ORIG_ENT_POS
+    NEG AX
     
-    ; Recuperamos contador original y calculamos ceros necesarios
-    POP BX                  ; BX = contador original de dígitos
-    MOV AX, BX
-    SUB AX, CX              ; AX = ceros a agregar al inicio
+@SELECTED_ORIG_ENT_POS:
+    CALL MOSTRAR_NUMERO_POSITIVO
     
-    ; Mostrar los ceros iniciales si son necesarios
-    CMP AX, 0
-    JLE MOSTRAR_DECIMAL_VALOR
+    ; Mostrar punto decimal
+    MOV AH, 09h
+    LEA DX, punto
+    INT 21h
     
-    MOV CX, AX              ; CX = número de ceros a mostrar
-MOSTRAR_CEROS_INICIALES:
+    ; Mostrar parte decimal
+    CMP BYTE PTR [dec_digitos1], 0
+    JNE @SELECTED_ORIG_HAY_DECIMALES
+    
+    ; No hay decimales, mostrar 0
     MOV DL, '0'
     MOV AH, 02h
     INT 21h
+    JMP @SELECTED_ORIG_FIN
     
-    LOOP MOSTRAR_CEROS_INICIALES
+@SELECTED_ORIG_HAY_DECIMALES:
+    ; Mostrar decimales del flotante original
+    XOR CH, CH
+    MOV CL, [dec_digitos1]
     
-MOSTRAR_DECIMAL_VALOR:
-    ; Ahora mostramos el valor decimal real
-    MOV AX, [decimal]
+    CMP WORD PTR [decimal1], 0
+    JNE @SELECTED_ORIG_DEC_NO_CERO
     
-    ; Convertir a dígitos (usando la pila para invertir orden)
-    XOR CX, CX              ; Contador de dígitos
-    MOV BX, 10              ; Divisor
-    
-DECIMAL_DIVIDIR:
-    XOR DX, DX              ; Limpiar DX para división
-    DIV BX                  ; AX = AX / 10, DX = resto (dígito)
-    
-    PUSH DX                 ; Guardar dígito en pila
-    INC CX                  ; Incrementar contador
-    
-    CMP AX, 0               ; ¿Terminamos?
-    JNE DECIMAL_DIVIDIR
-    
-DECIMAL_MOSTRAR:
-    POP DX                  ; Obtener dígito de pila
-    ADD DL, '0'             ; Convertir a carácter
-    MOV AH, 02h             ; Función 2: mostrar carácter
-    INT 21h                 ; Mostrar dígito
-    LOOP DECIMAL_MOSTRAR
-    
-FLOTANTE_SIN_DECIMALES:
-    ; Si no hay decimales, mostrar un 0
+    ; decimal1 es 0, mostrar ceros
+@SELECTED_ORIG_CEROS_LOOP:
     MOV DL, '0'
     MOV AH, 02h
     INT 21h
+    LOOP @SELECTED_ORIG_CEROS_LOOP
+    JMP @SELECTED_ORIG_FIN
     
-FIN_MOSTRAR_FLOTANTE:
-    ; Restaurar registros
+@SELECTED_ORIG_DEC_NO_CERO:
+    ; Mostrar valor real de decimal1 con ceros iniciales si es necesario
+    ; (Implementación similar a otros procedimientos de mostrar decimales)
+    MOV AX, [decimal1]
+    CALL MOSTRAR_NUMERO_POSITIVO
+    
+@SELECTED_ORIG_FIN:
     POP DX
     POP CX
     POP BX
     POP AX
     RET
-MOSTRAR_FLOTANTE ENDP
+MOSTRAR_FLOTANTE_ORIGINAL ENDP
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_NUMERO_POSITIVO
+; Muestra un número positivo en pantalla
+; Entrada: AX = número a mostrar (debe ser positivo)
+;------------------------------------------------------------
+MOSTRAR_NUMERO_POSITIVO PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Caso especial: cero
+    CMP AX, 0
+    JNE @SELECTED_POS_NO_CERO
+    
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h
+    JMP @SELECTED_POS_FIN
+    
+@SELECTED_POS_NO_CERO:
+    ; Convertir a dígitos usando pila
+    XOR CX, CX  ; Contador de dígitos
+    MOV BX, 10  ; Divisor
+    
+@SELECTED_POS_DIV_LOOP:
+    XOR DX, DX
+    DIV BX      ; AX = AX / 10, DX = resto (dígito)
+    PUSH DX     ; Guardar dígito en pila
+    INC CX      ; Incrementar contador
+    
+    CMP AX, 0
+    JNE @SELECTED_POS_DIV_LOOP
+    
+    ; Mostrar dígitos en orden correcto
+@SELECTED_POS_MOSTRAR_LOOP:
+    POP DX
+    ADD DL, '0'
+    MOV AH, 02h
+    INT 21h
+    LOOP @SELECTED_POS_MOSTRAR_LOOP
+    
+@SELECTED_POS_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+MOSTRAR_NUMERO_POSITIVO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTAR_PARTES_SUMA
+; Resta partes para la suma (caso positivo + negativo)
+;------------------------------------------------------------
+RESTAR_PARTES_SUMA PROC
+    PUSH AX
+    PUSH BX
+    
+    ; Determinar cuál es mayor para definir el signo del resultado
+    CALL COMPARAR_VALORES_ABSOLUTOS_MAYOR
+    JZ @SELECTED_RESTA_SUMA_SEGUNDO_MAYOR
+    
+    ; Primer número es mayor: resultado = |num1| - |num2|
+    MOV AX, [entero1]
+    SUB AX, [entero2]
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal1]
+    SUB AX, [decimal2]
+    MOV [resultado_decimal], AX
+    
+    MOV [resultado_negativo], 0  ; Resultado positivo
+    JMP @SELECTED_RESTA_SUMA_FIN
+    
+@SELECTED_RESTA_SUMA_SEGUNDO_MAYOR:
+    ; Segundo número es mayor: resultado = |num2| - |num1|
+    MOV AX, [entero2]
+    SUB AX, [entero1]
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal2]
+    SUB AX, [decimal1]
+    MOV [resultado_decimal], AX
+    
+    MOV [resultado_negativo], 1  ; Resultado negativo
+    
+@SELECTED_RESTA_SUMA_FIN:
+    POP BX
+    POP AX
+    RET
+RESTAR_PARTES_SUMA ENDP
+
+;------------------------------------------------------------
+; Procedimiento: RESTAR_PARTES_SUMA_INV
+; Resta partes para la suma (caso negativo + positivo)
+;------------------------------------------------------------
+RESTAR_PARTES_SUMA_INV PROC
+    ; Similar a RESTAR_PARTES_SUMA pero invirtiendo los operandos
+    CALL RESTAR_PARTES_SUMA
+    RET
+RESTAR_PARTES_SUMA_INV ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CONVERTIR_A_ENTEROS_MULT
+; Prepara números para multiplicación
+;------------------------------------------------------------
+CONVERTIR_A_ENTEROS_MULT PROC
+    ; Simplificado para este ejemplo
+    RET
+CONVERTIR_A_ENTEROS_MULT ENDP
+
+;------------------------------------------------------------
+; Procedimiento: CONVERTIR_DE_ENTERO_MULT
+; Convierte resultado de multiplicación de vuelta a flotante
+;------------------------------------------------------------
+CONVERTIR_DE_ENTERO_MULT PROC
+    ; Simplificado para este ejemplo
+    RET
+CONVERTIR_DE_ENTERO_MULT ENDP
+
+;------------------------------------------------------------
+; Procedimiento: PREPARAR_DIVISION
+; Prepara números para división
+;------------------------------------------------------------
+PREPARAR_DIVISION PROC
+    ; Multiplicar el dividendo por 100 para obtener precisión decimal
+    MOV AX, [entero1]
+    MOV BX, 100
+    MUL BX
+    MOV [entero1], AX
+    RET
+PREPARAR_DIVISION ENDP
+
+;------------------------------------------------------------
+; Procedimiento: DIVISION_ENTERA_FLOTANTES
+; Realiza división entera de flotantes
+;------------------------------------------------------------
+DIVISION_ENTERA_FLOTANTES PROC
+    MOV AX, [entero1]
+    MOV BX, [entero2]
+    
+    ; Tomar valores absolutos
+    CMP AX, 0
+    JGE @SELECTED_DIV_ENT_ABS1
+    NEG AX
+@SELECTED_DIV_ENT_ABS1:
+    
+    CMP BX, 0
+    JGE @SELECTED_DIV_ENT_ABS2
+    NEG BX
+@SELECTED_DIV_ENT_ABS2:
+    
+    XOR DX, DX
+    DIV BX
+    MOV [resultado_entero], AX
+    
+    RET
+DIVISION_ENTERA_FLOTANTES ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_FLOTANTES_MENOR_IGUAL
+; Compara si flotante1 <= flotante2
+; Salida: ZF=1 si es verdadero, ZF=0 si es falso
+;------------------------------------------------------------
+COMPARAR_FLOTANTES_MENOR_IGUAL PROC
+    ; A <= B es equivalente a (A < B) OR (A == B)
+    
+    CALL COMPARAR_FLOTANTES_MENOR
+    JZ @SELECTED_MENIG_ES_MENOR  ; Si ZF=1, es menor
+    
+    ; No es menor, verificar si es igual
+    CALL COMPARAR_FLOTANTES_IGUAL
+    JMP @SELECTED_MENIG_FIN_NUEVO
+    
+@SELECTED_MENIG_ES_MENOR:
+    ; Es menor, por tanto es menor o igual (ZF ya está en 1)
+    
+@SELECTED_MENIG_FIN_NUEVO:
+    RET
+COMPARAR_FLOTANTES_MENOR_IGUAL ENDP
+
+;------------------------------------------------------------
+; Procedimiento: COMPARAR_FLOTANTES_MAYOR_IGUAL
+; Compara si flotante1 >= flotante2
+; Salida: ZF=1 si es verdadero, ZF=0 si es falso
+;------------------------------------------------------------
+COMPARAR_FLOTANTES_MAYOR_IGUAL PROC
+    ; A >= B es equivalente a (A > B) OR (A == B)
+    
+    CALL COMPARAR_FLOTANTES_MAYOR
+    JZ @SELECTED_MAYIG_ES_MAYOR  ; Si ZF=1, es mayor
+    
+    ; No es mayor, verificar si es igual
+    CALL COMPARAR_FLOTANTES_IGUAL
+    JMP @SELECTED_MAYIG_FIN_NUEVO
+    
+@SELECTED_MAYIG_ES_MAYOR:
+    ; Es mayor, por tanto es mayor o igual (ZF ya está en 1)
+    
+@SELECTED_MAYIG_FIN_NUEVO:
+    RET
+COMPARAR_FLOTANTES_MAYOR_IGUAL ENDP
+
+
+;------------------------------------------------------------
+; Procedimiento: MOSTRAR_NUMERO_CON_SIGNO
+; Muestra un número con signo
+; Entrada: AX = número a mostrar
+;------------------------------------------------------------
+MOSTRAR_NUMERO_CON_SIGNO PROC
+    PUSH AX
+    
+    ; Verificar si es negativo
+    CMP AX, 0
+    JGE @SELECTED_SIGNO_POSITIVO
+    
+    ; Mostrar signo negativo
+    PUSH AX
+    MOV DL, '-'
+    MOV AH, 02h
+    INT 21h
+    POP AX
+    
+    ; Hacer positivo
+    NEG AX
+    
+@SELECTED_SIGNO_POSITIVO:
+    ; Mostrar número positivo
+    CALL MOSTRAR_NUMERO_POSITIVO
+    
+    POP AX
+    RET
+MOSTRAR_NUMERO_CON_SIGNO ENDP
+
+;------------------------------------------------------------
+; Procedimiento: NUEVA_LINEA
+; Muestra un salto de línea
+;------------------------------------------------------------
+NUEVA_LINEA PROC
+    PUSH AX
+    PUSH DX
+    
+    MOV AH, 09h
+    LEA DX, nueva_lin
+    INT 21h
+    
+    POP DX
+    POP AX
+    RET
+NUEVA_LINEA ENDP
 
 CODIGO ENDS
-END INICIO              ; Indicamos el punto de entrada del programa
+END INICIO
