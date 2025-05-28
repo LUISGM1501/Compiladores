@@ -12,6 +12,10 @@ from .gramatica.Gramatica import Gramatica
 from .TokenMap import TokenMap
 from .special_tokens import SpecialTokens  # Importamos la clase de tokens especiales
 
+# IMPORTACIONES PARA ANALISIS SEMANTICO
+
+from .semantica.asignacionTabla.Worldname import welcomeWorldname
+
 class Parser:
 
     def imprimir_debug(self, mensaje, nivel=1):
@@ -75,7 +79,7 @@ class Parser:
         
         # Historial de tokens para análisis de contexto
         self.token_history = []
-        self.max_history_size = 5  # Mantener historial de los últimos 5 tokens
+        self.max_history_size = 100  # Mantener historial de los últimos 5 tokens
         
         # Inicializar con el primer token (si existe)
         if self.tokens:
@@ -85,23 +89,66 @@ class Parser:
         if debug and len(self.tokens) > 0:
             self.imprimir_debug(f"Tokens recibidos ({len(self.tokens)}): primeros 5 tokens: {[f'{t.type} ({t.lexema})' for t in self.tokens[:5]]}", 2)
     
+    def mostrar_historial_completo(self, cantidad=5):
+        """
+        Muestra los últimos 'cantidad' tokens procesados.
+        """
+        print(f"📜 Últimos {cantidad} tokens avanzados:")
+        for token in self.historial_completo[-cantidad:]:
+            print(f"- {token.type} ('{token.lexema}') en línea {token.linea}, columna {token.columna}")
+
+
+
     def avanzar(self):
         """
         Avanza al siguiente token en la secuencia, ignorando comentarios
         y manteniendo un historial de tokens procesados.
         """
         # Guardar el token actual en el historial antes de avanzar
-        if self.token_actual:
-            self.token_history.append(self.token_actual)
-            # Mantener el historial con tamaño limitado
-            if len(self.token_history) > self.max_history_size:
-                self.token_history.pop(0)
-        
+        self.token_history.append(self.token_actual)
         # Avanzar al siguiente token
+        
         self.posicion_actual += 1
         if self.posicion_actual < len(self.tokens):
             self.token_actual = self.tokens[self.posicion_actual]
             self.imprimir_debug(f"Avanzando a token {self.posicion_actual}: {self.token_actual.type} ('{self.token_actual.lexema}')", 2)
+
+            if self.token_actual.type == "IDENTIFICADOR":
+                print("🟢 Se ha encontrado un IDENTIFICADOR")
+                print(f"Lexema:     {self.token_actual.lexema}")
+                print(f"Línea:      {self.token_actual.linea}")
+                print(f"Columna:    {self.token_actual.columna}")
+                print(f"Valor:      {self.token_actual.valor}")
+                print(f"Categoría:  {self.token_actual.categoria}")
+
+                #PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES. 
+
+                # Caso base directo, no requiere "mirar a futuro"
+                if self.token_history[-1].type == "WORLD_NAME":
+                    welcomeWorldname(self.token_history[-1], self.token_actual)
+
+                # Casos Indirectos que requieren "mirar a futuro"
+                # 🔹 Recolección temporal de tokens hasta PUNTO_Y_COMA
+
+                print("\n\n\n\n")
+                tokens_temporales = []
+                pos_temp = self.posicion_actual
+
+                while pos_temp < len(self.tokens):
+                    token_temp = self.tokens[pos_temp]
+                    tokens_temporales.append(token_temp)
+                    if token_temp.type == "PUNTO_Y_COMA":
+                        break
+                    pos_temp += 1
+
+                # Puedes ahora trabajar con `tokens_temporales` como gustes
+                print("🧪 Tokens temporales recolectados hasta ';':")
+                for tok in tokens_temporales:
+                    print(f"- {tok.type} ('{tok.lexema}') en línea {tok.linea}, columna {tok.columna}")
+
+                
+
+                
         else:
             # Crear un token ficticio para el fin de archivo
             self.token_actual = None
@@ -548,6 +595,7 @@ class Parser:
         self.push(Gramatica.NO_TERMINAL_INICIAL)
         self.push(Gramatica.MARCA_DERECHA)
         self.imprimir_estado_pila()
+
         
         try:
             # Mientras haya símbolos en la pila y tokens en la entrada

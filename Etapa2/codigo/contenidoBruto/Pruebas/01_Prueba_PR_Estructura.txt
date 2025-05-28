@@ -15,38 +15,4 @@ Bedrock
     Obsidian Spider SALUDO "Prueba de estructura";
 
 
-ResourcePack 
-    Anvil Stack -> Spider;
-
-
-Inventory 
-    Stack contador = 0;
-    Spider mensaje = "Hola mundo";
-
-
-Recipe 
-    Spell sumar(Stack :: a, b) -> Stack;
-    Ritual mostrarMensaje(Spider :: texto);
-
-
-CraftingTable 
-    Spell sumar(Stack :: a, b) -> Stack
-    PolloCrudo
-        Stack resultado = a + b;
-        respawn resultado;
-    PolloAsado
-
-    Ritual mostrarMensaje(Spider :: texto)
-    PolloCrudo
-        dropperSpider(texto);
-    PolloAsado
-
-
-SpawnPoint 
-    PolloCrudo
-        dropperSpider(SALUDO);
-        Stack resultado = sumar(5, 10);
-        dropperSpider("El resultado es: " bind resultado);
-    PolloAsado
-
 worldSave
