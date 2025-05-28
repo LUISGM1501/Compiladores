@@ -2,11 +2,6 @@ from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 
 def welcomeWorldname(tipo, actual):
-
-    print("\n\n\n\n")
-    print(f"Bienvenido a ASIGNACION DE WORLDNAME")
-    print(f"TOKEN ACTUAL: {actual} de TIPO: {tipo}")
-
     # Asignacion a la estructura de simbolo:
     mi_simbolo = Simbolo(
         nombre=actual.lexema,
@@ -20,4 +15,8 @@ def welcomeWorldname(tipo, actual):
     #insercion en la tabla de hash 
     tabla = TablaSimbolos.instancia()
     tabla.insertar(mi_simbolo)
+
+    print(f" \n\n ver info tabla")
+    tabla.imprimir_tabla()
+    print(f"\n\n")
 

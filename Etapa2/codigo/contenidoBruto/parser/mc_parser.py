@@ -15,6 +15,14 @@ from .special_tokens import SpecialTokens  # Importamos la clase de tokens espec
 # IMPORTACIONES PARA ANALISIS SEMANTICO
 
 from .semantica.asignacionTabla.Worldname import welcomeWorldname
+from .semantica.asignacionTabla.Obsidian import welcomeObsidian
+from .semantica.asignacionTabla.Stack import welcomeStack
+from .semantica.asignacionTabla.Spider import welcomeSpider
+from .semantica.asignacionTabla.Rune import welcomeRune
+from .semantica.asignacionTabla.Torch import welcomeTorch
+from .semantica.asignacionTabla.Ghast import welcomeGhast
+from .semantica.asignacionTabla.Chest import welcomeChest, welcomeShelf
+
 
 class Parser:
 
@@ -97,6 +105,13 @@ class Parser:
         for token in self.historial_completo[-cantidad:]:
             print(f"- {token.type} ('{token.lexema}') en línea {token.linea}, columna {token.columna}")
 
+    def obtener_token_historial(self, pasos_atras):
+        """
+        Retorna el token `pasos_atras` posiciones atrás en el historial, o None si no existe.
+        """
+        if len(self.token_history) >= pasos_atras:
+            return self.token_history[-pasos_atras]
+        return None
 
 
     def avanzar(self):
@@ -105,54 +120,99 @@ class Parser:
         y manteniendo un historial de tokens procesados.
         """
         # Guardar el token actual en el historial antes de avanzar
-        self.token_history.append(self.token_actual)
-        # Avanzar al siguiente token
+        if self.token_actual:  # <-- Asegurarse de que hay token actual
+            self.token_history.append(self.token_actual)
         
+        # Avanzar al siguiente token
         self.posicion_actual += 1
         if self.posicion_actual < len(self.tokens):
             self.token_actual = self.tokens[self.posicion_actual]
             self.imprimir_debug(f"Avanzando a token {self.posicion_actual}: {self.token_actual.type} ('{self.token_actual.lexema}')", 2)
-
+            
+            # Mover todo el procesamiento de identificadores a un método separado
             if self.token_actual.type == "IDENTIFICADOR":
-                print("🟢 Se ha encontrado un IDENTIFICADOR")
-                print(f"Lexema:     {self.token_actual.lexema}")
-                print(f"Línea:      {self.token_actual.linea}")
-                print(f"Columna:    {self.token_actual.columna}")
-                print(f"Valor:      {self.token_actual.valor}")
-                print(f"Categoría:  {self.token_actual.categoria}")
+                    print("🟢 Se ha encontrado un IDENTIFICADOR")
+                    print(f"Lexema:     {self.token_actual.lexema}")
+                    print(f"Línea:      {self.token_actual.linea}")
+                    print(f"Columna:    {self.token_actual.columna}")
+                    print(f"Valor:      {self.token_actual.valor}")
+                    print(f"Categoría:  {self.token_actual.categoria}")
 
-                #PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES. 
+                    #PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES. 
 
-                # Caso base directo, no requiere "mirar a futuro"
-                if self.token_history[-1].type == "WORLD_NAME":
-                    welcomeWorldname(self.token_history[-1], self.token_actual)
+                    # Caso base directo, no requiere "mirar a futuro"
+                    if self.token_history[-1].type == "WORLD_NAME":
+                        welcomeWorldname(self.token_history[-1], self.token_actual)
+                        return
 
-                # Casos Indirectos que requieren "mirar a futuro"
-                # 🔹 Recolección temporal de tokens hasta PUNTO_Y_COMA
+                    # Casos Indirectos que requieren "mirar a futuro"
+                    # Recolección temporal de tokens hasta PUNTO_Y_COMA
+                    tokens_temporales = []
+                    pos_temp = self.posicion_actual +1
 
-                print("\n\n\n\n")
-                tokens_temporales = []
-                pos_temp = self.posicion_actual
+                    while pos_temp < len(self.tokens):
+                        token_temp = self.tokens[pos_temp]
+                        tokens_temporales.append(token_temp)
+                        if token_temp.type == "PUNTO_Y_COMA":
+                            break
+                        pos_temp += 1
 
-                while pos_temp < len(self.tokens):
-                    token_temp = self.tokens[pos_temp]
-                    tokens_temporales.append(token_temp)
-                    if token_temp.type == "PUNTO_Y_COMA":
-                        break
-                    pos_temp += 1
+                    # Inicio de casos de asignacion inmediata 
 
-                # Puedes ahora trabajar con `tokens_temporales` como gustes
-                print("🧪 Tokens temporales recolectados hasta ';':")
-                for tok in tokens_temporales:
-                    print(f"- {tok.type} ('{tok.lexema}') en línea {tok.linea}, columna {tok.columna}")
+                    # caso de shelf, listas con tipo definido
+                    token_prev = self.obtener_token_historial(5)
+                    if token_prev and token_prev.type == "SHELF":
+                        welcomeShelf(self.obtener_token_historial(5), 
+                                    self.obtener_token_historial(3),
+                                    self.obtener_token_historial(1),
+                                    self.token_actual,
+                                    tokens_temporales)
+                        return 
 
+                    # caso de Bedrock, Bedrock tipo id valor
+                    token_prev = self.obtener_token_historial(2)
+                    if token_prev and token_prev.type == "OBSIDIAN":
+                        welcomeObsidian(self.obtener_token_historial(2), self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return 
+
+                    token_prev = self.obtener_token_historial(1)
+                    # caso de stack: entero 
+                    if token_prev and token_prev.type == "STACK":
+                        welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return  
+
+                    # caso de spider : string
+                    if token_prev and token_prev.type == "SPIDER":
+                        welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return  
                 
+                    # caso de rune : char 
+                    if token_prev and token_prev.type == "RUNE":
+                        welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
 
-                
+                    # caso torch : boolean 
+                    if token_prev and token_prev.type == "TORCH":
+                        welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+                    
+                    # caso ghast : float 
+                    if token_prev and token_prev.type == "GHAST":
+                        welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+                    
+                    # caso chest : conjuntos
+                    if token_prev and token_prev.type == "CHEST":
+                        welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return           
         else:
-            # Crear un token ficticio para el fin de archivo
             self.token_actual = None
             self.imprimir_debug("Avanzando a EOF", 2)
+
+
+
+
+
     
     def obtener_tipo_token(self):
         """

@@ -11,7 +11,7 @@ $$ Verificando las palabras reservadas: WorldName, Bedrock, ResourcePack, Invent
 WorldName PruebaEstructura:
 
 Bedrock 
-    Obsidian Stack MAX_VALOR 100;
+    Obsidian Stack MAX_VALOR2 100;
     Obsidian Spider SALUDO "Prueba de estructura";
 
 

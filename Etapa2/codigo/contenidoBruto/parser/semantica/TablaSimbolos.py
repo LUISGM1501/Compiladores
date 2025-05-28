@@ -33,3 +33,11 @@ class TablaSimbolos:
     def eliminar(self, nombre):
         idx = self._hash(nombre)
         self.tabla[idx] = [sym for sym in self.tabla[idx] if sym.nombre != nombre]
+
+    def imprimir_tabla(self):
+        for i, lista in enumerate(self.tabla):
+            if lista:
+                print(f"Índice {i}:")
+                for simbolo in lista:
+                    print(f"  - {simbolo}")
+

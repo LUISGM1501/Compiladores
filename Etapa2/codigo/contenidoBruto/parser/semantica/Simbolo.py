@@ -6,7 +6,7 @@ class Simbolo:
         self.linea = linea  # Línea de declaración
         self.columna = columna  # Columna de declaración
         self.valor = valor  # Para constantes o inicializaciones
-        self.otros_atributos = otros_atributos  # Diccionario u otros datos adicionales
+        
     
     def __str__(self):
         return (
@@ -15,6 +15,5 @@ class Simbolo:
             f"Categoría: {self.categoria}, "
             f"Línea: {self.linea}, "
             f"Columna: {self.columna}, "
-            f"Valor: {self.valor}, "
-            f"Otros atributos: {self.otros_atributos}"
+            f"Valor: {self.valor} "
         )
