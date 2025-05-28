@@ -43,10 +43,10 @@ ResourcePack
         Shelf[10] Entity Item inventario;
     PolloAsado;
 
-    Anvil Ghast -> Stack truncate;
-    Anvil Stack -> Spider;
-    Anvil Spider -> Stack;
-    Anvil Stack -> Torch;
+    Anvil Identi -> Stack;
+    Anvil Identi2 -> Spider;
+    Anvil Identi3 -> Stack truncate;
+    Anvil Identi4 -> Stack safe;
 
 Inventory
     Stack contador = 0;

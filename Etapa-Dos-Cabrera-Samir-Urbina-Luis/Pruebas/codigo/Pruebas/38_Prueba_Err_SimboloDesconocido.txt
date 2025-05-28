@@ -39,7 +39,7 @@ Inventory
 ResourcePack
 
     $$ Símbolo inválido en declaración de tipo
-    Anvil Stack ==> Spider;         $$ ==> no es un símbolo válido (debe ser ->)
+    Anvil Mitad ==> Spider;         $$ ==> no es un símbolo válido (debe ser ->)
 
 SpawnPoint
 

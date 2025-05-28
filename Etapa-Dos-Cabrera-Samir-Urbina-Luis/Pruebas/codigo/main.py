@@ -17,6 +17,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scanner.mc_scanner import procesar_archivo
 from parser.mc_parser import iniciar_parser
+from parser.gramatica.Gramatica import Gramatica
+
+# Verificar integridad
+Gramatica.verificarIntegridadRangos()
+
+# Diagnosticar símbolos problemáticos
+for simbolo in [220, 222, 224, 225, 226, 227, 228, 229, 230, 231]:
+    print(Gramatica.diagnosticarSimbolo(simbolo))
 
 
 def ejecucion():

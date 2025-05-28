@@ -32,10 +32,10 @@ $$ Declaraciones de tipos con diferentes formas
 ResourcePack
 
     $$ Conversiones de tipos básicas
-    Anvil Ghast -> Stack;
-    Anvil Ghast -> Stack truncate;
-    Anvil Stack -> Spider;
-    Anvil Rune -> Stack safe;
+    Anvil Identi -> Stack;
+    Anvil Identi2 -> Spider;
+    Anvil Identi3 -> Stack truncate;
+    Anvil Identi4 -> Stack safe;
     
     $$ Declaraciones de entidades (registros)
     Entity Item

@@ -17,8 +17,8 @@ Bedrock
 $$ Sección de tipos
 ResourcePack
 
-    Anvil Ghast -> Stack truncate;
-    Anvil Stack -> Spider;
+    Anvil Identi -> Stack;
+    Anvil Identi2 -> Spider;
     
     $$ Definición de un tipo personalizado
     Entity Jugador

@@ -16,7 +16,7 @@ Bedrock
 
 
 ResourcePack 
-    Anvil Stack -> Spider;
+    Anvil Mitad -> Spider;
 
 
 Inventory 

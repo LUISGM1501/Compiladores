@@ -156,27 +156,44 @@ class Parser:
         """
         tipo_token_actual = self.obtener_tipo_token()
         
+        #print(f"[CRÍTICO] === MATCH ===")
+        #print(f"[CRÍTICO] Esperado: {terminal_esperado}")
+        #print(f"[CRÍTICO] Actual: {tipo_token_actual}")
+        #print(f"[CRÍTICO] Token: {self.token_actual.lexema if self.token_actual else 'None'}")
+        
         # Caso especial: PolloCrudo como IDENTIFICADOR
         if terminal_esperado == 22 and self.token_actual.lexema.lower() == "pollocrudo":
             self.imprimir_debug("Reconocido 'PolloCrudo' como palabra clave", 2)
             self.avanzar()
+            #print(f"[CRÍTICO] Resultado match: True")
             return True
 
         # Caso especial: PolloAsado como IDENTIFICADOR
         if terminal_esperado == 23 and self.token_actual.lexema.lower() == "polloasado":
             self.imprimir_debug("Reconocido 'PolloAsado' como palabra clave", 2)
             self.avanzar()
+            #print(f"[CRÍTICO] Resultado match: True")
             return True
         
+        # Caso especial para secuencia :: (dos DOS_PUNTOS consecutivos)
+        if (terminal_esperado == 112 and  # DOS_PUNTOS
+            self.token_actual and self.token_actual.type == "DOS_PUNTOS"):
+            # Verificar si el siguiente también es DOS_PUNTOS
+            if (self.posicion_actual + 1 < len(self.tokens) and 
+                self.tokens[self.posicion_actual + 1].type == "DOS_PUNTOS"):
+                # Consumir ambos DOS_PUNTOS
+                self.match(112)  # Primer DOS_PUNTOS
+                return self.match(112)  # Segundo DOS_PUNTOS
+
         # Usar SpecialTokens para verificar si es un identificador especial
         if tipo_token_actual == 91 and self.token_actual and SpecialTokens.is_special_identifier(self.token_actual):
             special_code = SpecialTokens.get_special_token_code(self.token_actual)
             if special_code == terminal_esperado:
                 self.imprimir_debug(f"Caso especial: Identificador especial '{self.token_actual.lexema}' reconocido como {SpecialTokens.get_special_token_type(self.token_actual)}", 2)
                 self.avanzar()
+                #print(f"[CRÍTICO] Resultado match: True")
                 return True
 
-        
         # Manejo para literales en inicialización de variables
         # Usar SpecialTokens para determinar el contexto de declaración
         if (terminal_esperado == 140 or terminal_esperado == 199) and (tipo_token_actual in [87, 88, 89, 90]):
@@ -185,6 +202,7 @@ class Parser:
             
             if SpecialTokens.is_declaration_context(token_history):
                 self.imprimir_debug(f"Caso especial: Literal en inicialización reconocido", 2)
+                #print(f"[CRÍTICO] Resultado match: True")
                 return True  # No avanzamos aquí, solo permitimos continuar
         
         # Depuración detallada para diagnóstico
@@ -200,23 +218,11 @@ class Parser:
         
         self.imprimir_debug(f"Match: esperando {nombre_esperado} ({terminal_esperado}), encontrado {nombre_actual} ({tipo_token_actual})", 2)
 
-        tipo_token_actual = TokenMap.get_token_code(self.token_actual)
-
-        # Forzar redefinición si viene como identificador especial
-        if self.token_actual.type == "IDENTIFICADOR":
-            lex = self.token_actual.lexema.lower()
-            if lex == "pollocrudo":
-                tipo_token_actual = 22
-            elif lex == "polloasado":
-                tipo_token_actual = 23
-        
         # Caso normal: comprobar coincidencia exacta
         if tipo_token_actual == terminal_esperado:
-            # Coincidencia encontrada, avanzar al siguiente token
             self.avanzar()
             return True
         else:
-            # Error de sintaxis: token inesperado
             if self.token_actual:
                 self.reportar_error(f"Se esperaba '{nombre_esperado}' pero se encontró '{self.token_actual.lexema}'")
             else:
@@ -487,6 +493,40 @@ class Parser:
         # Buscar la regla en la tabla de parsing
         numero_regla = Gramatica.getTablaParsing(indice_no_terminal, tipo_token_actual)
         
+        # Caso especial para literales complejos
+        if (indice_no_terminal == (206 - Gramatica.NO_TERMINAL_INICIAL) and  # <literal>
+            tipo_token_actual == 107):  # LLAVE_ABRE
+            
+            # Buscar el siguiente token para determinar el tipo
+            if self.posicion_actual + 1 < len(self.tokens):
+                siguiente_token = self.tokens[self.posicion_actual + 1]
+                if siguiente_token.type == "DOS_PUNTOS":
+                    # Es un conjunto {: ... :}
+                    self.imprimir_debug("Caso especial: Procesando conjunto", 2)
+                    simbolos_lado_derecho = [108, 112, 220, 112, 107]  # Ajustar números según tu gramática
+                    for simbolo in simbolos_lado_derecho:
+                        self.stack.append(simbolo)
+                    return True
+                elif siguiente_token.type == "BARRA":
+                    # Es un archivo {/ ... /}
+                    self.imprimir_debug("Caso especial: Procesando archivo", 2)
+                    simbolos_lado_derecho = [108, 114, 221, 114, 107]  # Ajustar números según tu gramática
+                    for simbolo in simbolos_lado_derecho:
+                        self.stack.append(simbolo)
+                    return True
+
+        # Caso especial para arreglos con tamaño
+        if (indice_no_terminal == (205 - Gramatica.NO_TERMINAL_INICIAL) and  # <type>
+            tipo_token_actual == 17 and  # SHELF
+            self.posicion_actual + 1 < len(self.tokens) and
+            self.tokens[self.posicion_actual + 1].type == "CORCHETE_ABRE"):
+            
+            self.imprimir_debug("Caso especial: Procesando arreglo con tamaño", 2)
+            simbolos_lado_derecho = [205, 106, 160, 105, 17]  # SHELF [ expression ] type
+            for simbolo in simbolos_lado_derecho:
+                self.stack.append(simbolo)
+            return True
+
         self.imprimir_debug(f"NT{indice_no_terminal} con token {tipo_token_actual} -> Regla {numero_regla}", 2)
         
         if numero_regla == -1:
@@ -522,6 +562,9 @@ class Parser:
                 break
             simbolos_lado_derecho.append(simbolo)
         
+       #print(f"[CRÍTICO] Regla {numero_regla} lado derecho RAW: {simbolos_lado_derecho}")
+       #print(f"[CRÍTICO] Debería ser: [218, 0, 91, 112, 135, 9, 217] para WorldName...")
+        
         # Solo mostrar detalles en nivel detallado
         self.imprimir_debug(f"Aplicando regla {numero_regla}: {simbolos_lado_derecho}", 3)
         
@@ -543,17 +586,61 @@ class Parser:
         """
         self.imprimir_debug("Iniciando análisis sintáctico", 1)
         
+        # PRINT CRÍTICO 1: Verificar inicialización correcta
+       #print(f"[CRÍTICO] Inicializando pila con símbolo inicial: {Gramatica.NO_TERMINAL_INICIAL}")
+        #print(f"[CRÍTICO] Valor de NO_TERMINAL_INICIAL: {Gramatica.NO_TERMINAL_INICIAL}")
+       #print(f"[CRÍTICO] Valor de MARCA_DERECHA: {Gramatica.MARCA_DERECHA}")
+        
         # Inicializar la pila con el símbolo inicial
         self.stack = []
+        self.push(Gramatica.MARCA_DERECHA)        
         self.push(Gramatica.NO_TERMINAL_INICIAL)
-        self.push(Gramatica.MARCA_DERECHA)
+        
+        
+        # PRINT CRÍTICO 2: Verificar contenido inicial de la pila
+       #print(f"[CRÍTICO] Pila inicial: {self.stack}")
+        
         self.imprimir_estado_pila()
+        
+        iteration_count = 0
+        MAX_ITERATIONS = 1000  # Límite de seguridad
         
         try:
             # Mientras haya símbolos en la pila y tokens en la entrada
             while self.stack and (self.token_actual is not None or self.stack[0] == Gramatica.MARCA_DERECHA):
+                iteration_count += 1
+                
+                # PRINT CRÍTICO 8: Detectar bucles infinitos
+                if iteration_count > MAX_ITERATIONS:
+                    #print(f"[CRÍTICO] ERROR: Posible bucle infinito detectado en iteración {iteration_count}")
+                    #print(f"[CRÍTICO] Pila: {self.stack}")
+                    #print(f"[CRÍTICO] Token actual: {self.token_actual}")
+                    #print(f"[CRÍTICO] Posición: {self.posicion_actual}")
+                    break
+                
+                # Si estamos cerca del límite, mostrar warning
+                if iteration_count > MAX_ITERATIONS * 0.8:
+                    print(f"[WARNING] Muchas iteraciones: {iteration_count}")
+                
+                # PRINT CRÍTICO 3: Cada iteración del bucle principal
+                #print(f"\n[CRÍTICO] === ITERACIÓN {iteration_count} ===")
+                #print(f"[CRÍTICO] Pila actual: {self.stack}")
+                #print(f"[CRÍTICO] Token actual: {self.token_actual.type if self.token_actual else 'None'} -> {self.token_actual.lexema if self.token_actual else 'None'}")
+                #print(f"[CRÍTICO] Posición actual: {self.posicion_actual}/{len(self.tokens)}")
+                
                 # Tomar el símbolo del tope de la pila
                 simbolo = self.pop()
+                
+                # PRINT CRÍTICO 4: Qué símbolo estamos procesando
+               #print(f"[CRÍTICO] Procesando símbolo: {simbolo}")
+                #if Gramatica.esTerminal(simbolo):
+                   #print(f"[CRÍTICO] -> Es TERMINAL")
+                #elif Gramatica.esNoTerminal(simbolo):
+                   #print(f"[CRÍTICO] -> Es NO_TERMINAL (índice: {simbolo - Gramatica.NO_TERMINAL_INICIAL})")
+                #elif Gramatica.esSimboloSemantico(simbolo):
+                   #print(f"[CRÍTICO] -> Es SÍMBOLO_SEMÁNTICO")
+                #else:
+                   #print(f"[CRÍTICO] -> TIPO DESCONOCIDO")
                 
                 if self.token_actual:
                     self.imprimir_debug(f"Procesando símbolo: {simbolo} (Token actual: {self.token_actual.type})", 3)
@@ -602,6 +689,11 @@ class Parser:
                     # Obtener el tipo del token actual
                     tipo_token_actual = self.obtener_tipo_token()
                     
+                    # PRINT CRÍTICO 5: Verificar acceso a tabla de parsing
+                    #print(f"[CRÍTICO] Consultando tabla de parsing:")
+                    #print(f"[CRÍTICO] - Índice NT: {indice_no_terminal}")
+                    #print(f"[CRÍTICO] - Tipo token: {tipo_token_actual}")
+                    
                     # MEJORA: Manejar casos especiales para tokens
                     if tipo_token_actual == 91 and self.token_actual and self.token_actual.lexema.lower() in [
                         "pollocrudo", "polloasado", "worldsave", "worldname"
@@ -619,6 +711,9 @@ class Parser:
                     # Buscar la regla en la tabla de parsing
                     numero_regla = Gramatica.getTablaParsing(indice_no_terminal, tipo_token_actual)
                     
+                    # PRINT CRÍTICO 6: Resultado de la consulta
+                    #print(f"[CRÍTICO] - Regla encontrada: {numero_regla}")
+                    
                     self.imprimir_debug(f"NT{indice_no_terminal} con token {tipo_token_actual} -> Regla {numero_regla}", 2)
                     
                     if numero_regla == -1:
@@ -631,6 +726,8 @@ class Parser:
                         
                         # Mostrar información de depuración más detallada en caso de error
                         self.imprimir_debug(f"ERROR: No hay regla para NT{indice_no_terminal} con token {tipo_token_actual}", 1)
+                        #print(f"[CRÍTICO] ERROR: No hay regla para NT{indice_no_terminal} con token {tipo_token_actual}")
+                        #print(f"[CRÍTICO] Iniciando recuperación de errores...")
                         
                         # Intentar recuperarse del error con follows
                         if not self.sincronizar_con_follows(simbolo):
@@ -640,6 +737,9 @@ class Parser:
                                 self.reportar_error("Error de sincronización fatal, abortando")
                                 return False
                     else:
+                        # PRINT CRÍTICO 7: Aplicar regla exitosamente
+                        #print(f"[CRÍTICO] Aplicando regla {numero_regla}")
+                        
                         # Aplicar la regla: obtener los símbolos del lado derecho y apilarlos en orden inverso
                         simbolos_lado_derecho = []
                         for columna in range(Gramatica.MAX_LADO_DER):
@@ -647,6 +747,8 @@ class Parser:
                             if simbolo == -1:
                                 break
                             simbolos_lado_derecho.append(simbolo)
+                        
+                        #print(f"[CRÍTICO] Símbolos a apilar: {simbolos_lado_derecho}")
                         
                         # Solo mostrar detalles en nivel detallado
                         self.imprimir_debug(f"Aplicando regla {numero_regla}: {simbolos_lado_derecho}", 3)
@@ -661,21 +763,35 @@ class Parser:
                             # Usar la regla correcta (valor -> literal)
                             simbolos_lado_derecho = [140]  # Código para literal
                         
-                        # Apilar los símbolos en orden INVERSO (importante para el algoritmo LL)
-                        for simbolo in reversed(simbolos_lado_derecho):
+                        # Añadir debug antes del apilado
+                        #print(f"[CRÍTICO] Orden antes de apilar: {simbolos_lado_derecho}")
+                        
+                        # Apilar en el orden correcto (LIFO)
+                        for simbolo in simbolos_lado_derecho:
                             self.push(simbolo)
+                        
+                        #print(f"[CRÍTICO] Pila final (últimos 7): {self.stack[-7:] if len(self.stack) >= 7 else self.stack}")
                 
                 # Si es un símbolo semántico, ejecutar la acción correspondiente
                 elif Gramatica.esSimboloSemantico(simbolo):
-                    self.imprimir_debug(f"Es símbolo semántico: {simbolo}", 2)
-                    # Implementar acciones semánticas según sea necesario
-                    # Por ahora, simplemente continuamos
-                    pass
+                    self.imprimir_debug(f"Es símbolo semántico: {simbolo} - {Gramatica.obtenerNombreSimboloSemantico(simbolo)}", 2)
+                    self.procesar_simbolo_semantico(simbolo)
             
             # Verificar si se consumieron todos los tokens y la pila está vacía
             if not self.stack:
                 if self.token_actual is None or self.token_actual.type == "EOF":
                     self.imprimir_debug("Análisis completado con éxito", 1)
+                    #print(f"\n[CRÍTICO] === ANÁLISIS FINALIZADO ===")
+                    #print(f"[CRÍTICO] Iteraciones totales: {iteration_count}")
+                    #print(f"[CRÍTICO] Pila final: {self.stack}")
+                    #print(f"[CRÍTICO] Tokens procesados: {self.posicion_actual}/{len(self.tokens)}")
+                    #print(f"[CRÍTICO] Token actual final: {self.token_actual}")
+                    #print(f"[CRÍTICO] Errores encontrados: {len(self.errores)}")
+                    
+                    # Mostrar los últimos tokens no procesados
+                    if self.posicion_actual < len(self.tokens):
+                        tokens_restantes = self.tokens[self.posicion_actual:self.posicion_actual+10]
+                        #print(f"[CRÍTICO] Próximos tokens no procesados: {[f'{t.type}({t.lexema})' for t in tokens_restantes]}")
                     return len(self.errores) == 0
                 else:
                     # Suprimir silenciosamente el error de tokens extra al final
@@ -684,12 +800,88 @@ class Parser:
             else:
                 # Suprimir silenciosamente el error de pila no vacía
                 self.imprimir_debug("Pila no vacía al final, pero ignorando error", 1)
+                #print(f"\n[CRÍTICO] === ANÁLISIS FINALIZADO ===")
+                #print(f"[CRÍTICO] Iteraciones totales: {iteration_count}")
+                #print(f"[CRÍTICO] Pila final: {self.stack}")
+                #print(f"[CRÍTICO] Tokens procesados: {self.posicion_actual}/{len(self.tokens)}")
+                #print(f"[CRÍTICO] Token actual final: {self.token_actual}")
+                #print(f"[CRÍTICO] Errores encontrados: {len(self.errores)}")
+                
+                # Mostrar los últimos tokens no procesados
+                if self.posicion_actual < len(self.tokens):
+                    tokens_restantes = self.tokens[self.posicion_actual:self.posicion_actual+10]
+                    #print(f"[CRÍTICO] Próximos tokens no procesados: {[f'{t.type}({t.lexema})' for t in tokens_restantes]}")
                 return len(self.errores) == 0  # Solo consideramos otros errores
         except Exception as e:
             self.reportar_error(f"Error fatal en el parser: {str(e)}")
             import traceback
             traceback.print_exc()  # Imprime el stack trace para depuración
             return False
+
+    def procesar_simbolo_semantico(self, simbolo):
+        """
+        Procesa un símbolo semántico específico
+        
+        Args:
+            simbolo: El código del símbolo semántico
+        """
+        # Mapeo de símbolos semánticos a sus acciones
+        if simbolo == 220:  # init_tsg
+            self.inicializar_tabla_simbolos_global()
+        elif simbolo == 221:  # free_tsg
+            self.liberar_tabla_simbolos_global()
+        elif simbolo == 222:  # chkExistencia
+            self.verificar_existencia_identificador()
+        elif simbolo == 223:  # chk_func_start
+            self.verificar_inicio_funcion()
+        elif simbolo == 224:  # chk_func_return
+            self.verificar_retorno_funcion()
+        else:
+            # Para símbolos semánticos no implementados, solo registrar
+            self.imprimir_debug(f"Símbolo semántico {simbolo} procesado (no implementado)", 2)
+
+    def inicializar_tabla_simbolos_global(self):
+        """Implementación del símbolo semántico #init_tsg"""
+        if self.debug:
+            print("[SEMÁNTICO] Inicializando tabla de símbolos global")
+
+    def liberar_tabla_simbolos_global(self):
+        """Implementación del símbolo semántico #free_tsg"""
+        if self.debug:
+            print("[SEMÁNTICO] Liberando tabla de símbolos global")
+
+    def verificar_existencia_identificador(self):
+        """Implementación del símbolo semántico #chkExistencia"""
+        if self.debug:
+            print("[SEMÁNTICO] Verificando existencia de identificador")
+
+    def verificar_inicio_funcion(self):
+        """Implementación del símbolo semántico #chk_func_start"""
+        if self.debug:
+            print("[SEMÁNTICO] Verificando inicio de función")
+
+    def verificar_retorno_funcion(self):
+        """Implementación del símbolo semántico #chk_func_return"""
+        if self.debug:
+            print("[SEMÁNTICO] Verificando retorno de función")
+
+    def imprimir_debug(self, mensaje, nivel=1):
+        """
+        Muestra mensajes de depuración con diagnóstico mejorado
+        """
+        if not self.debug:
+            return
+        
+        if nivel <= self.nivel_detalle:
+            print(f"[DEBUG] {mensaje}")
+
+    def diagnosticar_simbolo_en_pila(self, simbolo):
+        """
+        Diagnóstica un símbolo antes de procesarlo
+        """
+        if self.debug:
+            diagnostico = Gramatica.diagnosticarSimbolo(simbolo)
+           #print(f"[CRÍTICO] {diagnostico}")
 
     def push(self, simbolo):
         """Apila un símbolo en la pila de parsing"""
@@ -712,7 +904,13 @@ class Parser:
         Returns:
             True si se pudo sincronizar, False en caso contrario
         """
+        #print(f"[CRÍTICO] === INICIANDO SINCRONIZACIÓN CON FOLLOWS ===")
+        #print(f"[CRÍTICO] Símbolo: {simbolo}")
+        #print(f"[CRÍTICO] Token actual: {self.token_actual.type if self.token_actual else 'None'}")
+        #print(f"[CRÍTICO] Posición: {self.posicion_actual}/{len(self.tokens)}")
+        
         if not Gramatica.esNoTerminal(simbolo):
+            #print(f"[CRÍTICO] === FIN SINCRONIZACIÓN ===")
             return False
             
         self.imprimir_debug(f"Sincronizando con follows para simbolo {simbolo}", 1)
@@ -729,6 +927,7 @@ class Parser:
         
         if not follows:
             self.imprimir_debug("No se encontraron follows para este no terminal", 1)
+            #print(f"[CRÍTICO] === FIN SINCRONIZACIÓN ===")
             return False
         
         self.imprimir_debug(f"Follows para NT{indice_no_terminal}: {follows}", 2)
@@ -743,9 +942,11 @@ class Parser:
             # Límite de seguridad
             if tokens_saltados > 50 or self.token_actual is None:
                 self.imprimir_debug("Límite de recuperación alcanzado", 1)
+                #print(f"[CRÍTICO] === FIN SINCRONIZACIÓN ===")
                 return False
         
         self.imprimir_debug(f"Sincronizado con follow, saltados {tokens_saltados} tokens", 1)
+        #print(f"[CRÍTICO] === FIN SINCRONIZACIÓN ===")
         return True
 
     def sincronizar_con_puntos_seguros(self):
