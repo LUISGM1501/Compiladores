@@ -1,7 +1,7 @@
 /*
  * GTablaParsing.java
  *
- * 2025/05/28 11:52:56
+ * 2025/05/28 11:54:14
  *
  * Archivo generado por GikGram 2.0
  *
