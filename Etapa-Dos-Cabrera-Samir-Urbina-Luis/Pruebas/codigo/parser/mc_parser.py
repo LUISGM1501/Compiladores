@@ -156,43 +156,41 @@ class Parser:
         """
         tipo_token_actual = self.obtener_tipo_token()
         
-        #print(f"[CRÍTICO] === MATCH ===")
-        #print(f"[CRÍTICO] Esperado: {terminal_esperado}")
-        #print(f"[CRÍTICO] Actual: {tipo_token_actual}")
-        #print(f"[CRÍTICO] Token: {self.token_actual.lexema if self.token_actual else 'None'}")
-        
         # Caso especial: PolloCrudo como IDENTIFICADOR
         if terminal_esperado == 22 and self.token_actual and self.token_actual.lexema.lower() == "pollocrudo":
             self.imprimir_debug("Reconocido 'PolloCrudo' como palabra clave", 2)
             self.avanzar()
-            #print(f"[CRÍTICO] Resultado match: True")
             return True
 
         # Caso especial: PolloAsado como IDENTIFICADOR
         if terminal_esperado == 23 and self.token_actual and self.token_actual.lexema.lower() == "polloasado":
             self.imprimir_debug("Reconocido 'PolloAsado' como palabra clave", 2)
             self.avanzar()
-            #print(f"[CRÍTICO] Resultado match: True")
             return True
         
-        # CORRECCIÓN: Manejo correcto de :: (dos DOS_PUNTOS consecutivos)
+        # CORRECCIÓN CRÍTICA: Manejo correcto de :: (dos DOS_PUNTOS consecutivos)
         if (terminal_esperado == 112 and  # DOS_PUNTOS
             tipo_token_actual == 112 and  # Token actual es DOS_PUNTOS
             self.posicion_actual + 1 < len(self.tokens) and
             self.tokens[self.posicion_actual + 1].type == "DOS_PUNTOS"):
             
-            # Consumir el primer DOS_PUNTOS
-            self.avanzar()
-            
-            # Verificar que el siguiente sigue siendo DOS_PUNTOS
-            if self.token_actual and self.token_actual.type == "DOS_PUNTOS":
-                # Consumir el segundo DOS_PUNTOS
+            # Verificar si la pila tiene otro DOS_PUNTOS esperando
+            # Si es así, solo consumir uno y dejar el otro para el siguiente match
+            if len(self.stack) > 0 and self.stack[-1] == 112:  # Hay otro DOS_PUNTOS en la pila
+                # Solo consumir el primer DOS_PUNTOS
                 self.avanzar()
-                self.imprimir_debug("Procesados dos DOS_PUNTOS consecutivos (::)", 2)
+                self.imprimir_debug("Procesado primer DOS_PUNTOS de secuencia ::", 2)
                 return True
             else:
-                self.reportar_error("Se esperaba segundo ':' después del primero")
-                return False
+                # Consumir ambos DOS_PUNTOS (caso original)
+                self.avanzar()  # Primer DOS_PUNTOS
+                if self.token_actual and self.token_actual.type == "DOS_PUNTOS":
+                    self.avanzar()  # Segundo DOS_PUNTOS
+                    self.imprimir_debug("Procesados dos DOS_PUNTOS consecutivos (::)", 2)
+                    return True
+                else:
+                    self.reportar_error("Se esperaba segundo ':' después del primero")
+                    return False
 
         # Usar SpecialTokens para verificar si es un identificador especial
         if tipo_token_actual == 91 and self.token_actual and SpecialTokens.is_special_identifier(self.token_actual):
@@ -200,20 +198,8 @@ class Parser:
             if special_code == terminal_esperado:
                 self.imprimir_debug(f"Caso especial: Identificador especial '{self.token_actual.lexema}' reconocido como {SpecialTokens.get_special_token_type(self.token_actual)}", 2)
                 self.avanzar()
-                #print(f"[CRÍTICO] Resultado match: True")
                 return True
 
-        # Manejo para literales en inicialización de variables
-        # Usar SpecialTokens para determinar el contexto de declaración
-        if (terminal_esperado == 140 or terminal_esperado == 199) and (tipo_token_actual in [87, 88, 89, 90]):
-            # Construir un historial de tokens para determinar el contexto
-            token_history = self.tokens[max(0, self.posicion_actual-3):self.posicion_actual]
-            
-            if SpecialTokens.is_declaration_context(token_history):
-                self.imprimir_debug(f"Caso especial: Literal en inicialización reconocido", 2)
-                #print(f"[CRÍTICO] Resultado match: True")
-                return True  # No avanzamos aquí, solo permitimos continuar
-        
         # Depuración detallada para diagnóstico
         try:
             nombre_esperado = Gramatica.getNombresTerminales(terminal_esperado)
