@@ -146,7 +146,7 @@ class Parser:
     def match(self, terminal_esperado):
         """
         Verifica si el token actual coincide con el terminal esperado.
-        Maneja casos especiales como PolloCrudo/PolloAsado y otros escenarios específicos.
+        Maneja casos especiales como PolloCrudo/PolloAsado y secuencias ::.
         
         Args:
             terminal_esperado: El código del terminal que se espera
@@ -162,28 +162,37 @@ class Parser:
         #print(f"[CRÍTICO] Token: {self.token_actual.lexema if self.token_actual else 'None'}")
         
         # Caso especial: PolloCrudo como IDENTIFICADOR
-        if terminal_esperado == 22 and self.token_actual.lexema.lower() == "pollocrudo":
+        if terminal_esperado == 22 and self.token_actual and self.token_actual.lexema.lower() == "pollocrudo":
             self.imprimir_debug("Reconocido 'PolloCrudo' como palabra clave", 2)
             self.avanzar()
             #print(f"[CRÍTICO] Resultado match: True")
             return True
 
         # Caso especial: PolloAsado como IDENTIFICADOR
-        if terminal_esperado == 23 and self.token_actual.lexema.lower() == "polloasado":
+        if terminal_esperado == 23 and self.token_actual and self.token_actual.lexema.lower() == "polloasado":
             self.imprimir_debug("Reconocido 'PolloAsado' como palabra clave", 2)
             self.avanzar()
             #print(f"[CRÍTICO] Resultado match: True")
             return True
         
-        # Caso especial para secuencia :: (dos DOS_PUNTOS consecutivos)
+        # CORRECCIÓN: Manejo correcto de :: (dos DOS_PUNTOS consecutivos)
         if (terminal_esperado == 112 and  # DOS_PUNTOS
-            self.token_actual and self.token_actual.type == "DOS_PUNTOS"):
-            # Verificar si el siguiente también es DOS_PUNTOS
-            if (self.posicion_actual + 1 < len(self.tokens) and 
-                self.tokens[self.posicion_actual + 1].type == "DOS_PUNTOS"):
-                # Consumir ambos DOS_PUNTOS
-                self.match(112)  # Primer DOS_PUNTOS
-                return self.match(112)  # Segundo DOS_PUNTOS
+            tipo_token_actual == 112 and  # Token actual es DOS_PUNTOS
+            self.posicion_actual + 1 < len(self.tokens) and
+            self.tokens[self.posicion_actual + 1].type == "DOS_PUNTOS"):
+            
+            # Consumir el primer DOS_PUNTOS
+            self.avanzar()
+            
+            # Verificar que el siguiente sigue siendo DOS_PUNTOS
+            if self.token_actual and self.token_actual.type == "DOS_PUNTOS":
+                # Consumir el segundo DOS_PUNTOS
+                self.avanzar()
+                self.imprimir_debug("Procesados dos DOS_PUNTOS consecutivos (::)", 2)
+                return True
+            else:
+                self.reportar_error("Se esperaba segundo ':' después del primero")
+                return False
 
         # Usar SpecialTokens para verificar si es un identificador especial
         if tipo_token_actual == 91 and self.token_actual and SpecialTokens.is_special_identifier(self.token_actual):
