@@ -1,6 +1,6 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
-from ..simbolos.ChequeoOperacion import chequear_tipos_expresion
+from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
 
 def welcomeGhast(actual, tipo, asignacion):
     print(f"verificacion de asignacion:")

@@ -1,0 +1,1 @@
+#En operadores (+, -, *, /)	Verifica que los operandos sean del mismo tipo (ej: no int + string)

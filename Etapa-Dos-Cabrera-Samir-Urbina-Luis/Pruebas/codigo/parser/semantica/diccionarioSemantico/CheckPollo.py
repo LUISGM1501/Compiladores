@@ -1,0 +1,1 @@
+# Chequea si pollo asado y pollo crudo abren y cierran bien

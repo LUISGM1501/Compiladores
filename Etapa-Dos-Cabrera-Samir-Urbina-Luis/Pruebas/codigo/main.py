@@ -18,6 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scanner.mc_scanner import procesar_archivo
 from parser.mc_parser import iniciar_parser
 from parser.gramatica.Gramatica import Gramatica
+from parser.semantica.TablaSimbolos import TablaSimbolos
 
 # Verificar integridad
 Gramatica.verificarIntegridadRangos()
@@ -79,10 +80,15 @@ def ejecucion():
     
     #################################################################
     #################################################################
-    ##                    INICIO PARSER                            ##
+    ##                    INICIO ANALISIS                          ##
+    ##                  SINTACTICO Y SEMANTICO                     ##
     #################################################################
     # Funcionamiento del parser 
     iniciar_parser(tokens, debug=True)
+
+    tabla = TablaSimbolos.instancia()
+    print(f" \n\n Ver informacion de la tablas semantica:")
+    tabla.imprimir_tabla()
     
     #################################################################
     #################################################################

@@ -12,6 +12,17 @@ from .gramatica.Gramatica import Gramatica
 from .TokenMap import TokenMap
 from .special_tokens import SpecialTokens  # Importamos la clase de tokens especiales
 
+# IMPORTACIONES PARA ANALISIS SEMANTICO
+
+from .semantica.asignacionTabla.Worldname import welcomeWorldname
+from .semantica.asignacionTabla.Obsidian import welcomeObsidian
+from .semantica.asignacionTabla.Stack import welcomeStack
+from .semantica.asignacionTabla.Spider import welcomeSpider
+from .semantica.asignacionTabla.Rune import welcomeRune
+from .semantica.asignacionTabla.Torch import welcomeTorch
+from .semantica.asignacionTabla.Ghast import welcomeGhast
+from .semantica.asignacionTabla.Chest import welcomeChest, welcomeShelf
+
 class Parser:
 
     def imprimir_debug(self, mensaje, nivel=1):
@@ -84,7 +95,16 @@ class Parser:
         self.imprimir_debug("Parser inicializado", 1)
         if debug and len(self.tokens) > 0:
             self.imprimir_debug(f"Tokens recibidos ({len(self.tokens)}): primeros 5 tokens: {[f'{t.type} ({t.lexema})' for t in self.tokens[:5]]}", 2)
-    
+
+    def obtener_token_historial(self, pasos_atras):
+        """
+        Retorna el token `pasos_atras` posiciones atrás en el historial, o None si no existe.
+        """
+        if len(self.token_history) >= pasos_atras:
+            return self.token_history[-pasos_atras]
+        return None
+
+
     def avanzar(self):
         """
         Avanza al siguiente token en la secuencia, ignorando comentarios
@@ -102,8 +122,85 @@ class Parser:
         if self.posicion_actual < len(self.tokens):
             self.token_actual = self.tokens[self.posicion_actual]
             self.imprimir_debug(f"Avanzando a token {self.posicion_actual}: {self.token_actual.type} ('{self.token_actual.lexema}')", 2)
+
+            # Mover todo el procesamiento de identificadores a un método separado
+            if self.token_actual.type == "IDENTIFICADOR":
+                print("🟢 Se ha encontrado un IDENTIFICADOR")
+                print(f"Lexema:     {self.token_actual.lexema}")
+                print(f"Línea:      {self.token_actual.linea}")
+                print(f"Columna:    {self.token_actual.columna}")
+                print(f"Valor:      {self.token_actual.valor}")
+                print(f"Categoría:  {self.token_actual.categoria}")
+
+                # PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES.
+
+                # Caso base directo, no requiere "mirar a futuro"
+                if self.token_history[-1].type == "WORLD_NAME":
+                    welcomeWorldname(self.token_history[-1], self.token_actual)
+                    return
+
+                # Casos Indirectos que requieren "mirar a futuro"
+                # Recolección temporal de tokens hasta PUNTO_Y_COMA
+                tokens_temporales = []
+                pos_temp = self.posicion_actual + 1
+
+                while pos_temp < len(self.tokens):
+                    token_temp = self.tokens[pos_temp]
+                    tokens_temporales.append(token_temp)
+                    if token_temp.type == "PUNTO_Y_COMA":
+                        break
+                    pos_temp += 1
+
+                # Inicio de casos de asignacion inmediata
+
+                # caso de shelf, listas con tipo definido
+                token_prev = self.obtener_token_historial(5)
+                if token_prev and token_prev.type == "SHELF":
+                    welcomeShelf(self.obtener_token_historial(5),
+                                 self.obtener_token_historial(3),
+                                 self.obtener_token_historial(1),
+                                 self.token_actual,
+                                 tokens_temporales)
+                    return
+
+                    # caso de Bedrock, Bedrock tipo id valor
+                token_prev = self.obtener_token_historial(2)
+                if token_prev and token_prev.type == "OBSIDIAN":
+                    welcomeObsidian(self.obtener_token_historial(2), self.token_actual, self.obtener_token_historial(1),
+                                    tokens_temporales)
+                    return
+
+                token_prev = self.obtener_token_historial(1)
+                # caso de stack: entero
+                if token_prev and token_prev.type == "STACK":
+                    welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                    return
+
+                    # caso de spider : string
+                if token_prev and token_prev.type == "SPIDER":
+                    welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                    return
+
+                    # caso de rune : char
+                if token_prev and token_prev.type == "RUNE":
+                    welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                    return
+
+                # caso torch : boolean
+                if token_prev and token_prev.type == "TORCH":
+                    welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                    return
+
+                # caso ghast : float
+                if token_prev and token_prev.type == "GHAST":
+                    welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                    return
+
+                # caso chest : conjuntos
+                if token_prev and token_prev.type == "CHEST":
+                    welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                    return
         else:
-            # Crear un token ficticio para el fin de archivo
             self.token_actual = None
             self.imprimir_debug("Avanzando a EOF", 2)
     
@@ -1011,7 +1108,8 @@ def parser(tokens, debug=False):
     if resultado:
         print("Análisis sintáctico completado con éxito.")
     else:
-        print(f"Análisis sintáctico fallido con {len(parser_instance.errores)} errores.")
+        return
+        #print(f"Análisis sintáctico fallido con {len(parser_instance.errores)} errores.")
     
     return resultado
 
@@ -1065,6 +1163,7 @@ def iniciar_parser(tokens, debug=False, nivel_debug=3):
     if not errores_reales:
         print("Análisis sintáctico completado con éxito.")
     else:
-        print(f"Análisis sintáctico fallido con {len(errores_reales)} errores.")
+        #print(f"Análisis sintáctico fallido con {len(errores_reales)} errores.")
+        return
     
     return len(errores_reales) == 0  # Retorna éxito solo si no hay errores reales

@@ -1,0 +1,1 @@
+# Chequeo de constantes

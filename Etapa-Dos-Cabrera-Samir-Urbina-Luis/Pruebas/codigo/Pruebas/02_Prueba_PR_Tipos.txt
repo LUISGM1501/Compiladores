@@ -38,16 +38,18 @@ Inventory
     
     $$ Shelf - Tipo de dato arreglos
     Shelf[5] Stack arreglo = [1, 2, 3, 4, 5];
-    
+
+    $*
     $$ Entity - Tipo de dato registros
-    Entity Jugador 
+    Entity Jugador
     PolloCrudo
         Spider nombre;
         Stack nivel;
         Ghast salud;
     PolloAsado;
-    
+
     Entity Jugador jugador = {nombre: "Steve", nivel: 1, salud: 20.0};
+    *$
 
 SpawnPoint
 

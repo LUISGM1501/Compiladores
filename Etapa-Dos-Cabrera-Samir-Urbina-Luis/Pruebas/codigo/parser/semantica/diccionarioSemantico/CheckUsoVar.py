@@ -1,0 +1,1 @@
+#Al encontrar un ID en expresiones (x + 1)	Verifica que la variable exista en la tabla de símbolos
