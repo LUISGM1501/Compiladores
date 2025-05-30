@@ -17,37 +17,6 @@ Inventory
     $$ Stack - Tipo de dato entero
     Stack entero = 42;
 
-    $$ Rune - Tipo de dato carácter
-    Rune caracter = 'N';
-
-    $$ Spider - Tipo de dato string
-    Spider texto = "NotchEngine";
-
-    $$ Torch - Tipo de dato booleano
-    Torch verdadero = On;
-    Torch falso = Off;
-
-    $$ Chest - Tipo de dato conjunto
-    Chest numeros = {: 1, 2, 3, 4, 5 :};
-
-    $$ Book - Tipo de dato archivo de texto
-    Book archivo = {/ "datos.txt", 'E' /};
-
-    $$ Ghast - Tipo de datos números flotantes
-    Ghast decimal = 3.14159;
-
-    $$ Shelf - Tipo de dato arreglos
-    Shelf[5] Stack arreglo = [1, 2, 3, 4, 5];
-
-    $$ Entity - Tipo de dato registros
-    Entity Jugador
-    PolloCrudo
-        Spider nombre;
-        Stack nivel;
-        Ghast salud;
-    PolloAsado;
-
-    Entity Jugador jugador = {nombre: "Steve", nivel: 1, salud: 20.0};
 
 SpawnPoint
 
