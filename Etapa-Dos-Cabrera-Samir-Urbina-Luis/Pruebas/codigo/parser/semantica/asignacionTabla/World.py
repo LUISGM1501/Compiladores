@@ -1,7 +1,9 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
+from ..diccionarioSemantico.CheckVarInit import checkInicializacionVariable
 
-def welcomeWorldname(tipo, actual):
+
+def welcomeWorld(tipo, actual):
     # Asignacion a la estructura de simbolo:
     mi_simbolo = Simbolo(
         nombre=actual.lexema,
@@ -12,7 +14,8 @@ def welcomeWorldname(tipo, actual):
         valor=actual.lexema
     ) 
 
-    #insercion en la tabla de hash 
+    #insercion en la tabla de hash
+    checkInicializacionVariable(mi_simbolo)
     tabla = TablaSimbolos.instancia()
     tabla.insertar(mi_simbolo)
 

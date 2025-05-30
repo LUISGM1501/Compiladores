@@ -1,4 +1,5 @@
 from ..HistorialSemantico import historialSemantico  # Usa el alias ya creado
+from ..HistorialSemanticoNegativo import historialSemanticoNegativo
 
 def checkWorldSave(token):
     print(f"IMPRESION DEL ultimo TOKEN type: {token.type}, lexema: {token.lexema}")
@@ -9,4 +10,5 @@ def checkWorldSave(token):
     else:
         mensaje = f"REGLA SEMANTICA 009: El ultimo Token del Programa es '{token.lexema}' con tipo '{token.type}', se DETIENE con la ejecucion."
         historialSemantico.agregar(mensaje)
+        historialSemanticoNegativo.agregar(mensaje)
         return False  # Error

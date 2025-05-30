@@ -16,11 +16,12 @@ from .special_tokens import SpecialTokens  # Importamos la clase de tokens espec
 
 # IMPORTACIONES PARA ANALISIS SEMANTICO
 
-from .semantica.asignacionTabla.Worldname import welcomeWorldname
+from .semantica.asignacionTabla.World import welcomeWorld
 from .semantica.asignacionTabla.Obsidian import welcomeObsidian
 from .semantica.asignacionTabla.Stack import welcomeStack
 from .semantica.asignacionTabla.Spider import welcomeSpider
 from .semantica.asignacionTabla.Rune import welcomeRune
+from .semantica.asignacionTabla.Book import welcomeBook
 from .semantica.asignacionTabla.Torch import welcomeTorch
 from .semantica.asignacionTabla.Ghast import welcomeGhast
 from .semantica.asignacionTabla.Chest import welcomeChest, welcomeShelf
@@ -174,10 +175,11 @@ class Parser:
                 #Validacion de que el Token existe:
                 if checkVarExiste(self.token_actual):
                     # PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES.
-
+                    print(f"\n\n\nTOKEN TOKEN TOKEN TOKEN: {self.token_actual}")
                     # Caso base directo, no requiere "mirar a futuro"
-                    if len(self.token_history) > 0 and self.token_history[-1].type == "WORLD_NAME":
-                        welcomeWorldname(self.token_history[-1], self.token_actual)
+                    if len(self.token_history) > 0 and (self.token_history[-1].type == "WORLD_NAME" or
+                            (self.token_history[-1].type == "WORLD_SAVE")):
+                        welcomeWorld(self.token_history[-1], self.token_actual)
                         return
 
                     print(f"\n\n\n\n\n PRUEBA ENTRANDO PRUEBA ENTRANDO")
@@ -248,6 +250,14 @@ class Parser:
                                      self.token_actual,
                                      tokens_temporales)
                         return
+
+                    #Caso de BOOK
+                    token_prev = self.obtener_token_historial(1)
+                    if token_prev and token_prev.type == "BOOK":
+                        welcomeBook(self.token_actual,
+                                    token_prev,
+                                    tokens_temporales)
+
 
                     # caso de Bedrock, Bedrock tipo id valor
                     token_prev = self.obtener_token_historial(2)

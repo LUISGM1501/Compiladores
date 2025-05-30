@@ -1,5 +1,7 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
+from ..diccionarioSemantico.CheckVarInit import checkInicializacionVariable
+
 
 def welcomeEntity(actual, tokens_temporales):
     """
@@ -119,6 +121,7 @@ def procesar_definicion_tipo(nombre_tipo, tokens_temporales):
     
     # Insertar en la tabla de símbolos
     try:
+        checkInicializacionVariable(simbolo_tipo)
         tabla.insertar(simbolo_tipo)
         print(f"  ENTITY_TYPE '{nombre_tipo.lexema}' insertado correctamente")
     except ValueError as e:
@@ -179,6 +182,7 @@ def procesar_declaracion_variable(tipo_entity, tokens_temporales):
     
     # Insertar en la tabla de símbolos
     try:
+        checkInicializacionVariable(simbolo_variable)
         tabla.insertar(simbolo_variable)
         print(f"  ENTITY_VARIABLE '{nombre_variable.lexema}' insertada correctamente")
     except ValueError as e:

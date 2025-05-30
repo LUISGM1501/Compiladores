@@ -1,4 +1,5 @@
 from ..HistorialSemantico import historialSemantico  # Usa el alias ya creado
+from ..HistorialSemanticoNegativo import historialSemanticoNegativo
 
 def checkWorldname(token):
     print(f"IMPRESION DEL primer TOKEN type: {token.type}, lexema: {token.lexema}")
@@ -9,4 +10,5 @@ def checkWorldname(token):
     else:
         mensaje = f"REGLA SEMANTICA 008: El primer Token del Programa es '{token.lexema}' con tipo '{token.type}', se DETIENE con la ejecucion."
         historialSemantico.agregar(mensaje)
+        historialSemanticoNegativo.agregar(mensaje)
         return False  # Error

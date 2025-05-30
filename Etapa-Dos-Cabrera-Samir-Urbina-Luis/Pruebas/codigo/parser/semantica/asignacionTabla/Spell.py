@@ -1,5 +1,7 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
+from ..diccionarioSemantico.CheckVarInit import checkInicializacionVariable
+
 
 def welcomeSpell(actual, tokens_temporales, es_prototipo=False):
     """
@@ -78,9 +80,11 @@ def welcomeSpell(actual, tokens_temporales, es_prototipo=False):
         if funcion_existente and funcion_existente.categoria == "PROTOTIPO" and categoria == "FUNCION":
             # Actualizar prototipo a función implementada
             tabla.eliminar(actual.lexema)
+            checkInicializacionVariable(simbolo_funcion)
             tabla.insertar(simbolo_funcion)
             print(f"  SPELL '{actual.lexema}' actualizado de prototipo a función implementada")
         else:
+            checkInicializacionVariable(simbolo_funcion)
             tabla.insertar(simbolo_funcion)
             print(f"  SPELL '{actual.lexema}' insertado correctamente como {categoria}")
     except ValueError as e:

@@ -1,6 +1,8 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
+from ..diccionarioSemantico.CheckVarInit import checkInicializacionVariable
+
 
 def welcomeObsidian(categoria, actual, tipo, asignacion):
     print(f"verificacion de asignacion:")
@@ -19,6 +21,7 @@ def welcomeObsidian(categoria, actual, tipo, asignacion):
         print(mi_simbolo.__str__())
         
         tabla = TablaSimbolos.instancia()
+        checkInicializacionVariable(mi_simbolo)
         tabla.insertar(mi_simbolo)
         print(f" \n\n ver info tabla")
         tabla.imprimir_tabla()

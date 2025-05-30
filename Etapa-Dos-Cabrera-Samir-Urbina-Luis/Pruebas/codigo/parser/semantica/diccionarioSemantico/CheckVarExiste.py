@@ -1,5 +1,6 @@
 from ..TablaSimbolos import TablaSimbolos
 from ..HistorialSemantico import historialSemantico
+from ..HistorialSemanticoNegativo import historialSemanticoNegativo
 
 def checkVarExiste(token):
     """
@@ -16,6 +17,7 @@ def checkVarExiste(token):
     
     if simbolo_existente:
         mensaje = f"REGLA SEMANTICA 001: El IDENTIFICADOR de nombre '{token.lexema}' ya existe"
+        historialSemanticoNegativo.agregar(mensaje)
         historialSemantico.agregar(mensaje)
         return False
     else:
