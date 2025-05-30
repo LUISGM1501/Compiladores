@@ -2,6 +2,7 @@
 
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
+from ..ScopeManager import get_scope_manager
 
 def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
     """
@@ -9,6 +10,18 @@ def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
     """
     print(f"Procesando RITUAL: {actual.lexema}")
     print(f"Tokens recibidos: {len(tokens_temporales)}")
+    
+    # CORREGIR: Auto-detectar si es implementación basado en tokens
+    tiene_implementacion = tiene_bloque_implementacion(tokens_temporales)
+    
+    # Si tiene PolloCrudo, ES una implementación, no un prototipo
+    if tiene_implementacion:
+        es_prototipo = False
+        print(f"  DETECTADO: Es una implementación (tiene PolloCrudo)")
+    else:
+        es_prototipo = True
+        print(f"  DETECTADO: Es un prototipo (solo termina en ;)")
+    
     print(f"Es prototipo: {es_prototipo}")
     
     # Debug: mostrar tokens recibidos
@@ -32,21 +45,28 @@ def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
             print(f"ERROR SEMANTICO: El procedimiento '{actual.lexema}' ya está implementado en línea {procedimiento_existente.linea}")
             return
         elif not es_prototipo and procedimiento_existente.categoria == "PROTOTIPO_PROC":
-            print(f"  -> Implementando procedimiento previamente prototipado")
+            print(f"  -> ACTUALIZANDO: Implementando procedimiento previamente prototipado")
             if not validar_signatura_proc_coincide(procedimiento_existente, tokens_temporales):
                 print(f"ERROR SEMANTICO: La implementación de '{actual.lexema}' no coincide con su prototipo")
                 return
     
     # Extraer parámetros
     parametros = extraer_parametros_procedimiento(tokens_temporales)
-    tiene_implementacion = tiene_bloque_implementacion(tokens_temporales)
     
     print(f"  Parámetros extraídos: {len(parametros)}")
     for i, param in enumerate(parametros):
         print(f"    Param {i}: {param['nombre']} ({param['tipo']})")
     print(f"  Tiene implementación: {tiene_implementacion}")
     
-    # Determinar categoría
+    # Procesar variables locales si es una implementación
+    variables_locales = []
+    if tiene_implementacion and not es_prototipo:
+        variables_locales = extraer_y_validar_variables_locales(tokens_temporales, parametros)
+        print(f"  Variables locales encontradas: {len(variables_locales)}")
+        for var in variables_locales:
+            print(f"    Variable local: {var['nombre']} ({var['tipo']})")
+    
+    # Determinar categoría CORRECTA
     if es_prototipo or not tiene_implementacion:
         categoria = "PROTOTIPO_PROC"
     else:
@@ -62,7 +82,8 @@ def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
         valor={
             "parametros": parametros,
             "tipo_retorno": "VOID",
-            "tiene_implementacion": tiene_implementacion
+            "tiene_implementacion": tiene_implementacion,
+            "variables_locales": variables_locales
         }
     )
     
@@ -71,6 +92,7 @@ def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
     print(f"    Tipo: {simbolo_procedimiento.tipo}")
     print(f"    Categoria: {simbolo_procedimiento.categoria}")
     print(f"    Parámetros: {len(parametros)}")
+    print(f"    Variables locales: {len(variables_locales)}")
     
     # Insertar o actualizar en la tabla de símbolos
     try:
@@ -238,12 +260,17 @@ def extraer_tipos_argumentos_llamada_proc(tokens_temporales):
             break
         
         if dentro_parentesis:
-            if token.type != "COMA":
-                tipo_argumento = inferir_tipo_argumento(token)
-                if tipo_argumento and tipo_argumento != "UNKNOWN":
-                    tipos_argumentos.append(tipo_argumento)
-                    print(f"      Argumento: {token.lexema} -> {tipo_argumento}")
-                
+            # CORRECCIÓN: Solo procesar tokens que son argumentos reales
+            if token.type in ["IDENTIFICADOR", "NUMERO_ENTERO", "NUMERO_DECIMAL", "CADENA", "CARACTER", "ON", "OFF", "LLAVE_ABRE"]:
+                # IGNORAR si el token anterior es un tipo de parámetro
+                if i > 0 and tokens_temporales[i-1].type in ["STACK", "SPIDER", "RUNE", "TORCH", "GHAST", "CHEST", "BOOK", "SHELF", "ENTITY"]:
+                    # Este identificador es parte de la declaración de parámetro, no un argumento
+                    pass
+                else:
+                    tipo_argumento = inferir_tipo_argumento(token)
+                    if tipo_argumento and tipo_argumento != "UNKNOWN":
+                        tipos_argumentos.append(tipo_argumento)
+                        print(f"      Argumento: {token.lexema} -> {tipo_argumento}")
         i += 1
     
     print(f"    Total argumentos encontrados: {len(tipos_argumentos)}")
@@ -311,3 +338,80 @@ def detectar_llamada_con_asignacion(tokens_history):
                 tokens_history[i + 1].type == "IGUAL"):
                 return True
     return False
+
+def extraer_y_validar_variables_locales(tokens_temporales, parametros_existentes):
+    """
+    Extrae y valida las variables locales usando el ScopeManager
+    """
+    scope_manager = get_scope_manager()
+    variables_locales = []
+    dentro_bloque = False
+    i = 0
+    
+    while i < len(tokens_temporales):
+        token = tokens_temporales[i]
+        
+        if token.type == "POLLO_CRUDO":
+            dentro_bloque = True
+            i += 1
+            continue
+        elif token.type == "POLLO_ASADO":
+            dentro_bloque = False
+            break
+        
+        if dentro_bloque:
+            # Buscar patrón: TIPO IDENTIFICADOR [= valor];
+            if token.type in ["STACK", "SPIDER", "RUNE", "TORCH", "GHAST", "CHEST", "BOOK", "SHELF", "ENTITY"]:
+                tipo_var = token.type
+                
+                # El siguiente token debería ser el identificador
+                if (i + 1 < len(tokens_temporales) and 
+                    tokens_temporales[i + 1].type == "IDENTIFICADOR"):
+                    
+                    nombre_var = tokens_temporales[i + 1].lexema
+                    
+                    try:
+                        # Declarar la variable en el scope actual
+                        scope_manager.declare_variable(nombre_var, tipo_var, "VARIABLE_LOCAL")
+                        
+                        variable = {
+                            "nombre": nombre_var,
+                            "tipo": tipo_var,
+                            "linea": tokens_temporales[i + 1].linea,
+                            "columna": tokens_temporales[i + 1].columna,
+                            "inicializada": False
+                        }
+                        
+                        # Verificar si hay inicialización
+                        if (i + 2 < len(tokens_temporales) and 
+                            tokens_temporales[i + 2].type == "IGUAL"):
+                            variable["inicializada"] = True
+                            
+                            # Validar el valor de inicialización
+                            if i + 3 < len(tokens_temporales):
+                                valor_token = tokens_temporales[i + 3]
+                                print(f"      Validando inicialización: {nombre_var} = {valor_token.lexema}")
+                                
+                                # Si el valor es un identificador, verificar que exista
+                                if valor_token.type == "IDENTIFICADOR":
+                                    var_referenciada = scope_manager.lookup_variable(valor_token.lexema)
+                                    if var_referenciada is None:
+                                        print(f"      ERROR SEMANTICO: Variable '{valor_token.lexema}' no declarada")
+                                    else:
+                                        print(f"      OK: Variable '{valor_token.lexema}' encontrada ({var_referenciada['tipo']})")
+                        
+                        variables_locales.append(variable)
+                        print(f"      Variable local declarada: {nombre_var} ({tipo_var})")
+                        
+                    except ValueError as e:
+                        print(f"      ERROR SEMANTICO: {e}")
+                    
+                    i += 2  # Saltar tipo e identificador
+                else:
+                    i += 1
+            else:
+                i += 1
+        else:
+            i += 1
+    
+    return variables_locales
