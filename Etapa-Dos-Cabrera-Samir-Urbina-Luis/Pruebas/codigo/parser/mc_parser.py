@@ -144,231 +144,240 @@ class Parser:
                 print(f"Línea:      {self.token_actual.linea}")
                 print(f"Columna:    {self.token_actual.columna}")
 
-                # VERIFICAR SI ESTAMOS DENTRO DE UNA DEFINICIÓN DE ENTITY
-                if hasattr(self, '_saltando_entity_tokens') and self._saltando_entity_tokens > 0:
-                    print(f"  Saltando token interno de Entity: {self.token_actual.lexema}")
-                    self._saltando_entity_tokens -= 1
-                    return
+                #Validacion de que el Token existe:
+                if(checkVarExiste(self.token_actual)):
+                    # PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES.
 
-                # Caso base directo
-                if len(self.token_history) > 0 and self.token_history[-1].type == "WORLD_NAME":
-                    welcomeWorldname(self.token_history[-1], self.token_actual)
-                    return
+                    # Caso base directo, no requiere "mirar a futuro"
+                    if self.token_history[-1].type == "WORLD_NAME":
+                        welcomeWorldname(self.token_history[-1], self.token_actual)
+                        return
+                    
+                    # VERIFICAR SI ESTAMOS DENTRO DE UNA DEFINICIÓN DE ENTITY
+                    if hasattr(self, '_saltando_entity_tokens') and self._saltando_entity_tokens > 0:
+                        print(f"  Saltando token interno de Entity: {self.token_actual.lexema}")
+                        self._saltando_entity_tokens -= 1
+                        return
 
-                # Recolección temporal de tokens MEJORADA
-                tokens_temporales = []
-                pos_temp = self.posicion_actual + 1
-                
-                # Determinar tipo de recolección basado en el contexto
-                token_prev = self.obtener_token_historial(1)
-                
-                if token_prev and token_prev.type == "ENTITY":
-                    # Para ENTITY, recolectar hasta POLLO_ASADO seguido de PUNTO_Y_COMA
-                    while pos_temp < len(self.tokens):
-                        token_temp = self.tokens[pos_temp]
-                        tokens_temporales.append(token_temp)
-                        
-                        if (token_temp.type == "PUNTO_Y_COMA" and 
-                            len(tokens_temporales) >= 2 and 
-                            tokens_temporales[-2].type == "POLLO_ASADO"):
-                            break
-                        pos_temp += 1
-                else:
-                    # Para otros casos, mantener la lógica original
-                    while pos_temp < len(self.tokens):
-                        token_temp = self.tokens[pos_temp]
-                        tokens_temporales.append(token_temp)
-                        if token_temp.type == "PUNTO_Y_COMA":
-                            break
-                        pos_temp += 1
+                    # Caso base directo
+                    if len(self.token_history) > 0 and self.token_history[-1].type == "WORLD_NAME":
+                        welcomeWorldname(self.token_history[-1], self.token_actual)
+                        return
 
-                # CASOS DE PROCESAMIENTO
-
-                # CASO: ENTITY - Mejorado para distinguir tipos y variables
-                if token_prev and token_prev.type == "ENTITY":
-                    # Determinar si es definición de tipo o declaración de variable
-                    es_definicion_tipo = False
-                    es_declaracion_variable = False
+                    # Recolección temporal de tokens MEJORADA
+                    tokens_temporales = []
+                    pos_temp = self.posicion_actual + 1
                     
-                    if len(tokens_temporales) > 0:
-                        primer_token_temp = tokens_temporales[0]
-                        if primer_token_temp.type == "POLLO_CRUDO":
-                            es_definicion_tipo = True
-                        elif primer_token_temp.type == "IDENTIFICADOR":
-                            es_declaracion_variable = True
+                    # Determinar tipo de recolección basado en el contexto
+                    token_prev = self.obtener_token_historial(1)
                     
-                    print(f"  Tipo de construcción Entity:")
-                    print(f"    Definición de tipo: {es_definicion_tipo}")
-                    print(f"    Declaración de variable: {es_declaracion_variable}")
-                    
-                    welcomeEntity(self.token_actual, tokens_temporales)
-                    
-                    # CALCULAR CUÁNTOS TOKENS SALTAR basado en el tipo de construcción
-                    tokens_a_saltar = 0
-                    
-                    if es_definicion_tipo:
-                        # Para definiciones de tipo, saltar campos internos
-                        dentro_bloque = False
-                        for token in tokens_temporales:
-                            if token.type == "POLLO_CRUDO":
-                                dentro_bloque = True
-                            elif token.type == "POLLO_ASADO":
-                                dentro_bloque = False
-                            elif dentro_bloque and token.type == "IDENTIFICADOR":
-                                tokens_a_saltar += 1
-                                
-                    elif es_declaracion_variable:
-                        # Para declaraciones de variable, saltar: nombreVariable, =, y contenido de inicialización
-                        if len(tokens_temporales) >= 1:
-                            tokens_a_saltar += 1  # nombreVariable
+                    if token_prev and token_prev.type == "ENTITY":
+                        # Para ENTITY, recolectar hasta POLLO_ASADO seguido de PUNTO_Y_COMA
+                        while pos_temp < len(self.tokens):
+                            token_temp = self.tokens[pos_temp]
+                            tokens_temporales.append(token_temp)
                             
-                        # Si hay inicialización, saltar también esos tokens
-                        if len(tokens_temporales) >= 2 and tokens_temporales[1].type == "IGUAL":
-                            dentro_inicializacion = False
-                            for i, token in enumerate(tokens_temporales[2:], 2):
-                                if token.type in ["LLAVE_ABRE", "POLLO_CRUDO"]:
-                                    dentro_inicializacion = True
-                                elif token.type in ["LLAVE_CIERRA", "POLLO_ASADO"]:
-                                    dentro_inicializacion = False
-                                elif dentro_inicializacion and token.type == "IDENTIFICADOR":
-                                    tokens_a_saltar += 1
-                    
-                    # Marcar para saltar esos tokens
-                    self._saltando_entity_tokens = tokens_a_saltar
-                    print(f"    Configurado para saltar {tokens_a_saltar} tokens internos de Entity")
-                    return
-
-                # CASO RITUAL: manejar declaraciones de procedimientos
-                token_prev = self.obtener_token_historial(1)
-                if token_prev and token_prev.type == "RITUAL":
-                    # Determinar si es prototipo o implementación
-                    es_prototipo = True
-                    
-                    # Buscar en tokens_temporales si hay PolloCrudo (indica implementación)
-                    for token_temp in tokens_temporales:
-                        if token_temp.type == "POLLO_CRUDO":
-                            es_prototipo = False
-                            break
-                    
-                    # También verificar si termina solo con PUNTO_Y_COMA (prototipo)
-                    if (len(tokens_temporales) > 0 and 
-                        tokens_temporales[-1].type == "PUNTO_Y_COMA" and
-                        not any(t.type == "POLLO_CRUDO" for t in tokens_temporales)):
-                        es_prototipo = True
-                    
-                    print(f"  Procesando RITUAL {'(prototipo)' if es_prototipo else '(implementación)'}")
-                    welcomeRitual(self.token_actual, tokens_temporales, es_prototipo)
-                    return
-
-                # Caso SPELL: manejar declaraciones de funciones
-                token_prev = self.obtener_token_historial(1)
-                if token_prev and token_prev.type == "SPELL":
-                    # Determinar si es prototipo o implementación
-                    es_prototipo = True
-                    
-                    # Buscar en tokens_temporales si hay PolloCrudo (indica implementación)
-                    for token_temp in tokens_temporales:
-                        if token_temp.type == "POLLO_CRUDO":
-                            es_prototipo = False
-                            break
-                    
-                    # También verificar si termina solo con PUNTO_Y_COMA (prototipo)
-                    if (len(tokens_temporales) > 0 and 
-                        tokens_temporales[-1].type == "PUNTO_Y_COMA" and
-                        not any(t.type == "POLLO_CRUDO" for t in tokens_temporales)):
-                        es_prototipo = True
-                    
-                    print(f"  Procesando SPELL {'(prototipo)' if es_prototipo else '(implementación)'}")
-                    welcomeSpell(self.token_actual, tokens_temporales, es_prototipo)
-                    return
-
-                # LLAMADAS A FUNCIONES Y PROCEDIMIENTOS: cuando encontramos IDENTIFICADOR seguido de PARENTESIS_ABRE
-                if (len(tokens_temporales) > 0 and 
-                    tokens_temporales[0].type == "PARENTESIS_ABRE"):
-                    
-                    print(f"  Detectada posible llamada a función/procedimiento: {self.token_actual.lexema}")
-                    
-                    # Verificar si es un procedimiento, función, o no declarado
-                    tabla = TablaSimbolos.instancia()
-                    simbolo = tabla.buscar(self.token_actual.lexema)
-                    
-                    if simbolo and simbolo.categoria in ["PROCEDIMIENTO", "PROTOTIPO_PROC"]:
-                        # Es un procedimiento
-                        print(f"  Confirmado: Es una llamada a procedimiento")
-                        
-                        # Verificar que NO haya asignación previa
-                        if detectar_llamada_con_asignacion(self.token_history):
-                            print(f"  ERROR SEMANTICO: Los procedimientos no retornan valores y no pueden ser asignados")
-                            print(f"  ERROR SEMANTICO: '{self.token_actual.lexema}' es un procedimiento y no puede usarse en asignaciones")
-                            return
-                        
-                        # Procesar llamada a procedimiento
-                        procesar_llamada_procedimiento_en_statement(self.token_actual.lexema, tokens_temporales)
-                        return
-                        
-                    elif simbolo and simbolo.categoria in ["FUNCION", "PROTOTIPO"]:
-                        # Es una función, usar el procesamiento existente
-                        print(f"  Confirmado: Es una llamada a función")
-                        tipos_argumentos = extraer_tipos_argumentos_llamada(tokens_temporales)
-                        verificar_llamada_funcion(self.token_actual.lexema, tipos_argumentos)
-                        return
-                        
+                            if (token_temp.type == "PUNTO_Y_COMA" and 
+                                len(tokens_temporales) >= 2 and 
+                                tokens_temporales[-2].type == "POLLO_ASADO"):
+                                break
+                            pos_temp += 1
                     else:
-                        # No está declarado o es otro tipo de símbolo
-                        print(f"  WARNING: '{self.token_actual.lexema}' no está declarado como función o procedimiento")
-                        # Continuar con el procesamiento normal
+                        # Para otros casos, mantener la lógica original
+                        while pos_temp < len(self.tokens):
+                            token_temp = self.tokens[pos_temp]
+                            tokens_temporales.append(token_temp)
+                            if token_temp.type == "PUNTO_Y_COMA":
+                                break
+                            pos_temp += 1
+
+                    # CASOS DE PROCESAMIENTO
+
+                    # CASO: ENTITY - Mejorado para distinguir tipos y variables
+                    if token_prev and token_prev.type == "ENTITY":
+                        # Determinar si es definición de tipo o declaración de variable
+                        es_definicion_tipo = False
+                        es_declaracion_variable = False
+                        
+                        if len(tokens_temporales) > 0:
+                            primer_token_temp = tokens_temporales[0]
+                            if primer_token_temp.type == "POLLO_CRUDO":
+                                es_definicion_tipo = True
+                            elif primer_token_temp.type == "IDENTIFICADOR":
+                                es_declaracion_variable = True
+                        
+                        print(f"  Tipo de construcción Entity:")
+                        print(f"    Definición de tipo: {es_definicion_tipo}")
+                        print(f"    Declaración de variable: {es_declaracion_variable}")
+                        
+                        welcomeEntity(self.token_actual, tokens_temporales)
+                        
+                        # CALCULAR CUÁNTOS TOKENS SALTAR basado en el tipo de construcción
+                        tokens_a_saltar = 0
+                        
+                        if es_definicion_tipo:
+                            # Para definiciones de tipo, saltar campos internos
+                            dentro_bloque = False
+                            for token in tokens_temporales:
+                                if token.type == "POLLO_CRUDO":
+                                    dentro_bloque = True
+                                elif token.type == "POLLO_ASADO":
+                                    dentro_bloque = False
+                                elif dentro_bloque and token.type == "IDENTIFICADOR":
+                                    tokens_a_saltar += 1
+                                    
+                        elif es_declaracion_variable:
+                            # Para declaraciones de variable, saltar: nombreVariable, =, y contenido de inicialización
+                            if len(tokens_temporales) >= 1:
+                                tokens_a_saltar += 1  # nombreVariable
+                                
+                            # Si hay inicialización, saltar también esos tokens
+                            if len(tokens_temporales) >= 2 and tokens_temporales[1].type == "IGUAL":
+                                dentro_inicializacion = False
+                                for i, token in enumerate(tokens_temporales[2:], 2):
+                                    if token.type in ["LLAVE_ABRE", "POLLO_CRUDO"]:
+                                        dentro_inicializacion = True
+                                    elif token.type in ["LLAVE_CIERRA", "POLLO_ASADO"]:
+                                        dentro_inicializacion = False
+                                    elif dentro_inicializacion and token.type == "IDENTIFICADOR":
+                                        tokens_a_saltar += 1
+                        
+                        # Marcar para saltar esos tokens
+                        self._saltando_entity_tokens = tokens_a_saltar
+                        print(f"    Configurado para saltar {tokens_a_saltar} tokens internos de Entity")
                         return
 
-                # Casos existentes (shelf, obsidian, etc.)
-                token_prev = self.obtener_token_historial(5)
-                if token_prev and token_prev.type == "SHELF":
-                    welcomeShelf(self.obtener_token_historial(5),
-                                 self.obtener_token_historial(3),
-                                 self.obtener_token_historial(1),
-                                 self.token_actual,
-                                 tokens_temporales)
-                    return
+                    # CASO RITUAL: manejar declaraciones de procedimientos
+                    token_prev = self.obtener_token_historial(1)
+                    if token_prev and token_prev.type == "RITUAL":
+                        # Determinar si es prototipo o implementación
+                        es_prototipo = True
+                        
+                        # Buscar en tokens_temporales si hay PolloCrudo (indica implementación)
+                        for token_temp in tokens_temporales:
+                            if token_temp.type == "POLLO_CRUDO":
+                                es_prototipo = False
+                                break
+                        
+                        # También verificar si termina solo con PUNTO_Y_COMA (prototipo)
+                        if (len(tokens_temporales) > 0 and 
+                            tokens_temporales[-1].type == "PUNTO_Y_COMA" and
+                            not any(t.type == "POLLO_CRUDO" for t in tokens_temporales)):
+                            es_prototipo = True
+                        
+                        print(f"  Procesando RITUAL {'(prototipo)' if es_prototipo else '(implementación)'}")
+                        welcomeRitual(self.token_actual, tokens_temporales, es_prototipo)
+                        return
 
-                # caso de Bedrock, Bedrock tipo id valor
-                token_prev = self.obtener_token_historial(2)
-                if token_prev and token_prev.type == "OBSIDIAN":
-                    welcomeObsidian(self.obtener_token_historial(2), self.token_actual, self.obtener_token_historial(1),
+                    # Caso SPELL: manejar declaraciones de funciones
+                    token_prev = self.obtener_token_historial(1)
+                    if token_prev and token_prev.type == "SPELL":
+                        # Determinar si es prototipo o implementación
+                        es_prototipo = True
+                        
+                        # Buscar en tokens_temporales si hay PolloCrudo (indica implementación)
+                        for token_temp in tokens_temporales:
+                            if token_temp.type == "POLLO_CRUDO":
+                                es_prototipo = False
+                                break
+                        
+                        # También verificar si termina solo con PUNTO_Y_COMA (prototipo)
+                        if (len(tokens_temporales) > 0 and 
+                            tokens_temporales[-1].type == "PUNTO_Y_COMA" and
+                            not any(t.type == "POLLO_CRUDO" for t in tokens_temporales)):
+                            es_prototipo = True
+                        
+                        print(f"  Procesando SPELL {'(prototipo)' if es_prototipo else '(implementación)'}")
+                        welcomeSpell(self.token_actual, tokens_temporales, es_prototipo)
+                        return
+
+                    # LLAMADAS A FUNCIONES Y PROCEDIMIENTOS: cuando encontramos IDENTIFICADOR seguido de PARENTESIS_ABRE
+                    if (len(tokens_temporales) > 0 and 
+                        tokens_temporales[0].type == "PARENTESIS_ABRE"):
+                        
+                        print(f"  Detectada posible llamada a función/procedimiento: {self.token_actual.lexema}")
+                        
+                        # Verificar si es un procedimiento, función, o no declarado
+                        tabla = TablaSimbolos.instancia()
+                        simbolo = tabla.buscar(self.token_actual.lexema)
+                        
+                        if simbolo and simbolo.categoria in ["PROCEDIMIENTO", "PROTOTIPO_PROC"]:
+                            # Es un procedimiento
+                            print(f"  Confirmado: Es una llamada a procedimiento")
+                            
+                            # Verificar que NO haya asignación previa
+                            if detectar_llamada_con_asignacion(self.token_history):
+                                print(f"  ERROR SEMANTICO: Los procedimientos no retornan valores y no pueden ser asignados")
+                                print(f"  ERROR SEMANTICO: '{self.token_actual.lexema}' es un procedimiento y no puede usarse en asignaciones")
+                                return
+                            
+                            # Procesar llamada a procedimiento
+                            procesar_llamada_procedimiento_en_statement(self.token_actual.lexema, tokens_temporales)
+                            return
+                            
+                        elif simbolo and simbolo.categoria in ["FUNCION", "PROTOTIPO"]:
+                            # Es una función, usar el procesamiento existente
+                            print(f"  Confirmado: Es una llamada a función")
+                            tipos_argumentos = extraer_tipos_argumentos_llamada(tokens_temporales)
+                            verificar_llamada_funcion(self.token_actual.lexema, tipos_argumentos)
+                            return
+                            
+                        else:
+                            # No está declarado o es otro tipo de símbolo
+                            print(f"  WARNING: '{self.token_actual.lexema}' no está declarado como función o procedimiento")
+                            # Continuar con el procesamiento normal
+                            return
+
+                    # Casos existentes (shelf, obsidian, etc.)
+                    token_prev = self.obtener_token_historial(5)
+                    if token_prev and token_prev.type == "SHELF":
+                        welcomeShelf(self.obtener_token_historial(5),
+                                    self.obtener_token_historial(3),
+                                    self.obtener_token_historial(1),
+                                    self.token_actual,
                                     tokens_temporales)
-                    return
+                        return
 
-                token_prev = self.obtener_token_historial(1)
-                # caso de stack: entero
-                if token_prev and token_prev.type == "STACK":
-                    welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
-                    return
+                    # caso de Bedrock, Bedrock tipo id valor
+                    token_prev = self.obtener_token_historial(2)
+                    if token_prev and token_prev.type == "OBSIDIAN":
+                        welcomeObsidian(self.obtener_token_historial(2), self.token_actual, self.obtener_token_historial(1),
+                                        tokens_temporales)
+                        return
 
-                # caso de spider : string
-                if token_prev and token_prev.type == "SPIDER":
-                    welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
-                    return
+                    token_prev = self.obtener_token_historial(1)
+                    # caso de stack: entero
+                    if token_prev and token_prev.type == "STACK":
+                        welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
 
-                # caso de rune : char
-                if token_prev and token_prev.type == "RUNE":
-                    welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
-                    return
+                    # caso de spider : string
+                    if token_prev and token_prev.type == "SPIDER":
+                        welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
 
-                # caso torch : boolean
-                if token_prev and token_prev.type == "TORCH":
-                    welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
-                    return
+                    # caso de rune : char
+                    if token_prev and token_prev.type == "RUNE":
+                        welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
 
-                # caso ghast : float
-                if token_prev and token_prev.type == "GHAST":
-                    welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
-                    return
+                    # caso torch : boolean
+                    if token_prev and token_prev.type == "TORCH":
+                        welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
 
-                # caso chest : conjuntos
-                if token_prev and token_prev.type == "CHEST":
-                    welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
-                    return
-        else:
-            self.token_actual = None
-            self.imprimir_debug("Avanzando a EOF", 2)
+                    # caso ghast : float
+                    if token_prev and token_prev.type == "GHAST":
+                        welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+
+                    # caso chest : conjuntos
+                    if token_prev and token_prev.type == "CHEST":
+                        welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+            else:
+                self.token_actual = None
+                self.imprimir_debug("Avanzando a EOF", 2)
 
     def detectar_contexto_asignacion(self):
         """
