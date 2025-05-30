@@ -46,6 +46,13 @@ from .semantica.diccionarioSemantico.CheckDivZero import (
     check_modulo_zero,
     check_expression_division_zero
 )
+from .semantica.diccionarioSemantico.CheckPollo import (
+    check_pollo_crudo_apertura,
+    check_pollo_asado_cierre,
+    verificar_balance_archivo_completo,
+    reset_pollo_checker,
+    get_estado_actual_pollo
+)
 
 # IMPORTACION DE CHEQUEOS SEMANTICOS
 from parser.semantica.TablaSimbolos import TablaSimbolos
@@ -144,6 +151,25 @@ class Parser:
         if debug and len(self.tokens) > 0:
             self.imprimir_debug(f"Tokens recibidos ({len(self.tokens)}): primeros 5 tokens: {[f'{t.type} ({t.lexema})' for t in self.tokens[:5]]}", 2)
 
+    def verificar_pollo_tokens(self):
+        """
+        Verifica el balance de POLLOCRUDO/POLLOASADO en todos los tokens
+        """
+        if not self.tokens:
+            return True
+        
+        # Realizar verificación completa del archivo
+        es_valido, reporte = verificar_balance_archivo_completo(self.tokens)
+        
+        if not es_valido:
+            print(f"\nERRORES DE BALANCE POLLOCRUDO/POLLOASADO:")
+            for error in reporte["errores"]:
+                print(f"  - {error}")
+        
+        print(f"\nREPORTE DE BLOQUES: {reporte['resumen']}")
+        
+        return es_valido
+    
     def procesar_simbolo_semantico(self, simbolo):
         """
         Procesa un símbolo semántico específico
@@ -602,17 +628,39 @@ class Parser:
         """
         tipo_token_actual = self.obtener_tipo_token()
         
-        # Caso especial: PolloCrudo como IDENTIFICADOR
-        if terminal_esperado == 22 and self.token_actual and self.token_actual.lexema.lower() == "pollocrudo":
-            self.imprimir_debug("Reconocido 'PolloCrudo' como palabra clave", 2)
-            self.avanzar()
-            return True
+        # NUEVO: Verificación de POLLOCRUDO
+        if terminal_esperado == 22 and self.token_actual:  # 22 es POLLO_CRUDO
+            if (self.token_actual.type == "POLLO_CRUDO" or 
+                (self.token_actual.type == "IDENTIFICADOR" and self.token_actual.lexema.lower() == "pollocrudo")):
+                
+                # Determinar contexto basado en el historial de tokens
+                contexto = self.determinar_contexto_actual()
+                
+                # Verificar apertura de bloque
+                es_valido, mensaje_error = check_pollo_crudo_apertura(self.token_actual, contexto)
+                
+                if not es_valido:
+                    print(f"ERROR POLLO: {mensaje_error}")
+                
+                self.imprimir_debug(f"POLLOCRUDO verificado en contexto: {contexto}", 2)
+                self.avanzar()
+                return True
 
-        # Caso especial: PolloAsado como IDENTIFICADOR
-        if terminal_esperado == 23 and self.token_actual and self.token_actual.lexema.lower() == "polloasado":
-            self.imprimir_debug("Reconocido 'PolloAsado' como palabra clave", 2)
-            self.avanzar()
-            return True
+        # NUEVO: Verificación de POLLOASADO  
+        if terminal_esperado == 23 and self.token_actual:  # 23 es POLLO_ASADO
+            if (self.token_actual.type == "POLLO_ASADO" or 
+                (self.token_actual.type == "IDENTIFICADOR" and self.token_actual.lexema.lower() == "polloasado")):
+                
+                # Verificar cierre de bloque
+                es_valido, bloque_cerrado, mensaje_error = check_pollo_asado_cierre(self.token_actual)
+                
+                if not es_valido:
+                    print(f"ERROR POLLO: {mensaje_error}")
+                elif bloque_cerrado:
+                    self.imprimir_debug(f"POLLOASADO cierra bloque de línea {bloque_cerrado['linea']}", 2)
+                
+                self.avanzar()
+                return True
         
         # CORRECCIÓN CRÍTICA: Manejo correcto de :: (dos DOS_PUNTOS consecutivos)
         if (terminal_esperado == 112 and  # DOS_PUNTOS
@@ -669,6 +717,26 @@ class Parser:
             else:
                 self.reportar_error(f"Se esperaba '{nombre_esperado}' pero se llegó al final del archivo")
             return False
+        
+    def determinar_contexto_actual(self):
+        """
+        Determina el contexto actual basado en el historial de tokens
+        """
+        # Buscar en el historial reciente para determinar contexto
+        if len(self.token_history) >= 2:
+            for i in range(len(self.token_history) - 1, max(-1, len(self.token_history) - 10), -1):
+                token = self.token_history[i]
+                if hasattr(token, 'type'):
+                    if token.type == "SPELL":
+                        return "funcion"
+                    elif token.type == "RITUAL":
+                        return "procedimiento"
+                    elif token.type == "ENTITY":
+                        return "entidad"
+                    elif token.type in ["TARGET", "REPEATER", "SPAWNER", "WALK", "JUKEBOX", "WITHER"]:
+                        return "estructura_control"
+        
+        return "bloque_general"
     
     def reportar_error(self, mensaje):
         """
@@ -1052,6 +1120,9 @@ class Parser:
         """
         self.imprimir_debug("Iniciando análisis sintáctico", 1)
         
+        # Reiniciar el checker de Pollo al inicio
+        reset_pollo_checker()
+        
         # Inicializar la pila con el símbolo inicial
         self.stack = []
         self.push(Gramatica.MARCA_DERECHA)        
@@ -1178,6 +1249,25 @@ class Parser:
                         self.avanzar()
                     
                     self.procesar_llamada_procedimiento_en_statement(nombre_proc, tokens_llamada)
+            
+            # Al final del parsing, verificar balance final
+            try:
+                estado_final = get_estado_actual_pollo()
+                
+                if estado_final["bloques_abiertos"] > 0:
+                    print(f"\nERROR SEMANTICO: Quedan {estado_final['bloques_abiertos']} bloques POLLOCRUDO sin cerrar:")
+                    for bloque in estado_final["info_bloques"]:
+                        print(f"  - Línea {bloque['linea']}, columna {bloque['columna']} (contexto: {bloque['contexto']})")
+                    return False
+                else:
+                    self.imprimir_debug("Balance de bloques POLLOCRUDO/POLLOASADO correcto", 1)
+            
+            except Exception as e:
+                self.imprimir_debug(f"Error al verificar balance de bloques: {str(e)}", 1)
+            
+            # Verificación completa de archivos (opcional, para reporte detallado)
+            if self.debug:
+                self.verificar_pollo_tokens()
             
             if not self.stack:
                 if self.token_actual is None or self.token_actual.type == "EOF":
@@ -1458,6 +1548,27 @@ def iniciar_parser(tokens, debug=False, nivel_debug=1):
     print("\n#################################################################")
     print("##                    INICIO PARSER                            ##")
     print("#################################################################")
+
+    # NUEVO: Verificación previa de balance de bloques
+    print("\n--- VERIFICACIÓN PREVIA DE BLOQUES ---")
+    es_valido_bloques, reporte_bloques = verificar_balance_archivo_completo(tokens)
+    
+    if not es_valido_bloques:
+        print(" ERRORES DE BALANCE DETECTADOS:")
+        for error in reporte_bloques["errores"]:
+            print(f"   {error}")
+        print(f"\nREPORTE: {reporte_bloques['resumen']}")
+        
+        # Decidir si continuar o abortar
+        print("\n Se encontraron errores de balance, pero continuando con el análisis...")
+    else:
+        print("Balance de bloques POLLOCRUDO/POLLOASADO correcto")
+        print(f" {reporte_bloques['resumen']}")
+    
+    print("------------------------------------------\n")
+    
+    # Reiniciar para análisis en tiempo real
+    reset_pollo_checker()
 
     # Crear una instancia del parser
     parser_instance = Parser(tokens, debug=debug)

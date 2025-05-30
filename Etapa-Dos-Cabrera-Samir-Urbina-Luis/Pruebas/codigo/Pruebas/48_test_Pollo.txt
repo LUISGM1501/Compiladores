@@ -1,0 +1,32 @@
+WorldName TestPolloBalance:
+
+Inventory
+    Stack numero = 42;
+    Spider texto = "Hola mundo";
+
+CraftingTable
+    Spell miFuncion() -> Stack
+    PolloCrudo
+        Stack resultado = numero + 10;
+        respawn resultado;
+    PolloAsado;
+    
+    Ritual miProcedimiento()
+    PolloCrudo
+        numero = numero * 2;
+        
+        target numero > 50 craft hit
+        PolloCrudo
+            texto = "Numero grande";
+        PolloAsado
+        miss 
+        PolloCrudo
+            texto = "Numero pequeño";
+        PolloAsado
+    PolloAsado;
+
+SpawnPoint
+    miFuncion();
+    miProcedimiento();
+
+WorldSave
