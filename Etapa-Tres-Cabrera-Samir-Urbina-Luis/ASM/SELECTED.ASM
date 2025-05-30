@@ -221,23 +221,22 @@ OPCION_MODULO:
     CALL NUEVA_LINEA
     CALL LEER_DOS_FLOTANTES
     
-    ; Verificar división por cero
+    ; Verificar división por cero con el procedimiento mejorado
     CALL VERIFICAR_CERO_SEGUNDO
-    JC @SELECTED_ERROR_MOD
+    JC @SELECTED_ERROR_MOD_NUEVO
     
-    ; Realizar el módulo flotante (:%)
+    ; Realizar el módulo flotante (nuevo procedimiento)
     CALL MODULO_FLOTANTES
     
     ; Mostrar resultado
     CALL MOSTRAR_RESULTADO_FLOTANTE
     JMP MENU_PRINCIPAL
 
-@SELECTED_ERROR_MOD:
+@SELECTED_ERROR_MOD_NUEVO:
     MOV AH, 09h
     LEA DX, error_div
     INT 21h
     JMP MENU_PRINCIPAL
-
 OPCION_ASIGNACIONES:
     CALL NUEVA_LINEA
     
@@ -321,12 +320,12 @@ ASIGNACION_MOD:
     CALL NUEVA_LINEA
     CALL LEER_DOS_FLOTANTES
     CALL VERIFICAR_CERO_SEGUNDO
-    JC @SELECTED_ASIG_ERROR_MOD
+    JC @SELECTED_ASIG_ERROR_MOD_NUEVO
     CALL MODULO_FLOTANTES
     CALL MOSTRAR_RESULTADO_FLOTANTE
     JMP MENU_PRINCIPAL
 
-@SELECTED_ASIG_ERROR_MOD:
+@SELECTED_ASIG_ERROR_MOD_NUEVO:
     MOV AH, 09h
     LEA DX, error_div
     INT 21h
@@ -1824,46 +1823,101 @@ MODULO_FLOTANTES PROC
     PUSH CX
     PUSH DX
     
-    ; El módulo flotante se calcula como: A % B = A - (A // B) * B
-    ; Donde // es división entera
+    ; MÉTODO DIRECTO Y SIMPLE (similar al éxito de división/multiplicación)
+    ; Usar enfoque de restas sucesivas para mayor precisión
     
-    ; Primero calculamos A // B (división entera)
-    CALL DIVISION_ENTERA_FLOTANTES
-    ; Resultado en [resultado_entero]
+    ; 1. Determinar signo del resultado (A % B tiene signo de A)
+    MOV AL, [es_negativo1]
+    MOV [resultado_negativo], AL
     
-    ; Multiplicar (A // B) * B
-    MOV AX, [resultado_entero]
-    MOV BX, [entero2]
-    CMP [es_negativo2], 0
-    JE @SELECTED_MOD_MULT_POS
-    NEG BX
-@SELECTED_MOD_MULT_POS:
-    
-    IMUL BX  ; AX = (A // B) * B
-    
-    ; Restar A - (A // B) * B
-    MOV BX, [entero1]
+    ; 2. Obtener valores absolutos (igual que en multiplicación/división exitosas)
+    MOV AX, [entero1]
     CMP [es_negativo1], 0
-    JE @SELECTED_MOD_REST_POS
-    NEG BX
-@SELECTED_MOD_REST_POS:
+    JE @MOD_NUEVO_ENT1_POS
+    CMP AX, 0
+    JGE @MOD_NUEVO_ENT1_POS
+    NEG AX
+@MOD_NUEVO_ENT1_POS:
+    MOV BX, AX              ; BX = |entero1|
     
-    SUB BX, AX  ; BX = A - (A // B) * B
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @MOD_NUEVO_ENT2_POS
+    CMP AX, 0
+    JGE @MOD_NUEVO_ENT2_POS
+    NEG AX
+@MOD_NUEVO_ENT2_POS:
+    MOV CX, AX              ; CX = |entero2|
     
-    ; El resultado es BX
+    ; 3. VERIFICACIÓN CRÍTICA: División por cero
+    CMP CX, 0
+    JE @MOD_NUEVO_ERROR_CERO
+    
+    ; 4. ALGORITMO SIMPLIFICADO: 
+    ;    Para flotantes A.d1 % B.d2, usar solo partes enteras si son suficientes
+    ;    Si A < B, entonces A % B = A (simplificación válida para casos comunes)
+    
+    CMP BX, CX
+    JL @MOD_NUEVO_MENOR_QUE_DIVISOR
+    
+    ; 5. División entera directa (sin procedimiento auxiliar problemático)
+    MOV AX, BX              ; AX = dividendo
+    XOR DX, DX              ; Limpiar DX
+    DIV CX                  ; AX = cociente, DX = resto
+    
+    ; El resto DX es directamente el resultado de la parte entera
+    MOV [resultado_entero], DX
+    
+    ; 6. Para la parte decimal, usar aproximación simple
+    ;    resto_decimal = (decimal1 * resto_entero) / entero2
+    MOV AX, [decimal1]
+    MUL DX                  ; AX = decimal1 * resto_entero
+    CMP CX, 0
+    JE @MOD_NUEVO_SIN_DEC   ; Evitar división por cero
+    
+    XOR DX, DX
+    DIV CX                  ; AX = parte decimal aproximada
+    
+    ; Limitar a 99 para 2 dígitos decimales
+    CMP AX, 99
+    JLE @MOD_NUEVO_DEC_OK
+    MOV AX, 99
+@MOD_NUEVO_DEC_OK:
+    MOV [resultado_decimal], AX
+    JMP @MOD_NUEVO_FIN_CALCULO
+    
+@MOD_NUEVO_MENOR_QUE_DIVISOR:
+    ; Si A < B, entonces A % B = A (caso simple)
     MOV [resultado_entero], BX
+    MOV AX, [decimal1]
+    MOV [resultado_decimal], AX
+    JMP @MOD_NUEVO_FIN_CALCULO
+    
+@MOD_NUEVO_SIN_DEC:
     MOV [resultado_decimal], 0
-    MOV [resultado_digitos], 1
+    JMP @MOD_NUEVO_FIN_CALCULO
+    
+@MOD_NUEVO_ERROR_CERO:
+    ; División por cero: resultado = 0
+    MOV [resultado_entero], 0
+    MOV [resultado_decimal], 0
     MOV [resultado_negativo], 0
     
-    ; Ajustar signo si es necesario
-    CMP BX, 0
-    JGE @SELECTED_MOD_FIN
-    NEG BX
-    MOV [resultado_entero], BX
-    MOV [resultado_negativo], 1
+@MOD_NUEVO_FIN_CALCULO:
+    ; 7. Configurar dígitos decimales
+    MOV [resultado_digitos], 2
     
-@SELECTED_MOD_FIN:
+    ; 8. CASOS ESPECIALES CORREGIDOS:
+    ;    Si el resultado es 0, no debe ser negativo
+    CMP WORD PTR [resultado_entero], 0
+    JNE @MOD_NUEVO_FIN
+    CMP WORD PTR [resultado_decimal], 0
+    JNE @MOD_NUEVO_FIN
+    
+    ; Resultado es 0.00, debe ser positivo
+    MOV [resultado_negativo], 0
+    
+@MOD_NUEVO_FIN:
     POP DX
     POP CX
     POP BX
@@ -1878,20 +1932,32 @@ MODULO_FLOTANTES ENDP
 ;------------------------------------------------------------
 VERIFICAR_CERO_SEGUNDO PROC
     PUSH AX
+    PUSH BX
+    
+    ; Verificar parte entera
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @VERIF_NUEVO_ENT_POS
+    ; Si es negativo, tomar valor absoluto
+    CMP AX, 0
+    JGE @VERIF_NUEVO_ENT_POS
+    NEG AX
+@VERIF_NUEVO_ENT_POS:
     
     ; Verificar si entero2 es cero Y decimal2 es cero
-    CMP WORD PTR [entero2], 0
-    JNE @VERIF_NO_CERO_SIMPLE
+    CMP AX, 0
+    JNE @VERIF_NUEVO_NO_CERO
     CMP WORD PTR [decimal2], 0
-    JNE @VERIF_NO_CERO_SIMPLE
+    JNE @VERIF_NUEVO_NO_CERO
     
     STC  ; Es cero - establecer Carry Flag
-    JMP @VERIF_FIN_SIMPLE
+    JMP @VERIF_NUEVO_FIN
     
-@VERIF_NO_CERO_SIMPLE:
+@VERIF_NUEVO_NO_CERO:
     CLC  ; No es cero - limpiar Carry Flag
     
-@VERIF_FIN_SIMPLE:
+@VERIF_NUEVO_FIN:
+    POP BX
     POP AX
     RET
 VERIFICAR_CERO_SEGUNDO ENDP
