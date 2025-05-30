@@ -722,52 +722,48 @@ SUMAR_FLOTANTES PROC
     PUSH CX
     PUSH DX
     
-    ; Normalizar decimales primero
+    ; Normalizar decimales para operación
     CALL NORMALIZAR_DECIMALES_PARA_OPERACION
     
-    ; Determinar signo del resultado (XOR de los signos para suma)
+    ; Determinar el tipo de operación según los signos
     MOV AL, [es_negativo1]
     MOV BL, [es_negativo2]
-    XOR AL, BL
-    MOV [resultado_negativo], AL
     
-    ; Sumar partes decimales
-    MOV AX, [decimal1]
-    ADD AX, [decimal2]
-    MOV [resultado_decimal], AX
+    CMP AL, 0
+    JNE @SUMA_PRIMER_NEGATIVO
     
-    ; Calcular el valor máximo para los decimales (10^digitos)
-    MOV BL, [resultado_digitos]
-    CALL CALCULAR_POTENCIA_10_BL ; Resultado en BX
+    ; Primer número es positivo
+    CMP BL, 0
+    JE @SUMA_AMBOS_POSITIVOS
+    JMP @SUMA_POS_MAS_NEG      ; Positivo + Negativo
     
-    ; Verificar acarreo
-    CMP AX, BX
-    JL @SUMA_SIN_ACARREO
+@SUMA_PRIMER_NEGATIVO:
+    ; Primer número es negativo
+    CMP BL, 0
+    JE @SUMA_NEG_MAS_POS       ; Negativo + Positivo  
+    JMP @SUMA_AMBOS_NEGATIVOS  ; Negativo + Negativo
     
-    ; Hay acarreo: ajustar decimal y sumar 1 a entero
-    SUB AX, BX
-    MOV [resultado_decimal], AX
-    MOV CX, 1      ; Acarreo = 1
-    JMP @SUMA_ENTEROS
+@SUMA_AMBOS_POSITIVOS:
+    ; A + B (ambos positivos)
+    CALL SUMAR_VALORES_ABSOLUTOS
+    MOV [resultado_negativo], 0
+    JMP @SUMA_FIN
     
-@SUMA_SIN_ACARREO:
-    MOV CX, 0      ; Sin acarreo
-    
-@SUMA_ENTEROS:
-    ; Sumar partes enteras + acarreo
-    MOV AX, [entero1]
-    ADD AX, [entero2]
-    ADD AX, CX
-    MOV [resultado_entero], AX
-    
-    ; Manejar signos especiales
-    CMP [es_negativo1], 1
-    JNE @SUMA_FIN
-    CMP [es_negativo2], 1
-    JNE @SUMA_FIN
-    
-    ; Ambos son negativos, resultado debe ser negativo
+@SUMA_AMBOS_NEGATIVOS:
+    ; (-A) + (-B) = -(A + B)
+    CALL SUMAR_VALORES_ABSOLUTOS
     MOV [resultado_negativo], 1
+    JMP @SUMA_FIN
+    
+@SUMA_POS_MAS_NEG:
+    ; A + (-B) = A - B
+    CALL RESTAR_VALORES_ABSOLUTOS_SUMA
+    JMP @SUMA_FIN
+    
+@SUMA_NEG_MAS_POS:
+    ; (-A) + B = B - A
+    CALL RESTAR_SEGUNDO_MENOS_PRIMERO
+    JMP @SUMA_FIN
     
 @SUMA_FIN:
     POP DX
@@ -777,6 +773,85 @@ SUMAR_FLOTANTES PROC
     RET
 SUMAR_FLOTANTES ENDP
 
+;------------------------------------------------------------
+; Procedimiento: RESTAR_SEGUNDO_MENOS_PRIMERO
+; Resta el segundo número del primero, considerando los signos
+;------------------------------------------------------------
+
+RESTAR_SEGUNDO_MENOS_PRIMERO PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    
+    ; Comparar |segundo| con |primero|
+    CALL COMPARAR_VALORES_ABSOLUTOS_MAYOR
+    JZ @RSP_SEGUNDO_MAYOR
+    
+    ; |primero| >= |segundo|: resultado = |primero| - |segundo|, signo del primero
+    MOV AX, [entero1]
+    CMP AX, 0
+    JGE @RSP_ENT1_ABS
+    NEG AX
+@RSP_ENT1_ABS:
+    MOV BX, [entero2]
+    CMP BX, 0
+    JGE @RSP_ENT2_ABS
+    NEG BX
+@RSP_ENT2_ABS:
+    
+    SUB AX, BX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal1]
+    SUB AX, [decimal2]
+    ; Manejar préstamo si es necesario
+    CMP AX, 0
+    JGE @RSP_DEC_OK1
+    DEC WORD PTR [resultado_entero]
+    ADD AX, 1000  ; Ajustar según dígitos
+@RSP_DEC_OK1:
+    MOV [resultado_decimal], AX
+    
+    MOV AL, [es_negativo1]
+    MOV [resultado_negativo], AL
+    JMP @RSP_FIN
+    
+@RSP_SEGUNDO_MAYOR:
+    ; |segundo| > |primero|: resultado = |segundo| - |primero|, signo del segundo
+    MOV AX, [entero2]
+    CMP AX, 0
+    JGE @RSP_ENT2_ABS2
+    NEG AX
+@RSP_ENT2_ABS2:
+    MOV BX, [entero1]
+    CMP BX, 0
+    JGE @RSP_ENT1_ABS2
+    NEG BX
+@RSP_ENT1_ABS2:
+    
+    SUB AX, BX
+    MOV [resultado_entero], AX
+    
+    MOV AX, [decimal2]
+    SUB AX, [decimal1]
+    CMP AX, 0
+    JGE @RSP_DEC_OK2
+    DEC WORD PTR [resultado_entero]
+    ADD AX, 1000
+@RSP_DEC_OK2:
+    MOV [resultado_decimal], AX
+    
+    MOV AL, [es_negativo2]
+    MOV [resultado_negativo], AL
+    
+@RSP_FIN:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+RESTAR_SEGUNDO_MENOS_PRIMERO ENDP
 ;------------------------------------------------------------
 ; Procedimiento: RESTAR_VALORES_ABSOLUTOS_SUMA
 ; Resta valores absolutos cuando los signos son diferentes en suma
@@ -1025,13 +1100,13 @@ RESTAR_FLOTANTES PROC
     PUSH AX
     PUSH BX
     
-    ; La resta A - B es equivalente a A + (-B)
+    ; A - B = A + (-B)
     ; Invertir el signo del segundo operando
     MOV AL, [es_negativo2]
     XOR AL, 1
     MOV [es_negativo2], AL
     
-    ; Realizar suma con el signo cambiado
+    ; Llamar a la suma (que ya maneja todos los casos correctamente)
     CALL SUMAR_FLOTANTES
     
     ; Restaurar el signo original del segundo operando
@@ -1841,41 +1916,49 @@ SUMAR_VALORES_ABSOLUTOS PROC
     ; Obtener valores absolutos de partes enteras
     MOV AX, [entero1]
     CMP [es_negativo1], 0
-    JE @SUMA_ABS_CORR_ENT1_POS
+    JE @SUMA_ABS_ENT1_POS
     NEG AX
-@SUMA_ABS_CORR_ENT1_POS:
-    MOV BX, AX
+@SUMA_ABS_ENT1_POS:
+    MOV BX, AX              ; BX = |entero1|
     
     MOV AX, [entero2]
     CMP [es_negativo2], 0
-    JE @SUMA_ABS_CORR_ENT2_POS
+    JE @SUMA_ABS_ENT2_POS
     NEG AX
-@SUMA_ABS_CORR_ENT2_POS:
-    MOV CX, AX
+@SUMA_ABS_ENT2_POS:
+    MOV CX, AX              ; CX = |entero2|
     
     ; Sumar partes decimales
     MOV AX, [decimal1]
     ADD AX, [decimal2]
     
-    ; Verificar acarreo
+    ; Calcular la base para verificar acarreo (10^resultado_digitos)
+    PUSH BX                 ; Guardar |entero1|
+    PUSH CX                 ; Guardar |entero2|
+    
     MOV DL, [resultado_digitos]
     CALL CALCULAR_POTENCIA_10_DL
-    ; BX contiene 10^digitos
+    ; BX contiene 10^digitos (base decimal)
     
-    XOR DX, DX              ; DX = acarreo
-    CMP AX, BX
-    JL @SUMA_ABS_CORR_SIN_ACARREO
+    MOV DX, BX              ; DX = base decimal
+    POP CX                  ; Restaurar |entero2|
+    POP BX                  ; Restaurar |entero1|
     
-    SUB AX, BX
-    INC DX                  ; Hay acarreo
+    ; Verificar acarreo en decimales
+    XOR DI, DI              ; DI = acarreo (0 inicialmente)
+    CMP AX, DX
+    JL @SUMA_ABS_SIN_ACARREO
     
-@SUMA_ABS_CORR_SIN_ACARREO:
+    SUB AX, DX              ; Ajustar decimal
+    MOV DI, 1               ; Hay acarreo
+    
+@SUMA_ABS_SIN_ACARREO:
     MOV [resultado_decimal], AX
     
     ; Sumar partes enteras + acarreo
-    MOV AX, BX              ; entero1 absoluto
-    ADD AX, CX              ; + entero2 absoluto
-    ADD AX, DX              ; + acarreo
+    MOV AX, BX              ; AX = |entero1|
+    ADD AX, CX              ; AX = |entero1| + |entero2|
+    ADD AX, DI              ; AX = suma + acarreo
     MOV [resultado_entero], AX
     
     POP DX
@@ -1892,22 +1975,25 @@ CALCULAR_POTENCIA_10_DL PROC
     PUSH AX
     PUSH CX
     
-    MOV BX, 1
-    MOV CL, DL
-    XOR CH, CH
+    MOV BX, 1               ; Resultado inicial
+    XOR DH, DH              ; Limpiar DH
+    MOV CL, DL              ; CL = exponente
+    
+    CMP CL, 0
+    JE @POT_DL_FIN
     
 @POT_DL_LOOP:
-    CMP CX, 0
-    JE @POT_DL_FIN
     PUSH CX
     MOV AX, BX
-    MUL WORD PTR [const_diez]
-    MOV BX, AX
+    MOV CX, 10
+    MUL CX                  ; AX = BX * 10
+    MOV BX, AX              ; BX = resultado
     POP CX
-    DEC CX
-    JMP @POT_DL_LOOP
+    DEC CL
+    JNZ @POT_DL_LOOP
     
 @POT_DL_FIN:
+    ; BX contiene 10^DL
     POP CX
     POP AX
     RET
