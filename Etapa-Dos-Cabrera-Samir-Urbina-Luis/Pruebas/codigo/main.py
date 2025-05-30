@@ -19,6 +19,7 @@ from scanner.mc_scanner import procesar_archivo
 from parser.mc_parser import iniciar_parser
 from parser.gramatica.Gramatica import Gramatica
 from parser.semantica.TablaSimbolos import TablaSimbolos
+from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
 
 # Verificar integridad
 Gramatica.verificarIntegridadRangos()
@@ -89,6 +90,10 @@ def ejecucion():
     tabla = TablaSimbolos.instancia()
     print(f" \n\n Ver informacion de la tablas semantica:")
     tabla.imprimir_tabla()
+
+    historialSemantico = HistorialSemanticoSingleton()
+    print(f"\n\n Ver informacion del historial semantico:")
+    historialSemantico.imprimir_historial()
     
     #################################################################
     #################################################################

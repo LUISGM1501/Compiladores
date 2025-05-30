@@ -1,5 +1,6 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
+from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
 
 def welcomeObsidian(categoria, actual, tipo, asignacion):
     print(f"verificacion de asignacion:")
@@ -12,7 +13,7 @@ def welcomeObsidian(categoria, actual, tipo, asignacion):
             categoria=categoria.type,
             linea=actual.linea,
             columna=actual.columna,
-            valor=asignacion[0].lexema
+            valor= chequear_tipos_expresion(tipo.type, asignacion[0].lexema)
         ) 
         print(f"verificacion de simbolo:")
         print(mi_simbolo.__str__())

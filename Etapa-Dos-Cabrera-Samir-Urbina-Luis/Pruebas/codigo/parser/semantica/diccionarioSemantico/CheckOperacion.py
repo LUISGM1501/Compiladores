@@ -1,14 +1,15 @@
+from ..HistorialSemantico import historialSemantico
+
 def chequear_tipos_expresion(tipo_esperado, valor):
     """Verifica que un valor o conjunto de valores sea compatible con el tipo esperado
-    
+
     Args:
         tipo_esperado (str): Tipo esperado (Stack, Rune, Spider, Torch, Ghast)
         valor: Valor individual o lista de valores a verificar
-    
+
     Returns:
         Valor o lista de valores convertidos al tipo esperado, o valores por defecto si hay error
     """
-    # Mapeo de tipos con sus propiedades
     tipos = {
         'STACK': {
             'tipo_base': 'int',
@@ -37,59 +38,98 @@ def chequear_tipos_expresion(tipo_esperado, valor):
         }
     }
 
-    # Función interna para verificar un ítem individual
     def verificar_item(item):
         tipo_info = tipos.get(tipo_esperado)
         if not tipo_info:
-            print(f"Tipo desconocido: {tipo_esperado}")
-            return item  # Retorna el valor original si el tipo es desconocido
+            mensaje = f"REGLA SEMANTICA 000: Tipo desconocido '{tipo_esperado}' para el valor '{item}'"
+            historialSemantico.agregar(mensaje)
+            return item  # Tipo no reconocido
 
-        # Intentar conversión según el tipo esperado
         try:
             if tipo_esperado == 'STACK':
                 if isinstance(item, bool):
-                    return int(item)
+                    resultado = int(item)
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (bool) convertido a STACK → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
                 if isinstance(item, (int, float)):
-                    return int(item)
+                    resultado = int(item)
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' ({type(item).__name__}) convertido a STACK → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
                 if isinstance(item, str):
                     if item.lower() in ('on', 'off'):
-                        return 1 if item.lower() == 'on' else 0
-                    return int(float(item))  # Para manejar strings numéricos
-                
+                        resultado = 1 if item.lower() == 'on' else 0
+                        mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (str) interpretado como booleano para STACK → {resultado}"
+                        historialSemantico.agregar(mensaje)
+                        return resultado
+                    resultado = int(float(item))
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (str) convertido a STACK → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
+
             elif tipo_esperado == 'GHAST':
                 if isinstance(item, bool):
-                    return float(item)
+                    resultado = float(item)
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (bool) convertido a GHAST → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
                 if isinstance(item, (int, float)):
-                    return float(item)
+                    resultado = float(item)
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' ({type(item).__name__}) convertido a GHAST → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
                 if isinstance(item, str):
                     if item.lower() in ('on', 'off'):
-                        return 1.0 if item.lower() == 'on' else 0.0
-                    return float(item)
-                
+                        resultado = 1.0 if item.lower() == 'on' else 0.0
+                        mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (str) interpretado como booleano para GHAST → {resultado}"
+                        historialSemantico.agregar(mensaje)
+                        return resultado
+                    resultado = float(item)
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (str) convertido a GHAST → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
+
             elif tipo_esperado == 'TORCH':
                 if isinstance(item, str):
                     if item.lower() in ('on', 'off', 'true', 'false', '1', '0'):
-                        return 'On' if item.lower() in ('on', 'true', '1') else 'Off'
+                        resultado = 'On' if item.lower() in ('on', 'true', '1') else 'Off'
+                        mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (str) convertido a TORCH → {resultado}"
+                        historialSemantico.agregar(mensaje)
+                        return resultado
                 if isinstance(item, (int, float)):
-                    return 'On' if item != 0 else 'Off'
+                    resultado = 'On' if item != 0 else 'Off'
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' ({type(item).__name__}) convertido a TORCH → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
                 if isinstance(item, bool):
-                    return 'On' if item else 'Off'
-                
+                    resultado = 'On' if item else 'Off'
+                    mensaje = f"REGLA SEMANTICA 000: Valor '{item}' (bool) convertido a TORCH → {resultado}"
+                    historialSemantico.agregar(mensaje)
+                    return resultado
+
             elif tipo_esperado == 'SPIDER':
-                return str(item)
-                
+                resultado = str(item)
+                mensaje = f"REGLA SEMANTICA 000: Valor '{item}' convertido a SPIDER → '{resultado}'"
+                historialSemantico.agregar(mensaje)
+                return resultado
+
             elif tipo_esperado == 'RUNE':
                 s = str(item)
-                return s[0] if len(s) > 0 else '\0'
-                
-        except (ValueError, TypeError):
-            pass  # Más abajo se maneja el error
+                resultado = s[0] if len(s) > 0 else '\0'
+                mensaje = f"REGLA SEMANTICA 000: Valor '{item}' convertido a RUNE → '{resultado}'"
+                historialSemantico.agregar(mensaje)
+                return resultado
 
-        # Si llegamos aquí es porque no se pudo convertir
-        print(f"\n\n ERROR SEMANTICO: Variable de tipo {tipo_esperado} recibió un valor incompatible: {item}")
+        except (ValueError, TypeError):
+            pass  # Manejo de error abajo
+
+        # Fallo de conversión
+        mensaje = (f"REGLA SEMANTICA 000: ERROR al convertir '{item}' al tipo '{tipo_esperado}', "
+                   f"se asigna valor por defecto: {tipo_info['default']}")
+        historialSemantico.agregar(mensaje)
         return tipo_info['default']
 
-    # Procesar valor individual o lista
     if isinstance(valor, list):
         return [verificar_item(item) for item in valor]
     return verificar_item(valor)
