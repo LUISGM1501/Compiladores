@@ -1,0 +1,40 @@
+WorldName MundoRitual:
+
+Bedrock
+    Obsidian Stack contador 0;
+    Obsidian Spider mensaje "¡Bienvenido!";
+    Obsidian Stack valor 5;
+
+Recipe
+    Ritual saludar(Spider :: mensaje);
+    Ritual duplicar(Stack :: valor);
+    Ritual sinParametros();
+
+Inventory
+    Stack resultado = 0;
+
+CraftingTable
+    Ritual saludar(Spider :: mensaje)
+    PolloCrudo
+        $$ Este procedimiento no hace nada visible
+    PolloAsado
+
+    Ritual duplicar(Stack :: valor)
+    PolloCrudo
+        Stack doble = valor * 2;
+        resultado = doble;
+    PolloAsado
+
+    Ritual sinParametros()
+    PolloCrudo
+        contador = contador + 1;
+    PolloAsado
+
+SpawnPoint
+    PolloCrudo
+        saludar(mensaje);
+        duplicar(valor);
+        sinParametros();
+    PolloAsado
+
+WorldSave
