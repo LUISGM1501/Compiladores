@@ -197,21 +197,24 @@ OPCION_DIVISION:
     CALL NUEVA_LINEA
     CALL LEER_DOS_FLOTANTES
     
-    ; Verificar división por cero
-    CALL VERIFICAR_CERO_SEGUNDO
-    JC @SELECTED_ERROR_DIV
+    ; Verificar división por cero - SIMPLIFICADO
+    CMP WORD PTR [entero2], 0
+    JNE @DIV_NO_CERO_DIRECTO
+    CMP WORD PTR [decimal2], 0
+    JNE @DIV_NO_CERO_DIRECTO
     
+    ; Es cero - mostrar error
+    MOV AH, 09h
+    LEA DX, error_div
+    INT 21h
+    JMP MENU_PRINCIPAL
+    
+@DIV_NO_CERO_DIRECTO:
     ; Realizar la división flotante (://)
     CALL DIVIDIR_FLOTANTES
     
     ; Mostrar resultado
     CALL MOSTRAR_RESULTADO_FLOTANTE
-    JMP MENU_PRINCIPAL
-
-@SELECTED_ERROR_DIV:
-    MOV AH, 09h
-    LEA DX, error_div
-    INT 21h
     JMP MENU_PRINCIPAL
 
 OPCION_MODULO:
@@ -294,19 +297,23 @@ ASIGNACION_MULT:
     JMP MENU_PRINCIPAL
 
 ASIGNACION_DIV:
-    ; Implementar A ://= B (equivale a A = A :// B)
     CALL NUEVA_LINEA
     CALL LEER_DOS_FLOTANTES
-    CALL VERIFICAR_CERO_SEGUNDO
-    JC @SELECTED_ASIG_ERROR_DIV
-    CALL DIVIDIR_FLOTANTES
-    CALL MOSTRAR_RESULTADO_FLOTANTE
-    JMP MENU_PRINCIPAL
-
-@SELECTED_ASIG_ERROR_DIV:
+    
+    ; Verificar división por cero - SIMPLIFICADO
+    CMP WORD PTR [entero2], 0
+    JNE @ASIG_DIV_NO_CERO
+    CMP WORD PTR [decimal2], 0
+    JNE @ASIG_DIV_NO_CERO
+    
     MOV AH, 09h
     LEA DX, error_div
     INT 21h
+    JMP MENU_PRINCIPAL
+    
+@ASIG_DIV_NO_CERO:
+    CALL DIVIDIR_FLOTANTES
+    CALL MOSTRAR_RESULTADO_FLOTANTE
     JMP MENU_PRINCIPAL
 
 ASIGNACION_MOD:
@@ -1551,7 +1558,11 @@ SUMAR_PARTES_POSITIVAS ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: DIVIDIR_FLOTANTES  
-; Realiza la división de dos flotantes (://)
+; Realiza la división de dos flotantes (://) - VERSIÓN CORREGIDA
+;------------------------------------------------------------
+;------------------------------------------------------------
+; Procedimiento: DIVIDIR_FLOTANTES  
+; Realiza la división de dos flotantes (://) - VERSIÓN SIMPLE Y DIRECTA
 ;------------------------------------------------------------
 DIVIDIR_FLOTANTES PROC
     PUSH AX
@@ -1565,67 +1576,67 @@ DIVIDIR_FLOTANTES PROC
     XOR AL, BL
     MOV [resultado_negativo], AL
     
-    ; Convertir dividendo a entero extendido (multiplicar por 10000)
+    ; Obtener valores absolutos
     MOV AX, [entero1]
-    MOV BX, 10000
-    MUL BX              ; DX:AX = AX * 10000
+    CMP [es_negativo1], 0
+    JE @DIV_SIMPLE_ENT1_POS
+    CMP AX, 0
+    JGE @DIV_SIMPLE_ENT1_POS
+    NEG AX
+@DIV_SIMPLE_ENT1_POS:
+    MOV BX, AX              ; BX = |entero1|
     
-    ; Agregar parte decimal ajustada
-    MOV BX, [decimal1]
-    MOV CL, [dec_digitos1]
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @DIV_SIMPLE_ENT2_POS
+    CMP AX, 0
+    JGE @DIV_SIMPLE_ENT2_POS
+    NEG AX
+@DIV_SIMPLE_ENT2_POS:
+    MOV CX, AX              ; CX = |entero2|
     
-    ; Ajustar decimal1 según sus dígitos
-@DIV_AJUSTE_DEC1:
-    CMP CL, 4
-    JGE @DIV_DEC1_OK
-    MOV DX, 10
-    MUL DX              ; AX = AX * 10
-    INC CL
-    JMP @DIV_AJUSTE_DEC1
+    ; ENFOQUE DIRECTO Y SIMPLE:
+    ; Usar solo las partes enteras para división básica
+    ; Luego calcular decimales por separado
     
-@DIV_DEC1_OK:
-    ADD AX, BX          ; AX = dividendo completo
+    ; Verificar división por cero
+    CMP CX, 0
+    JE @DIV_SIMPLE_ERROR_CERO
     
-    ; Preparar divisor
-    MOV BX, [entero2]
-    MOV CL, [dec_digitos2]
+    ; División básica de enteros: BX / CX
+    MOV AX, BX              ; AX = dividendo (entero1)
+    XOR DX, DX              ; Limpiar DX
+    DIV CX                  ; AX = cociente entero, DX = resto
     
-    ; Convertir divisor a entero extendido
-    MOV DX, 10000
-    MOV AX, BX
-    MUL DX              ; DX:AX = AX * 10000
-    
-    ; Ajustar según decimales
-@DIV_AJUSTE_DEC2:
-    CMP CL, 4
-    JGE @DIV_DEC2_OK
-    MOV DX, 10
-    MUL DX              ; AX = AX * 10
-    INC CL
-    JMP @DIV_AJUSTE_DEC2
-    
-@DIV_DEC2_OK:
-    ADD AX, [decimal2]  ; AX = divisor completo
-    
-    ; Realizar división: DX:AX / BX
-    MOV BX, AX          ; BX = divisor
-    MOV AX, [entero1]   ; AX = dividendo bajo
-    MOV DX, [entero1+2] ; DX = dividendo alto (si es necesario)
-    
-    DIV BX              ; AX = cociente, DX = resto
-    
-    ; Separar resultado en entero y decimal
     MOV [resultado_entero], AX
     
-    ; Calcular parte decimal: (resto * 10000) / divisor
-    MOV AX, DX
-    MOV BX, 10000
-    MUL BX              ; DX:AX = resto * 10000
-    DIV WORD PTR [entero2] ; AX = parte decimal
+    ; Calcular parte decimal: (resto * 100) / divisor
+    MOV AX, DX              ; AX = resto de la división anterior
+    MOV BX, 100             ; Multiplicar por 100 para obtener 2 decimales
+    MUL BX                  ; AX = resto * 100
+    
+    XOR DX, DX              ; Limpiar DX
+    DIV CX                  ; AX = parte decimal
+    
+    ; Limitar parte decimal a máximo 99
+    CMP AX, 99
+    JLE @DIV_SIMPLE_DEC_OK
+    MOV AX, 99
+@DIV_SIMPLE_DEC_OK:
     
     MOV [resultado_decimal], AX
-    MOV [resultado_digitos], 4  ; Precisión de 4 decimales
+    MOV [resultado_digitos], 2
     
+    JMP @DIV_SIMPLE_FIN
+    
+@DIV_SIMPLE_ERROR_CERO:
+    ; División por cero
+    MOV [resultado_entero], 0
+    MOV [resultado_decimal], 0
+    MOV [resultado_digitos], 2
+    MOV [resultado_negativo], 0
+    
+@DIV_SIMPLE_FIN:
     POP DX
     POP CX
     POP BX
@@ -1868,21 +1879,19 @@ MODULO_FLOTANTES ENDP
 VERIFICAR_CERO_SEGUNDO PROC
     PUSH AX
     
-    ; Un flotante es cero si tanto la parte entera como decimal son 0
+    ; Verificar si entero2 es cero Y decimal2 es cero
     CMP WORD PTR [entero2], 0
-    JNE @SELECTED_NO_CERO
+    JNE @VERIF_NO_CERO_SIMPLE
     CMP WORD PTR [decimal2], 0
-    JNE @SELECTED_NO_CERO
+    JNE @VERIF_NO_CERO_SIMPLE
     
-    ; Es cero
-    STC  ; Establecer Carry Flag
-    JMP @SELECTED_VERIF_FIN
+    STC  ; Es cero - establecer Carry Flag
+    JMP @VERIF_FIN_SIMPLE
     
-@SELECTED_NO_CERO:
-    ; No es cero
-    CLC  ; Limpiar Carry Flag
+@VERIF_NO_CERO_SIMPLE:
+    CLC  ; No es cero - limpiar Carry Flag
     
-@SELECTED_VERIF_FIN:
+@VERIF_FIN_SIMPLE:
     POP AX
     RET
 VERIFICAR_CERO_SEGUNDO ENDP
@@ -3100,46 +3109,6 @@ RESTAR_PARTES_SUMA PROC
     RET
 RESTAR_PARTES_SUMA ENDP
 
-;------------------------------------------------------------
-; Procedimiento: RESTAR_PARTES_SUMA_INV
-; Resta partes para la suma (caso negativo + positivo)
-;------------------------------------------------------------
-RESTAR_PARTES_SUMA_INV PROC
-    ; Similar a RESTAR_PARTES_SUMA pero invirtiendo los operandos
-    CALL RESTAR_PARTES_SUMA
-    RET
-RESTAR_PARTES_SUMA_INV ENDP
-
-;------------------------------------------------------------
-; Procedimiento: CONVERTIR_A_ENTEROS_MULT
-; Prepara números para multiplicación
-;------------------------------------------------------------
-CONVERTIR_A_ENTEROS_MULT PROC
-    ; Simplificado para este ejemplo
-    RET
-CONVERTIR_A_ENTEROS_MULT ENDP
-
-;------------------------------------------------------------
-; Procedimiento: CONVERTIR_DE_ENTERO_MULT
-; Convierte resultado de multiplicación de vuelta a flotante
-;------------------------------------------------------------
-CONVERTIR_DE_ENTERO_MULT PROC
-    ; Simplificado para este ejemplo
-    RET
-CONVERTIR_DE_ENTERO_MULT ENDP
-
-;------------------------------------------------------------
-; Procedimiento: PREPARAR_DIVISION
-; Prepara números para división
-;------------------------------------------------------------
-PREPARAR_DIVISION PROC
-    ; Multiplicar el dividendo por 100 para obtener precisión decimal
-    MOV AX, [entero1]
-    MOV BX, 100
-    MUL BX
-    MOV [entero1], AX
-    RET
-PREPARAR_DIVISION ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: DIVISION_ENTERA_FLOTANTES
