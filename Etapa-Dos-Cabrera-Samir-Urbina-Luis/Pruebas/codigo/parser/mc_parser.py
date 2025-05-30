@@ -44,10 +44,10 @@ from .semantica.TablaSimbolos import TablaSimbolos
 from parser.semantica.TablaSimbolos import TablaSimbolos
 from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
 
-from .semantica.diccionarioSemantico.CheckVarExiste import checkVarExiste
-from .semantica.diccionarioSemantico.CheckObsidian import checkObsidian
-from .semantica.diccionarioSemantico.CheckWorldName import checkWorldname
-from .semantica.diccionarioSemantico.CheckWorldSave import checkWorldSave
+from parser.semantica.diccionarioSemantico.CheckVarExiste import checkVarExiste
+from parser.semantica.diccionarioSemantico.CheckObsidian import checkObsidian
+from parser.semantica.diccionarioSemantico.CheckWorldName import checkWorldname
+from parser.semantica.diccionarioSemantico.CheckWorldSave import checkWorldSave
 
 class Parser:
 
@@ -171,12 +171,77 @@ class Parser:
                 print(f"Columna:    {self.token_actual.columna}")
 
                 #Validacion de que el Token existe:
-                if(checkVarExiste(self.token_actual)):
+                if checkVarExiste(self.token_actual):
                     # PROCESAMIENTO PARA INSERCION EN LA TABLA DE VALORES.
 
                     # Caso base directo, no requiere "mirar a futuro"
                     if self.token_history[-1].type == "WORLD_NAME":
                         welcomeWorldname(self.token_history[-1], self.token_actual)
+                        return
+
+                    print(f"\n\n\n\n\n PRUEBA ENTRANDO PRUEBA ENTRANDO")
+                    # Casos Indirectos que requieren "mirar a futuro"
+                    # Recolección temporal de tokens hasta PUNTO_Y_COMA
+                    tokens_temporales = []
+                    pos_temp = self.posicion_actual + 1
+
+                    while pos_temp < len(self.tokens):
+                        token_temp = self.tokens[pos_temp]
+                        tokens_temporales.append(token_temp)
+                        if token_temp.type == "PUNTO_Y_COMA":
+                            break
+                        pos_temp += 1
+
+                    # Inicio de casos de asignacion inmediata
+
+                    # caso de shelf, listas con tipo definido
+                    token_prev = self.obtener_token_historial(5)
+                    if token_prev and token_prev.type == "SHELF":
+                        welcomeShelf(self.obtener_token_historial(5),
+                                     self.obtener_token_historial(3),
+                                     self.obtener_token_historial(1),
+                                     self.token_actual,
+                                     tokens_temporales)
+                        return
+
+                        # caso de Bedrock, Bedrock tipo id valor
+                    token_prev = self.obtener_token_historial(2)
+                    if token_prev and token_prev.type == "OBSIDIAN":
+                        if checkObsidian(self.token_actual, token_prev):
+                            welcomeObsidian(self.obtener_token_historial(2), self.token_actual,
+                                            self.obtener_token_historial(1),
+                                            tokens_temporales)
+                        return
+
+                    token_prev = self.obtener_token_historial(1)
+                    # caso de stack: entero
+                    if token_prev and token_prev.type == "STACK":
+                        welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+
+                        # caso de spider : string
+                    if token_prev and token_prev.type == "SPIDER":
+                        welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+
+                        # caso de rune : char
+                    if token_prev and token_prev.type == "RUNE":
+                        welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+
+                    # caso torch : boolean
+                    if token_prev and token_prev.type == "TORCH":
+                        welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+
+                    # caso ghast : float
+                    if token_prev and token_prev.type == "GHAST":
+                        welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        return
+
+                    # caso chest : conjuntos
+                    if token_prev and token_prev.type == "CHEST":
+                        welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
                         return
                     
                     # VERIFICAR SI ESTAMOS DENTRO DE UNA DEFINICIÓN DE ENTITY
@@ -348,77 +413,23 @@ class Parser:
                             verificar_llamada_funcion(self.token_actual.lexema, tipos_argumentos)
                             return
                             
-                        else:
-                            # No está declarado o es otro tipo de símbolo
-                            print(f"  WARNING: '{self.token_actual.lexema}' no está declarado como función o procedimiento")
-                            # Continuar con el procesamiento normal
-                            return
-                        
-
-                    # Casos Indirectos que requieren "mirar a futuro"
-                    # Recolección temporal de tokens hasta PUNTO_Y_COMA
-                    tokens_temporales2 = []
-                    pos_temp = self.posicion_actual + 1
-
-                    while pos_temp < len(self.tokens):
-                        token_temp = self.tokens[pos_temp]
-                        tokens_temporales2.append(token_temp)
-                        if token_temp.type == "PUNTO_Y_COMA":
-                            break
-                        pos_temp += 1
-                    
-                    # Casos existentes (shelf, obsidian, etc.)
-                    token_prev = self.obtener_token_historial(5)
-                    if token_prev and token_prev.type == "SHELF":
-                        welcomeShelf(self.obtener_token_historial(5),
-                                    self.obtener_token_historial(3),
-                                    self.obtener_token_historial(1),
-                                    self.token_actual,
-                                    tokens_temporales2)
+                    else:
+                        # No está declarado o es otro tipo de símbolo
+                        print(f"  WARNING: '{self.token_actual.lexema}' no está declarado como función o procedimiento")
+                        # Continuar con el procesamiento normal
                         return
 
-                    # caso de Bedrock, Bedrock tipo id valor
-                    token_prev = self.obtener_token_historial(2)
-                    if token_prev and token_prev.type == "OBSIDIAN":
-                        if(checkObsidian(self.token_actual, token_prev)):
-                            welcomeObsidian(self.obtener_token_historial(2), self.token_actual,
-                                            self.obtener_token_historial(1),
-                                            tokens_temporales2)
-                        return
-
-                    token_prev = self.obtener_token_historial(1)
-                    # caso de stack: entero
-                    if token_prev and token_prev.type == "STACK":
-                        welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
-                        return
-
-                    # caso de spider : string
-                    if token_prev and token_prev.type == "SPIDER":
-                        welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
-                        return
-
-                    # caso de rune : char
-                    if token_prev and token_prev.type == "RUNE":
-                        welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
-                        return
-
-                    # caso torch : boolean
-                    if token_prev and token_prev.type == "TORCH":
-                        welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
-                        return
-
-                    # caso ghast : float
-                    if token_prev and token_prev.type == "GHAST":
-                        welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
-                        return
-
-                    # caso chest : conjuntos
-                    if token_prev and token_prev.type == "CHEST":
-                        welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
-                        return
             else:
-                self.token_actual = None
-                self.imprimir_debug("Avanzando a EOF", 2)
+                print("\n\n\n\n NO insercion")
+
+                # formalidades para consistencia de reglas:
+                token_prev = self.obtener_token_historial(2)
+                if token_prev and token_prev.type == "OBSIDIAN":
+                    checkObsidian(self.token_actual, token_prev)
+
+        else:
+            self.token_actual = None
+            self.imprimir_debug("Avanzando a EOF", 2)
 
 
     def detectar_contexto_asignacion(self):
