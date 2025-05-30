@@ -22,17 +22,17 @@ def limpiar_tokens_para_parser(tokens):
     Returns:
         Lista de tokens modificada para compatibilidad con el parser
     """
-    tokens_limpios = []
+    tokens_limpios = detectar_operadores_compuestos(tokens)
     i = 0
     
-    while i < len(tokens):
-        token = tokens[i]
+    while i < len(tokens_limpios):
+        token = tokens_limpios[i]
         
         # MAQUILLAJE 1: Detectar secuencias flotantes DOS_PUNTOS + OPERADOR
         if (token.type == "DOS_PUNTOS" and 
-            i + 1 < len(tokens)):
+            i + 1 < len(tokens_limpios)):
             
-            next_token = tokens[i + 1]
+            next_token = tokens_limpios[i + 1]
             
             # Mapeo de operadores flotantes
             operadores_flotantes = {
@@ -54,8 +54,8 @@ def limpiar_tokens_para_parser(tokens):
                     linea=token.linea,
                     columna=token.columna
                 )
-                tokens_limpios.append(nuevo_token)
-                i += 2  # Saltar ambos tokens (DOS_PUNTOS y OPERADOR)
+                tokens_limpios[i] = nuevo_token
+                del tokens_limpios[i + 1]  # Eliminar el siguiente token (OPERADOR)
                 continue
         
         # MAQUILLAJE 2: Convertir BARRA a DIVISION (para división regular)
@@ -66,13 +66,12 @@ def limpiar_tokens_para_parser(tokens):
                 linea=token.linea,
                 columna=token.columna
             )
-            tokens_limpios.append(nuevo_token)
+            tokens_limpios[i] = nuevo_token
         
         # MAQUILLAJE 3: Detectar secuencias de asignación flotante (:+=, :-=, etc.)
         elif (token.type in ["SUMA_IGUAL", "RESTA_IGUAL", "MULTIPLICACION_IGUAL", "DIVISION_IGUAL", "MODULO_IGUAL"] and
               i > 0 and 
-              i - 1 >= 0 and
-              tokens[i-1].type == "DOS_PUNTOS"):
+              tokens_limpios[i-1].type == "DOS_PUNTOS"):
             
             # Si el token anterior era DOS_PUNTOS, convertir a versión flotante
             asignacion_flotante = {
@@ -85,8 +84,9 @@ def limpiar_tokens_para_parser(tokens):
             
             if token.type in asignacion_flotante:
                 # Remover el DOS_PUNTOS anterior que ya fue agregado
-                if tokens_limpios and tokens_limpios[-1].type == "DOS_PUNTOS":
-                    tokens_limpios.pop()
+                if tokens_limpios and tokens_limpios[i-1].type == "DOS_PUNTOS":
+                    del tokens_limpios[i-1]
+                    i -= 1
                 
                 # Crear token de asignación flotante
                 nuevo_lexema = ":" + token.lexema  # :+=, :-=, etc.
@@ -96,9 +96,7 @@ def limpiar_tokens_para_parser(tokens):
                     linea=token.linea,
                     columna=token.columna
                 )
-                tokens_limpios.append(nuevo_token)
-            else:
-                tokens_limpios.append(token)
+                tokens_limpios[i] = nuevo_token
         
         # MAQUILLAJE 4: Manejo especial de identificadores que podrían ser palabras clave
         elif token.type == "IDENTIFICADOR":
@@ -122,20 +120,52 @@ def limpiar_tokens_para_parser(tokens):
                     linea=token.linea,
                     columna=token.columna
                 )
-                tokens_limpios.append(nuevo_token)
-            else:
-                tokens_limpios.append(token)
+                tokens_limpios[i] = nuevo_token
         
         # MAQUILLAJE 5: Casos especiales para mejorar compatibilidad
         elif token.type == "COMENTARIO":
             # Mantener comentarios (el parser los filtra)
-            tokens_limpios.append(token)
-        
-        # Para todos los demás tokens, mantener como están
-        else:
-            tokens_limpios.append(token)
+            pass
         
         i += 1
+    
+    return tokens_limpios
+
+def detectar_operadores_compuestos(tokens):
+    """
+    Detecta y combina secuencias de operador + IGUAL en operadores compuestos.
+    
+    Args:
+        tokens: Lista de tokens original del scanner
+        
+    Returns:
+        Lista de tokens modificada con operadores compuestos
+    """
+    tokens_limpios = []
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        
+        # Detectar secuencias operador + IGUAL
+        if (token.type in ["SUMA", "RESTA", "MULTIPLICACION", "DIVISION", "MODULO"] and
+            i + 1 < len(tokens) and 
+            tokens[i + 1].type == "IGUAL"):
+            
+            # Combinar en operador compuesto
+            operador_compuesto = token.type + "_IGUAL"
+            nuevo_lexema = token.lexema + tokens[i + 1].lexema
+            
+            nuevo_token = Token(
+                type=operador_compuesto,
+                lexema=nuevo_lexema,
+                linea=token.linea,
+                columna=token.columna
+            )
+            tokens_limpios.append(nuevo_token)
+            i += 2  # Saltar ambos tokens
+        else:
+            tokens_limpios.append(token)
+            i += 1
     
     return tokens_limpios
 

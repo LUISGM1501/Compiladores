@@ -105,8 +105,30 @@ def ejecucion():
     print(f"\n\n Ver informacion del historial semantico:")
     historialSemantico.imprimir_historial()
     
+    # NUEVO: Mostrar resultados de operadores compuestos
+    mostrar_resultados_operadores_compuestos()
+    
     #################################################################
     #################################################################
+
+def mostrar_resultados_operadores_compuestos():
+    """Muestra los resultados de las operaciones compuestas"""
+    tabla = TablaSimbolos.instancia()
+    
+    print("\n" + "="*50)
+    print("RESULTADOS DE OPERADORES COMPUESTOS")
+    print("="*50)
+    
+    variables_interes = ["numero1", "numero2", "flotante1", "flotante2", "cadena1", "cadena2"]
+    
+    for var_nombre in variables_interes:
+        simbolo = tabla.buscar(var_nombre)
+        if simbolo:
+            print(f"{var_nombre} ({simbolo.tipo}): {simbolo.valor}")
+        else:
+            print(f"{var_nombre}: No encontrado")
+    
+    print("="*50)
 
 if __name__ == "__main__":
     ejecucion()

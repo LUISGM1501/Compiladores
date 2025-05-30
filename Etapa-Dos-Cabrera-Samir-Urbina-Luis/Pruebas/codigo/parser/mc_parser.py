@@ -84,6 +84,11 @@ from .semantica.diccionarioSemantico.CheckWorldName import checkWorldname
 from .semantica.diccionarioSemantico.CheckWorldSave import checkWorldSave
 
 from .semantica.HistorialSemantico import historialSemantico
+from .semantica.diccionarioSemantico.CheckIgualdadOperadores import (
+    verificar_operador_compuesto,
+    procesar_secuencia_asignacion_compuesta,
+    es_operador_compuesto
+)
 
 class Parser:
 
@@ -363,7 +368,7 @@ class Parser:
         """
         Avanza al siguiente token en la secuencia, ignorando comentarios
         y manteniendo un historial de tokens procesados.
-        NUEVO: También detecta y verifica operaciones aritméticas.
+        MODIFICADO: Detecta operadores compuestos y los verifica.
         """
         # Guardar el token actual en el historial antes de avanzar
         if self.token_actual:
@@ -378,7 +383,10 @@ class Parser:
             self.token_actual = self.tokens[self.posicion_actual]
             self.imprimir_debug(f"Avanzando a token {self.posicion_actual}: {self.token_actual.type} ('{self.token_actual.lexema}')", 2)
 
-            # NUEVO: Detectar operaciones aritméticas en tiempo real
+            # NUEVO: Detectar operadores compuestos en tiempo real
+            self.detectar_y_verificar_operadores_compuestos()
+
+            # Detectar operaciones aritméticas en tiempo real
             self.detectar_y_verificar_operaciones()
 
             # CORRECCIÓN CRÍTICA: Solo procesar IDENTIFICADORES
@@ -687,6 +695,176 @@ class Parser:
             self.token_actual = None
             self.imprimir_debug("Avanzando a EOF", 2)
 
+
+    def detectar_y_verificar_operadores_compuestos(self):
+        """
+        Detecta y verifica operadores compuestos en tiempo real
+        """
+        if not self.token_actual:
+            return
+
+        # Verificar si el token actual es un operador compuesto
+        if es_operador_compuesto(self.token_actual):
+            self.imprimir_debug(f"Operador compuesto detectado: {self.token_actual.lexema}", 1)
+            
+            # Buscar el identificador en el historial (debería ser el token anterior)
+            identificador_token = None
+            if (len(self.token_history) >= 1 and 
+                self.token_history[-1].type == "IDENTIFICADOR"):
+                identificador_token = self.token_history[-1]
+            
+            if identificador_token:
+                # Buscar el valor (siguiente token)
+                valor_token = None
+                if self.posicion_actual + 1 < len(self.tokens):
+                    valor_token = self.tokens[self.posicion_actual + 1]
+                
+                if valor_token:
+                    # Verificar la operación compuesta
+                    es_valido, tipo_resultado, error = verificar_operador_compuesto(
+                        identificador_token,
+                        self.token_actual,
+                        valor_token,
+                        self.token_actual.linea
+                    )
+                    
+                    if not es_valido:
+                        print(f"ERROR OPERADOR COMPUESTO: {error}")
+                    else:
+                        self.imprimir_debug(f"Operador compuesto válido: {identificador_token.lexema} {self.token_actual.lexema} {valor_token.lexema}", 1)
+                        
+                        # APLICAR LA OPERACIÓN si es válida
+                        self.aplicar_operacion_compuesta(identificador_token, self.token_actual, valor_token)
+
+
+    def aplicar_operacion_compuesta(self, identificador_token, operador_token, valor_token):
+        """
+        Aplica una operación compuesta actualizando el valor en la tabla de símbolos
+        """
+        from .semantica.TablaSimbolos import TablaSimbolos
+        
+        tabla = TablaSimbolos.instancia()
+        simbolo = tabla.buscar(identificador_token.lexema)
+        
+        if simbolo and simbolo.valor is not None:
+            try:
+                # Obtener valores actuales
+                valor_actual = simbolo.valor
+                nuevo_valor = valor_token.lexema
+                
+                # Convertir a tipos apropiados
+                if simbolo.tipo == "STACK":
+                    valor_actual = int(float(str(valor_actual)))
+                    if valor_token.type == "NUMERO_ENTERO":
+                        nuevo_valor = int(nuevo_valor)
+                    elif valor_token.type == "IDENTIFICADOR":
+                        otro_simbolo = tabla.buscar(nuevo_valor)
+                        if otro_simbolo and otro_simbolo.valor is not None:
+                            nuevo_valor = int(float(str(otro_simbolo.valor)))
+                        else:
+                            nuevo_valor = 0
+                    else:
+                        nuevo_valor = int(float(nuevo_valor))
+                    
+                    # Aplicar operación
+                    if operador_token.type == "SUMA_IGUAL":
+                        resultado = valor_actual + nuevo_valor
+                    elif operador_token.type == "RESTA_IGUAL":
+                        resultado = valor_actual - nuevo_valor
+                    elif operador_token.type == "MULTIPLICACION_IGUAL":
+                        resultado = valor_actual * nuevo_valor
+                    elif operador_token.type == "DIVISION_IGUAL":
+                        if nuevo_valor != 0:
+                            resultado = valor_actual // nuevo_valor  # División entera
+                        else:
+                            print(f"ERROR: División por cero en {identificador_token.lexema} /= {nuevo_valor}")
+                            return
+                    elif operador_token.type == "MODULO_IGUAL":
+                        if nuevo_valor != 0:
+                            resultado = valor_actual % nuevo_valor
+                        else:
+                            print(f"ERROR: Módulo por cero en {identificador_token.lexema} %= {nuevo_valor}")
+                            return
+                    else:
+                        return
+                    
+                    # Verificar overflow
+                    from .semantica.diccionarioSemantico.CheckOverflow import check_stack_overflow
+                    es_valido, resultado_ajustado, mensaje_error = check_stack_overflow(resultado, identificador_token.lexema)
+                    
+                    if not es_valido:
+                        print(f"WARNING OVERFLOW: {mensaje_error}")
+                    
+                    simbolo.valor = resultado_ajustado
+                    print(f"OPERACIÓN COMPUESTA: {identificador_token.lexema} {operador_token.lexema} {nuevo_valor} = {resultado_ajustado}")
+                
+                elif simbolo.tipo == "GHAST":
+                    # Similar para flotantes
+                    valor_actual = float(str(valor_actual))
+                    if valor_token.type == "NUMERO_DECIMAL":
+                        nuevo_valor = float(nuevo_valor)
+                    elif valor_token.type == "IDENTIFICADOR":
+                        otro_simbolo = tabla.buscar(nuevo_valor)
+                        if otro_simbolo and otro_simbolo.valor is not None:
+                            nuevo_valor = float(str(otro_simbolo.valor))
+                        else:
+                            nuevo_valor = 0.0
+                    else:
+                        nuevo_valor = float(nuevo_valor)
+                    
+                    # Aplicar operación flotante
+                    if operador_token.type in ["SUMA_FLOTANTE_IGUAL", "SUMA_IGUAL"]:
+                        resultado = valor_actual + nuevo_valor
+                    elif operador_token.type in ["RESTA_FLOTANTE_IGUAL", "RESTA_IGUAL"]:
+                        resultado = valor_actual - nuevo_valor
+                    elif operador_token.type in ["MULTIPLICACION_FLOTANTE_IGUAL", "MULTIPLICACION_IGUAL"]:
+                        resultado = valor_actual * nuevo_valor
+                    elif operador_token.type in ["DIVISION_FLOTANTE_IGUAL", "DIVISION_IGUAL"]:
+                        if nuevo_valor != 0.0:
+                            resultado = valor_actual / nuevo_valor
+                        else:
+                            print(f"ERROR: División por cero en {identificador_token.lexema} /= {nuevo_valor}")
+                            return
+                    elif operador_token.type in ["MODULO_FLOTANTE_IGUAL", "MODULO_IGUAL"]:
+                        if nuevo_valor != 0.0:
+                            resultado = valor_actual % nuevo_valor
+                        else:
+                            print(f"ERROR: Módulo por cero en {identificador_token.lexema} %= {nuevo_valor}")
+                            return
+                    else:
+                        return
+                    
+                    simbolo.valor = round(resultado, 2)
+                    print(f"OPERACIÓN COMPUESTA FLOTANTE: {identificador_token.lexema} {operador_token.lexema} {nuevo_valor} = {simbolo.valor}")
+                
+                elif simbolo.tipo == "SPIDER":
+                    # Para strings, solo concatenación tiene sentido
+                    if operador_token.type == "SUMA_IGUAL":
+                        valor_actual = str(valor_actual)
+                        nuevo_valor = str(nuevo_valor)
+                        resultado = valor_actual + nuevo_valor
+                        
+                        # Verificar overflow de string
+                        from .semantica.diccionarioSemantico.CheckOverflow import check_spider_overflow
+                        es_valido, resultado_ajustado, mensaje_error = check_spider_overflow(resultado, identificador_token.lexema)
+                        
+                        if not es_valido:
+                            print(f"WARNING OVERFLOW: {mensaje_error}")
+                        
+                        simbolo.valor = resultado_ajustado
+                        print(f"CONCATENACIÓN: {identificador_token.lexema} += '{nuevo_valor}' = '{resultado_ajustado}'")
+                    else:
+                        print(f"ERROR: Operador {operador_token.type} no válido para strings")
+                
+                # Registrar en historial semántico
+                from .semantica.HistorialSemantico import historialSemantico
+                historialSemantico.agregar(f"REGLA SEMANTICA 053: Operación compuesta ejecutada: {identificador_token.lexema} {operador_token.lexema} {valor_token.lexema}")
+                
+            except Exception as e:
+                print(f"ERROR aplicando operación compuesta: {str(e)}")
+
+    
+
     def detectar_y_verificar_operaciones(self):
         """
         Detecta operaciones aritméticas analizando el contexto actual
@@ -825,16 +1003,30 @@ class Parser:
     
     def match(self, terminal_esperado):
         """
-        Verifica si el token actual coincide con el terminal esperado.
-        Maneja casos especiales como PolloCrudo/PolloAsado y secuencias ::.
-        
-        Args:
-            terminal_esperado: El código del terminal que se espera
-            
-        Returns:
-            True si hay coincidencia y se avanza al siguiente token, False en caso contrario
+        MODIFICADO: Agrega manejo especial para operadores compuestos
         """
         tipo_token_actual = self.obtener_tipo_token()
+        
+        # NUEVO: Verificación específica para operadores compuestos
+        operadores_compuestos_codes = {
+            116: "SUMA_IGUAL", 117: "RESTA_IGUAL", 118: "MULTIPLICACION_IGUAL",
+            119: "DIVISION_IGUAL", 120: "MODULO_IGUAL",
+            127: "SUMA_FLOTANTE_IGUAL", 128: "RESTA_FLOTANTE_IGUAL",
+            129: "MULTIPLICACION_FLOTANTE_IGUAL", 130: "DIVISION_FLOTANTE_IGUAL",
+            131: "MODULO_FLOTANTE_IGUAL"
+        }
+        
+        if terminal_esperado in operadores_compuestos_codes:
+            operador_nombre = operadores_compuestos_codes[terminal_esperado]
+            
+            if tipo_token_actual == terminal_esperado:
+                # El operador compuesto ya fue verificado en detectar_y_verificar_operadores_compuestos
+                self.imprimir_debug(f"Match exitoso para operador compuesto: {operador_nombre}", 2)
+                self.avanzar()
+                return True
+            else:
+                self.reportar_error(f"Se esperaba operador {operador_nombre}")
+                return False
         
         # NUEVO: Verificación específica para operadores aritméticos
         operadores_aritmeticos_codes = {

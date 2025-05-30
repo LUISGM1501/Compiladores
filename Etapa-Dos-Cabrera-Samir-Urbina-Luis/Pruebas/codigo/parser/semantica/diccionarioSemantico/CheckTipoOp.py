@@ -6,8 +6,7 @@ Estudiantes: Cabrera Samir, Urbina Luis
 Chequeo de tipos de operación para garantizar que los operadores aritméticos
 se utilicen exclusivamente con tipos de datos compatibles.
 
-Este módulo verifica que las operaciones aritméticas (suma, resta, multiplicación, división)
-se realicen entre tipos compatibles, evitando errores como sumar números con cadenas.
+VERSIÓN CORREGIDA: Arreglado el mapeo de operadores para reconocer tanto símbolos como nombres
 """
 
 from ..HistorialSemantico import historialSemantico
@@ -27,10 +26,10 @@ class TipoOperacionChecker:
     TIPOS_ARCHIVO = {"BOOK"}  # Archivos
     TIPOS_PERSONALIZADOS = {"ENTITY"}  # Tipos definidos por usuario
     
-    # Operadores válidos
-    OPERADORES_VALIDOS = {
+    # CORREGIDO: Mapeo bidireccional de operadores (símbolo <-> nombre)
+    OPERADORES_SIMBOLOS_A_NOMBRES = {
         "+": "SUMA",
-        "-": "RESTA",
+        "-": "RESTA", 
         "*": "MULTIPLICACION",
         "/": "DIVISION",
         "%": "MODULO",
@@ -41,10 +40,16 @@ class TipoOperacionChecker:
         ":%": "MODULO_FLOTANTE"
     }
     
+    # NUEVO: Mapeo inverso (nombre -> símbolo) para validación
+    OPERADORES_NOMBRES_A_SIMBOLOS = {v: k for k, v in OPERADORES_SIMBOLOS_A_NOMBRES.items()}
+    
+    # NUEVO: Conjunto unificado de operadores válidos (nombres)
+    OPERADORES_VALIDOS = set(OPERADORES_SIMBOLOS_A_NOMBRES.values())
+    
     # Operadores de comparación que también requieren tipos compatibles
     OPERADORES_COMPARACION = {
         "DOBLE_IGUAL": "==",
-        "MENOR_QUE": "<",
+        "MENOR_QUE": "<", 
         "MAYOR_QUE": ">",
         "MENOR_IGUAL": "<=",
         "MAYOR_IGUAL": ">=",
@@ -53,6 +58,7 @@ class TipoOperacionChecker:
     }
 
 def evaluar_expresion_flotante(tokens):
+    """Evalúa expresiones flotantes complejas"""
     if not tokens:
         print("ERROR: Expresión vacía")
         return None
@@ -114,7 +120,6 @@ def evaluar_expresion_flotante(tokens):
     else:
         print("ERROR: Expresión mal formada.")
         return None
-        return None
 
 def verificar_operacion_aritmetica(operando_izq, operador, operando_der, linea=None):
     """
@@ -122,7 +127,7 @@ def verificar_operacion_aritmetica(operando_izq, operador, operando_der, linea=N
     
     Args:
         operando_izq: Tipo del operando izquierdo ("STACK", "GHAST", etc.)
-        operador: Tipo de operador ("SUMA", "RESTA", etc.)
+        operador: Tipo de operador ("SUMA", "RESTA", etc.) o símbolo ("+", "-", etc.)
         operando_der: Tipo del operando derecho
         linea: Línea donde ocurre la operación (opcional)
         
@@ -136,23 +141,28 @@ def verificar_operacion_aritmetica(operando_izq, operador, operando_der, linea=N
     
     ubicacion = f" en línea {linea}" if linea else ""
     
-    # Obtener el tipo de operador válido
-    tipo_operador = TipoOperacionChecker.OPERADORES_VALIDOS.get(op, None)
+    # CORREGIDO: Normalizar operador a nombre si viene como símbolo
+    if op in TipoOperacionChecker.OPERADORES_SIMBOLOS_A_NOMBRES:
+        op = TipoOperacionChecker.OPERADORES_SIMBOLOS_A_NOMBRES[op]
     
-    if tipo_operador is None:
-        mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operador '{operador}' no reconocido{ubicacion}"
-        historialSemantico.agregar(mensaje_error)
-        return False, "UNKNOWN", mensaje_error
+    # CORREGIDO: Verificar si el operador es válido
+    if op not in TipoOperacionChecker.OPERADORES_VALIDOS:
+        # Verificar también en operadores de comparación
+        if op not in TipoOperacionChecker.OPERADORES_COMPARACION:
+            mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operador '{operador}' no reconocido{ubicacion}"
+            historialSemantico.agregar(mensaje_error)
+            return False, "UNKNOWN", mensaje_error
     
     # Caso 1: Operadores flotantes específicos (:+, :-, :*, :/, :%)
-    if tipo_operador in TipoOperacionChecker.OPERADORES_VALIDOS.values():
-        if tipo_operador.endswith("_FLOTANTE"):
-            return verificar_operacion_flotante(tipo_izq, tipo_operador, tipo_der, linea)
-        else:
-            return verificar_operacion_entera(tipo_izq, tipo_operador, tipo_der, linea)
+    if op.endswith("_FLOTANTE"):
+        return verificar_operacion_flotante(tipo_izq, op, tipo_der, linea)
     
-    # Caso 2: Operadores de comparación
-    if op in TipoOperacionChecker.OPERADORES_COMPARACION:
+    # Caso 2: Operadores aritméticos estándar
+    elif op in ["SUMA", "RESTA", "MULTIPLICACION", "DIVISION", "MODULO"]:
+        return verificar_operacion_entera(tipo_izq, op, tipo_der, linea)
+    
+    # Caso 3: Operadores de comparación
+    elif op in TipoOperacionChecker.OPERADORES_COMPARACION:
         return verificar_operacion_comparacion(tipo_izq, op, tipo_der, linea)
     
     # Operador no reconocido
@@ -165,7 +175,9 @@ def verificar_operacion_entera(tipo_izq, operador, tipo_der, linea=None):
     Verifica operaciones aritméticas estándar que trabajan principalmente con enteros
     """
     ubicacion = f" en línea {linea}" if linea else ""
-    op_simbolo = TipoOperacionChecker.OPERADORES_VALIDOS.get(operador, operador)
+    
+    # CORREGIDO: Obtener símbolo del operador para display
+    op_simbolo = TipoOperacionChecker.OPERADORES_NOMBRES_A_SIMBOLOS.get(operador, operador)
     
     # Caso 1: Ambos operandos son STACK (enteros) - IDEAL
     if tipo_izq == "STACK" and tipo_der == "STACK":
@@ -185,14 +197,20 @@ def verificar_operacion_entera(tipo_izq, operador, tipo_der, linea=None):
         historialSemantico.agregar(mensaje)
         return True, "GHAST", None
     
+    # Caso especial: Concatenación de strings con SUMA
+    if operador == "SUMA" and tipo_izq == "SPIDER" and tipo_der == "SPIDER":
+        mensaje = f"REGLA SEMANTICA 040: Concatenación de strings {tipo_izq} {op_simbolo} {tipo_der} válida{ubicacion}"
+        historialSemantico.agregar(mensaje)
+        return True, "SPIDER", None
+    
     # Caso 4: TIPOS INCOMPATIBLES - ERROR
-    tipos_incompatibles = verificar_tipos_incompatibles(tipo_izq, tipo_der)
+    tipos_incompatibles = verificar_tipos_incompatibles(tipo_izq, tipo_der, operador)
     if tipos_incompatibles:
         mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operación {tipo_izq} {op_simbolo} {tipo_der} inválida: {tipos_incompatibles}{ubicacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
-    # Caso 5: Otros tipos numéricos no estándar
+    # Caso 5: Otros tipos no soportados
     mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operación {tipo_izq} {op_simbolo} {tipo_der} no soportada{ubicacion}"
     historialSemantico.agregar(mensaje_error)
     return False, "ERROR", mensaje_error
@@ -202,7 +220,7 @@ def verificar_operacion_flotante(tipo_izq, operador, tipo_der, linea=None):
     Verifica operaciones flotantes específicas (:+, :-, :*, :/, :%)
     """
     ubicacion = f" en línea {linea}" if linea else ""
-    op_simbolo = TipoOperacionChecker.OPERADORES_VALIDOS.get(operador, operador)
+    op_simbolo = TipoOperacionChecker.OPERADORES_NOMBRES_A_SIMBOLOS.get(operador, operador)
     
     # Caso 1: Ambos operandos son GHAST (flotantes) - IDEAL
     if tipo_izq == "GHAST" and tipo_der == "GHAST":
@@ -223,7 +241,7 @@ def verificar_operacion_flotante(tipo_izq, operador, tipo_der, linea=None):
         return True, "GHAST", None
     
     # Caso 4: TIPOS INCOMPATIBLES
-    tipos_incompatibles = verificar_tipos_incompatibles(tipo_izq, tipo_der)
+    tipos_incompatibles = verificar_tipos_incompatibles(tipo_izq, tipo_der, operador)
     if tipos_incompatibles:
         mensaje_error = f"REGLA SEMANTICA 041: ERROR - Operación flotante {tipo_izq} {op_simbolo} {tipo_der} inválida: {tipos_incompatibles}{ubicacion}"
         historialSemantico.agregar(mensaje_error)
@@ -265,16 +283,25 @@ def verificar_operacion_comparacion(tipo_izq, operador, tipo_der, linea=None):
     historialSemantico.agregar(mensaje_error)
     return False, "ERROR", mensaje_error
 
-def verificar_tipos_incompatibles(tipo_izq, tipo_der):
+def verificar_tipos_incompatibles(tipo_izq, tipo_der, operador=None):
     """
     Verifica si dos tipos son fundamentalmente incompatibles
     
     Returns:
         str: Descripción del problema de incompatibilidad, o None si son compatibles
     """
+    # CASO ESPECIAL: Para strings, solo permitir SUMA (concatenación)
+    if tipo_izq == "SPIDER" or tipo_der == "SPIDER":
+        if operador == "SUMA" and tipo_izq == "SPIDER" and tipo_der == "SPIDER":
+            return None  # Concatenación válida
+        elif operador != "SUMA":
+            return f"solo se permite concatenación (+) con strings, no {operador}"
+        elif tipo_izq != tipo_der:
+            return "no se puede concatenar string con otro tipo"
+    
     # Definir grupos de tipos incompatibles
     incompatibilidades = [
-        # Números vs Cadenas
+        # Números vs Cadenas (excepto suma/concatenación ya manejada arriba)
         (TipoOperacionChecker.TIPOS_NUMERICOS, TipoOperacionChecker.TIPOS_CADENA,
          "no se pueden realizar operaciones aritméticas entre números y cadenas"),
         
@@ -282,7 +309,7 @@ def verificar_tipos_incompatibles(tipo_izq, tipo_der):
         (TipoOperacionChecker.TIPOS_NUMERICOS, TipoOperacionChecker.TIPOS_BOOLEANOS,
          "operaciones aritméticas entre números y booleanos requieren conversión explícita"),
         
-        # Cadenas vs Booleanos
+        # Cadenas vs Booleanos  
         (TipoOperacionChecker.TIPOS_CADENA, TipoOperacionChecker.TIPOS_BOOLEANOS,
          "no se pueden realizar operaciones aritméticas entre cadenas y booleanos"),
         
@@ -396,7 +423,8 @@ def es_operador_aritmetico(token):
     if not hasattr(token, 'type'):
         return False
     
-    return token.type in TipoOperacionChecker.OPERADORES_VALIDOS.values()
+    # CORREGIDO: Verificar tanto contra nombres como valores
+    return token.type in TipoOperacionChecker.OPERADORES_VALIDOS
 
 def inferir_tipo_operando(token):
     """Infiere el tipo de un operando basado en su token"""
@@ -467,6 +495,11 @@ def sugerir_correccion_tipo(tipo_izq, operador, tipo_der):
         }.get(operador)
         if op_flotante:
             return f"Para operaciones con flotantes, use '{op_flotante}' en lugar de '{operador}'"
+    
+    # Casos especiales para strings
+    if tipo_izq == "SPIDER" or tipo_der == "SPIDER":
+        if operador != "SUMA":
+            return f"Para strings, solo use '+' para concatenación, no '{operador}'"
     
     # Sugerir verificar tipos
     return f"Verifique que ambos operandos sean del mismo tipo o tipos compatibles"
