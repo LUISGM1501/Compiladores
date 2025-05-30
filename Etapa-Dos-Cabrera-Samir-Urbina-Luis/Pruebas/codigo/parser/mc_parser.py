@@ -8,6 +8,8 @@ Archivo: mc_parser
 Breve Descripcion: Encargado del manejo del parser.
 """
 
+import sys
+
 from .gramatica.Gramatica import Gramatica
 from .TokenMap import TokenMap
 from .special_tokens import SpecialTokens  # Importamos la clase de tokens especiales
@@ -37,6 +39,15 @@ from .semantica.asignacionTabla.Ritual import (
 )
 from .semantica.TablaSimbolos import TablaSimbolos
 
+
+# IMPORTACION DE CHEQUEOS SEMANTICOS
+from parser.semantica.TablaSimbolos import TablaSimbolos
+from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
+
+from .semantica.diccionarioSemantico.CheckVarExiste import checkVarExiste
+from .semantica.diccionarioSemantico.CheckObsidian import checkObsidian
+from .semantica.diccionarioSemantico.CheckWorldName import checkWorldname
+from .semantica.diccionarioSemantico.CheckWorldSave import checkWorldSave
 
 class Parser:
 
@@ -85,7 +96,7 @@ class Parser:
         """
         Inicializa el analizador sintáctico con la lista de tokens
         obtenida del scanner.
-        
+
         Args:
             tokens: Lista de tokens generada por el scanner
             debug: Si es True, muestra información detallada del parsing
@@ -98,15 +109,30 @@ class Parser:
         self.errores = []
         self.debug = debug
         self.nivel_detalle = 2  # Por defecto nivel 2 (importante)
-        
+
         # Historial de tokens para análisis de contexto
         self.token_history = []
         self.max_history_size = 5  # Mantener historial de los últimos 5 tokens
-        
+
         # Inicializar con el primer token (si existe)
         if self.tokens:
             self.token_actual = self.tokens[0]
-        
+            self.token_ultimo = self.tokens[-1]
+            inicio_valido = checkWorldname(self.token_actual)
+            fin_valido = checkWorldSave(self.tokens[-1])
+
+            if not (inicio_valido and fin_valido):
+                tabla = TablaSimbolos.instancia()
+                print(f" \n\n Ver informacion de la tablas semantica:")
+                tabla.imprimir_tabla()
+
+                historialSemantico = HistorialSemanticoSingleton()
+                print(f"\n\n Ver informacion del historial semantico:")
+                historialSemantico.imprimir_historial()
+                sys.exit()
+            else:
+                print("\n\n\n\nProceder ejecucion")
+
         self.imprimir_debug("Parser inicializado", 1)
         if debug and len(self.tokens) > 0:
             self.imprimir_debug(f"Tokens recibidos ({len(self.tokens)}): primeros 5 tokens: {[f'{t.type} ({t.lexema})' for t in self.tokens[:5]]}", 2)
@@ -327,7 +353,20 @@ class Parser:
                             print(f"  WARNING: '{self.token_actual.lexema}' no está declarado como función o procedimiento")
                             # Continuar con el procesamiento normal
                             return
+                        
 
+                    # Casos Indirectos que requieren "mirar a futuro"
+                    # Recolección temporal de tokens hasta PUNTO_Y_COMA
+                    tokens_temporales2 = []
+                    pos_temp = self.posicion_actual + 1
+
+                    while pos_temp < len(self.tokens):
+                        token_temp = self.tokens[pos_temp]
+                        tokens_temporales2.append(token_temp)
+                        if token_temp.type == "PUNTO_Y_COMA":
+                            break
+                        pos_temp += 1
+                    
                     # Casos existentes (shelf, obsidian, etc.)
                     token_prev = self.obtener_token_historial(5)
                     if token_prev and token_prev.type == "SHELF":
@@ -335,49 +374,52 @@ class Parser:
                                     self.obtener_token_historial(3),
                                     self.obtener_token_historial(1),
                                     self.token_actual,
-                                    tokens_temporales)
+                                    tokens_temporales2)
                         return
 
                     # caso de Bedrock, Bedrock tipo id valor
                     token_prev = self.obtener_token_historial(2)
                     if token_prev and token_prev.type == "OBSIDIAN":
-                        welcomeObsidian(self.obtener_token_historial(2), self.token_actual, self.obtener_token_historial(1),
-                                        tokens_temporales)
+                        if(checkObsidian(self.token_actual, token_prev)):
+                            welcomeObsidian(self.obtener_token_historial(2), self.token_actual,
+                                            self.obtener_token_historial(1),
+                                            tokens_temporales2)
                         return
 
                     token_prev = self.obtener_token_historial(1)
                     # caso de stack: entero
                     if token_prev and token_prev.type == "STACK":
-                        welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        welcomeStack(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
                         return
 
                     # caso de spider : string
                     if token_prev and token_prev.type == "SPIDER":
-                        welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        welcomeSpider(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
                         return
 
                     # caso de rune : char
                     if token_prev and token_prev.type == "RUNE":
-                        welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        welcomeRune(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
                         return
 
                     # caso torch : boolean
                     if token_prev and token_prev.type == "TORCH":
-                        welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        welcomeTorch(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
                         return
 
                     # caso ghast : float
                     if token_prev and token_prev.type == "GHAST":
-                        welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        welcomeGhast(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
                         return
 
                     # caso chest : conjuntos
                     if token_prev and token_prev.type == "CHEST":
-                        welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales)
+                        welcomeChest(self.token_actual, self.obtener_token_historial(1), tokens_temporales2)
                         return
             else:
                 self.token_actual = None
                 self.imprimir_debug("Avanzando a EOF", 2)
+
 
     def detectar_contexto_asignacion(self):
         """
@@ -1226,26 +1268,26 @@ def parser(tokens, debug=False):
 def iniciar_parser(tokens, debug=False, nivel_debug=1):
     """
     Función para ser llamada desde el main después del scanner
-    
+
     Args:
         tokens: Lista de tokens generada por el scanner
         debug: Si es True, muestra información detallada del parsing
         nivel_debug: Nivel de detalle de la depuración (1=mínimo, 3=máximo)
-        
+
     Returns:
         True si el análisis fue exitoso, False en caso contrario
     """
     print("\n#################################################################")
     print("##                    INICIO PARSER                            ##")
     print("#################################################################")
-    
+
     # Crear una instancia del parser
     parser_instance = Parser(tokens, debug=debug)
     parser_instance.nivel_detalle = nivel_debug  # Configurar nivel de detalle
-    
+
     # Iniciar el análisis sintáctico
     resultado = parser_instance.parse()
-    
+
     # Lista de errores específicos a suprimir
     errores_a_suprimir = [
         "Hay tokens de más al final del archivo",
@@ -1258,21 +1300,21 @@ def iniciar_parser(tokens, debug=False, nivel_debug=1):
         "Error de sincronización fatal",  # Suprimir errores de sincronización fatal
         "final del archivo"  # Suprimir errores relacionados con el final del archivo
     ]
-    
+
     # Filtrar la lista de errores para eliminar los que queremos suprimir
     errores_reales = []
     for error in parser_instance.errores:
         if not any(suprimir in error for suprimir in errores_a_suprimir):
             errores_reales.append(error)
-    
+
     # Actualizar la lista de errores
     parser_instance.errores = errores_reales
-    
+
     # Mostrar un mensaje más apropiado
     if not errores_reales:
         print("Análisis sintáctico completado con éxito.")
     else:
         #print(f"Análisis sintáctico fallido con {len(errores_reales)} errores.")
         return
-    
+
     return len(errores_reales) == 0  # Retorna éxito solo si no hay errores reales
