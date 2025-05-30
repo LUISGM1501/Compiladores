@@ -39,6 +39,13 @@ from .semantica.asignacionTabla.Spell import (
 )
 from .semantica.TablaSimbolos import TablaSimbolos
 
+from .semantica.diccionarioSemantico.CheckDivZero import (
+    check_division_zero, 
+    check_integer_division_zero, 
+    check_float_division_zero,
+    check_modulo_zero,
+    check_expression_division_zero
+)
 
 # IMPORTACION DE CHEQUEOS SEMANTICOS
 from parser.semantica.TablaSimbolos import TablaSimbolos
@@ -137,6 +144,89 @@ class Parser:
         if debug and len(self.tokens) > 0:
             self.imprimir_debug(f"Tokens recibidos ({len(self.tokens)}): primeros 5 tokens: {[f'{t.type} ({t.lexema})' for t in self.tokens[:5]]}", 2)
 
+    def procesar_simbolo_semantico(self, simbolo):
+        """
+        Procesa un símbolo semántico específico
+        """
+        # Símbolos semánticos existentes...
+        if simbolo == 220:  # init_tsg
+            self.inicializar_tabla_simbolos_global()
+        elif simbolo == 221:  # free_tsg
+            self.liberar_tabla_simbolos_global()
+        
+        # *** AGREGAR ESTOS 4 CASOS NUEVOS: ***
+        elif simbolo == 250:  # chk_div_zero
+            self.verificar_division_cero()
+        elif simbolo == 251:  # chk_mod_zero
+            self.verificar_modulo_cero()
+        elif simbolo == 252:  # chk_float_div_zero
+            self.verificar_division_flotante_cero()
+        elif simbolo == 253:  # chk_float_mod_zero
+            self.verificar_modulo_flotante_cero()
+        
+        else:
+            self.imprimir_debug(f"Símbolo semántico {simbolo} procesado (no implementado)", 2)
+
+    def verificar_division_por_cero(self):
+        """Implementación del símbolo semántico #chk_div_zero"""
+        # Obtener el divisor del contexto actual
+        # Esto depende de cómo manejes la pila de tipos/valores
+        if hasattr(self, 'pila_valores') and len(self.pila_valores) >= 2:
+            divisor = self.pila_valores[-1]  # Último valor (divisor)
+            
+            from parser.semantica.diccionarioSemantico.CheckDivZero import check_division_zero
+            es_valido, mensaje_error = check_division_zero(
+                divisor, 
+                "división", 
+                self.token_actual.linea if self.token_actual else None
+            )
+            
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {mensaje_error}")
+                # Podrías decidir abortar o continuar con valor por defecto
+
+    def verificar_division_entera_por_cero(self):
+        """Implementación del símbolo semántico #chk_int_div_zero"""
+        if hasattr(self, 'pila_valores') and len(self.pila_valores) >= 2:
+            divisor = self.pila_valores[-1]
+            
+            from parser.semantica.diccionarioSemantico.CheckDivZero import check_integer_division_zero
+            es_valido, mensaje_error = check_integer_division_zero(
+                divisor, 
+                self.token_actual.linea if self.token_actual else None
+            )
+            
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {mensaje_error}")
+
+    def verificar_division_flotante_por_cero(self):
+        """Implementación del símbolo semántico #chk_float_div_zero"""
+        if hasattr(self, 'pila_valores') and len(self.pila_valores) >= 2:
+            divisor = self.pila_valores[-1]
+            
+            from parser.semantica.diccionarioSemantico.CheckDivZero import check_float_division_zero
+            es_valido, mensaje_error = check_float_division_zero(
+                divisor, 
+                self.token_actual.linea if self.token_actual else None
+            )
+            
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {mensaje_error}")
+
+    def verificar_modulo_por_cero(self):
+        """Implementación del símbolo semántico #chk_mod_zero"""
+        if hasattr(self, 'pila_valores') and len(self.pila_valores) >= 2:
+            divisor = self.pila_valores[-1]
+            
+            from parser.semantica.diccionarioSemantico.CheckDivZero import check_modulo_zero
+            es_valido, mensaje_error = check_modulo_zero(
+                divisor, 
+                self.token_actual.linea if self.token_actual else None
+            )
+            
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {mensaje_error}")
+    
     def obtener_token_historial(self, pasos_atras):
         """
         Retorna el token `pasos_atras` posiciones atrás en el historial, o None si no existe.
@@ -1284,6 +1374,47 @@ class Parser:
         
         self.imprimir_debug("No se encontraron puntos seguros", 1)
         return False
+    
+    def verificar_division_cero(self):
+        """Verifica división por cero para enteros"""
+        from parser.semantica.diccionarioSemantico.CheckDivZero import check_integer_division_zero
+        
+        # Simulamos que el divisor es el token actual (ajustar según tu implementación)
+        if self.token_actual and self.token_actual.type in ["NUMERO_ENTERO", "IDENTIFICADOR"]:
+            divisor = self.token_actual.lexema
+            es_valido, error = check_integer_division_zero(divisor, self.token_actual.linea)
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {error}")
+
+    def verificar_modulo_cero(self):
+        """Verifica módulo por cero para enteros"""  
+        from parser.semantica.diccionarioSemantico.CheckDivZero import check_integer_modulo_zero
+        
+        if self.token_actual and self.token_actual.type in ["NUMERO_ENTERO", "IDENTIFICADOR"]:
+            divisor = self.token_actual.lexema
+            es_valido, error = check_integer_modulo_zero(divisor, self.token_actual.linea)
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {error}")
+
+    def verificar_division_flotante_cero(self):
+        """Verifica división por cero para flotantes"""
+        from parser.semantica.diccionarioSemantico.CheckDivZero import check_float_division_zero
+        
+        if self.token_actual and self.token_actual.type in ["NUMERO_DECIMAL", "IDENTIFICADOR"]:
+            divisor = self.token_actual.lexema
+            es_valido, error = check_float_division_zero(divisor, self.token_actual.linea)
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {error}")
+
+    def verificar_modulo_flotante_cero(self):
+        """Verifica módulo por cero para flotantes"""
+        from parser.semantica.diccionarioSemantico.CheckDivZero import check_float_modulo_zero
+        
+        if self.token_actual and self.token_actual.type in ["NUMERO_DECIMAL", "IDENTIFICADOR"]:
+            divisor = self.token_actual.lexema
+            es_valido, error = check_float_modulo_zero(divisor, self.token_actual.linea)
+            if not es_valido:
+                print(f"ERROR SEMANTICO: {error}")
 
 def parser(tokens, debug=False):
     """

@@ -1,6 +1,7 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
+from ..diccionarioSemantico.CheckOverflow import check_overflow_by_type
 
 def welcomeSpider(actual, tipo, asignacion):
     print(f"verificacion de asignacion:")
@@ -28,14 +29,30 @@ def welcomeSpider(actual, tipo, asignacion):
         )
     elif len(asignacion) >= 3 and asignacion[0].type == "IGUAL":
         # Declaración con inicialización: Spider variable = valor;
-        print(f"tipo: {tipo.type} y asignacion: {asignacion[1].lexema}")
+        valor_inicial = asignacion[1].lexema
+        print(f"tipo: {tipo.type} y asignacion: {valor_inicial}")
+        
+        # Chequeo de tipo
+        valor_chequeado = chequear_tipos_expresion(tipo.type, valor_inicial)
+        
+        # *** CHEQUEO DE OVERFLOW PARA STRINGS ***
+        from ..diccionarioSemantico.CheckOverflow import check_spider_overflow
+        es_valido, cadena_ajustada, mensaje_error = check_spider_overflow(
+            valor_chequeado, 
+            actual.lexema
+        )
+        
+        if not es_valido:
+            print(f"WARNING OVERFLOW: {mensaje_error}")
+            print(f"Cadena truncada de {len(valor_inicial)} a {len(cadena_ajustada)} caracteres")
+        
         mi_simbolo = Simbolo(
             nombre=actual.lexema,
             tipo=tipo.type,
             categoria="VARIABLE",
             linea=actual.linea,
             columna=actual.columna,
-            valor=chequear_tipos_expresion(tipo.type, asignacion[1].lexema)
+            valor=cadena_ajustada  # Usar valor ajustado
         )
     else:
         # Caso especial o error

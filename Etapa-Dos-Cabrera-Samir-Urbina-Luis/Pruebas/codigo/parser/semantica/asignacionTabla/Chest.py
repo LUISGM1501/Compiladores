@@ -1,6 +1,7 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
+from ..diccionarioSemantico.CheckOverflow import check_overflow_by_type
 
 def welcomeChest(actual, tipo, asignacion,):
     print(f"Verificación de asignación:")

@@ -1,6 +1,7 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
+from ..diccionarioSemantico.CheckOverflow import check_overflow_by_type
 
 def welcomeGhast(actual, tipo, asignacion):
     print(f"verificacion de asignacion:")
@@ -28,14 +29,55 @@ def welcomeGhast(actual, tipo, asignacion):
         )
     elif len(asignacion) >= 3 and asignacion[0].type == "IGUAL":
         # Declaración con inicialización: Ghast variable = valor;
-        print(f"tipo: {tipo.type} y asignacion: {asignacion[1].lexema}")
+        valor_inicial = asignacion[1].lexema
+        
+        # Chequeo de tipo
+        valor_chequeado = chequear_tipos_expresion(tipo.type, valor_inicial)
+        
+        # CORRECCIÓN: Manejar tanto strings como floats del valor chequeado
+        try:
+            # Si valor_chequeado es un float, convertirlo a string primero
+            if isinstance(valor_chequeado, float):
+                valor_str = str(valor_chequeado)
+            else:
+                valor_str = str(valor_chequeado)
+            
+            # Parsear el flotante
+            if '.' in valor_str:
+                partes = valor_str.split('.')
+                entero = int(float(partes[0]))  # Usar float() para manejar casos como "-0"
+                # Tomar máximo 2 dígitos decimales y rellenar con ceros si es necesario
+                decimal_str = partes[1][:2] if len(partes[1]) >= 2 else partes[1].ljust(2, '0')
+                decimal = int(decimal_str)
+            else:
+                entero = int(float(valor_str))
+                decimal = 0
+                
+            # *** CHEQUEO DE OVERFLOW PARA FLOTANTES ***
+            from ..diccionarioSemantico.CheckOverflow import check_ghast_overflow
+            es_valido, (entero_adj, decimal_adj), mensaje_error = check_ghast_overflow(
+                entero, 
+                decimal, 
+                actual.lexema
+            )
+            
+            if not es_valido:
+                print(f"WARNING OVERFLOW: {mensaje_error}")
+                print(f"Valor ajustado: {entero_adj}.{decimal_adj:02d}")
+            
+            valor_final = f"{entero_adj}.{decimal_adj:02d}"
+            
+        except (ValueError, IndexError) as e:
+            print(f"ERROR: Valor flotante inválido: {valor_inicial} - {str(e)}")
+            valor_final = "0.00"
+        
         mi_simbolo = Simbolo(
             nombre=actual.lexema,
             tipo=tipo.type,
             categoria="VARIABLE",
             linea=actual.linea,
             columna=actual.columna,
-            valor=chequear_tipos_expresion(tipo.type, asignacion[1].lexema)
+            valor=valor_final
         )
     else:
         # Caso especial o error
