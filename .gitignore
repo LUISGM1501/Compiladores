@@ -1,0 +1,8 @@
+# archivos de cache 
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+
