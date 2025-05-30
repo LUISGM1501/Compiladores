@@ -584,15 +584,6 @@ PROCESAR_PRIMER_FLOTANTE PROC
     JMP @SELECTED_PROC1_DECIMAL
     
 @SELECTED_PROC1_FIN:
-    ; Aplicar signo si es negativo
-    CMP [es_negativo1], 1
-    JNE @SELECTED_PROC1_NORMAL
-    
-    MOV AX, [entero1]
-    NEG AX
-    MOV [entero1], AX
-    
-@SELECTED_PROC1_NORMAL:
     POP SI
     POP DX
     POP CX
@@ -695,15 +686,6 @@ PROCESAR_SEGUNDO_FLOTANTE PROC
     JMP @SELECTED_PROC2_DECIMAL
     
 @SELECTED_PROC2_FIN:
-    ; Aplicar signo si es negativo
-    CMP [es_negativo2], 1
-    JNE @SELECTED_PROC2_NORMAL
-    
-    MOV AX, [entero2]
-    NEG AX
-    MOV [entero2], AX
-    
-@SELECTED_PROC2_NORMAL:
     POP SI
     POP DX
     POP CX
@@ -778,74 +760,100 @@ SUMAR_FLOTANTES ENDP
 ; Resta el segundo número del primero, considerando los signos
 ;------------------------------------------------------------
 
+;------------------------------------------------------------
+; Procedimiento: RESTAR_SEGUNDO_MENOS_PRIMERO  
+; Maneja (-A) + B = B - A cuando signos son diferentes
+;------------------------------------------------------------
 RESTAR_SEGUNDO_MENOS_PRIMERO PROC
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Comparar |segundo| con |primero|
-    CALL COMPARAR_VALORES_ABSOLUTOS_MAYOR
-    JZ @RSP_SEGUNDO_MAYOR
-    
-    ; |primero| >= |segundo|: resultado = |primero| - |segundo|, signo del primero
+    ; Obtener valores absolutos para comparación
     MOV AX, [entero1]
+    CMP [es_negativo1], 0
+    JE @RSMP_ENT1_YA_ABS
     CMP AX, 0
-    JGE @RSP_ENT1_ABS
+    JGE @RSMP_ENT1_YA_ABS
     NEG AX
-@RSP_ENT1_ABS:
-    MOV BX, [entero2]
-    CMP BX, 0
-    JGE @RSP_ENT2_ABS
-    NEG BX
-@RSP_ENT2_ABS:
+@RSMP_ENT1_YA_ABS:
+    MOV BX, AX              ; BX = |entero1|
     
-    SUB AX, BX
+    MOV AX, [entero2]
+    CMP [es_negativo2], 0
+    JE @RSMP_ENT2_YA_ABS
+    CMP AX, 0
+    JGE @RSMP_ENT2_YA_ABS
+    NEG AX
+@RSMP_ENT2_YA_ABS:
+    MOV CX, AX              ; CX = |entero2|
+    
+    ; Comparar magnitudes: ¿|val2| >= |val1|?
+    CMP CX, BX
+    JG @RSMP_SEGUNDO_MAYOR
+    JL @RSMP_PRIMERO_MAYOR
+    
+    ; Partes enteras iguales, comparar decimales
+    MOV AX, [decimal2]
+    MOV DX, [decimal1]
+    CMP AX, DX
+    JGE @RSMP_SEGUNDO_MAYOR
+    
+@RSMP_PRIMERO_MAYOR:
+    ; |primero| > |segundo|: resultado = |primero| - |segundo|
+    ; Pero como es (-A) + B, el signo es el opuesto del primero
+    
+    MOV AX, BX              ; AX = |entero1|
+    SUB AX, CX              ; AX = |entero1| - |entero2|
     MOV [resultado_entero], AX
     
     MOV AX, [decimal1]
     SUB AX, [decimal2]
-    ; Manejar préstamo si es necesario
+    
     CMP AX, 0
-    JGE @RSP_DEC_OK1
+    JGE @RSMP_DEC1_OK
+    
     DEC WORD PTR [resultado_entero]
-    ADD AX, 1000  ; Ajustar según dígitos
-@RSP_DEC_OK1:
+    MOV BL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_BL
+    ADD AX, BX
+    
+@RSMP_DEC1_OK:
     MOV [resultado_decimal], AX
     
+    ; Signo opuesto al primer número (porque era negativo en la suma)
     MOV AL, [es_negativo1]
     MOV [resultado_negativo], AL
-    JMP @RSP_FIN
+    JMP @RSMP_FIN
     
-@RSP_SEGUNDO_MAYOR:
-    ; |segundo| > |primero|: resultado = |segundo| - |primero|, signo del segundo
-    MOV AX, [entero2]
-    CMP AX, 0
-    JGE @RSP_ENT2_ABS2
-    NEG AX
-@RSP_ENT2_ABS2:
-    MOV BX, [entero1]
-    CMP BX, 0
-    JGE @RSP_ENT1_ABS2
-    NEG BX
-@RSP_ENT1_ABS2:
+@RSMP_SEGUNDO_MAYOR:
+    ; |segundo| >= |primero|: resultado = |segundo| - |primero|
+    ; Signo del segundo número
     
-    SUB AX, BX
+    MOV AX, CX              ; AX = |entero2|
+    SUB AX, BX              ; AX = |entero2| - |entero1|
     MOV [resultado_entero], AX
     
     MOV AX, [decimal2]
     SUB AX, [decimal1]
+    
     CMP AX, 0
-    JGE @RSP_DEC_OK2
+    JGE @RSMP_DEC2_OK
+    
     DEC WORD PTR [resultado_entero]
-    ADD AX, 1000
-@RSP_DEC_OK2:
+    MOV BL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_BL
+    ADD AX, BX
+    
+@RSMP_DEC2_OK:
     MOV [resultado_decimal], AX
     
+    ; Signo del segundo número
     MOV AL, [es_negativo2]
     MOV [resultado_negativo], AL
     
-@RSP_FIN:
+@RSMP_FIN:
     POP DX
     POP CX
     POP BX
@@ -856,94 +864,104 @@ RESTAR_SEGUNDO_MENOS_PRIMERO ENDP
 ; Procedimiento: RESTAR_VALORES_ABSOLUTOS_SUMA
 ; Resta valores absolutos cuando los signos son diferentes en suma
 ;------------------------------------------------------------
+;------------------------------------------------------------
+; Procedimiento: RESTAR_VALORES_ABSOLUTOS_SUMA
+; Maneja A + (-B) = A - B cuando signos son diferentes
+;------------------------------------------------------------
 RESTAR_VALORES_ABSOLUTOS_SUMA PROC
     PUSH AX
     PUSH BX
     PUSH CX
     PUSH DX
     
-    ; Obtener valores absolutos de partes enteras
+    ; Obtener valores absolutos para comparación
     MOV AX, [entero1]
     CMP [es_negativo1], 0
-    JE @RESTA_SUMA_ENT1_POS
+    JE @RVAS_ENT1_YA_ABS
+    CMP AX, 0
+    JGE @RVAS_ENT1_YA_ABS
     NEG AX
-@RESTA_SUMA_ENT1_POS:
+@RVAS_ENT1_YA_ABS:
     MOV BX, AX              ; BX = |entero1|
     
-    MOV AX, [entero2]
+    MOV AX, [entero2] 
     CMP [es_negativo2], 0
-    JE @RESTA_SUMA_ENT2_POS
+    JE @RVAS_ENT2_YA_ABS
+    CMP AX, 0
+    JGE @RVAS_ENT2_YA_ABS
     NEG AX
-@RESTA_SUMA_ENT2_POS:
+@RVAS_ENT2_YA_ABS:
     MOV CX, AX              ; CX = |entero2|
     
-    ; Determinar cuál es mayor para definir el signo del resultado
-    ; Comparar primero las partes enteras
+    ; Comparar magnitudes: ¿|val1| >= |val2|?
     CMP BX, CX
-    JG @RESTA_SUMA_PRIMERO_MAYOR
-    JL @RESTA_SUMA_SEGUNDO_MAYOR
+    JG @RVAS_PRIMERO_MAYOR
+    JL @RVAS_SEGUNDO_MAYOR
     
     ; Partes enteras iguales, comparar decimales
     MOV AX, [decimal1]
-    CMP AX, [decimal2]
-    JGE @RESTA_SUMA_PRIMERO_MAYOR
+    MOV DX, [decimal2]
+    CMP AX, DX
+    JGE @RVAS_PRIMERO_MAYOR
     
-@RESTA_SUMA_SEGUNDO_MAYOR:
-    ; |segundo| >= |primero|: resultado = |segundo| - |primero|
-    ; El signo del resultado será el del segundo número
-    MOV AL, [es_negativo2]
-    MOV [resultado_negativo], AL
+@RVAS_SEGUNDO_MAYOR:
+    ; |segundo| > |primero|: resultado = |segundo| - |primero|
+    ; Signo del resultado = signo del número con mayor magnitud
     
-    ; Restar: segundo - primero
+    ; Restar: |segundo| - |primero|
+    MOV AX, CX              ; AX = |entero2|
+    SUB AX, BX              ; AX = |entero2| - |entero1|
+    MOV [resultado_entero], AX
+    
     MOV AX, [decimal2]
     SUB AX, [decimal1]
     
-    ; Si el resultado decimal es negativo, pedir prestado
+    ; Manejar préstamo si es necesario
     CMP AX, 0
-    JGE @RESTA_SUMA_DEC2_OK
+    JGE @RVAS_DEC2_OK
     
-    ; Pedir prestado de la parte entera
-    DEC CX
-    MOV DL, [resultado_digitos]
-    CALL CALCULAR_POTENCIA_10_DL
-    ADD AX, BX              ; BX contiene 10^digitos
+    DEC WORD PTR [resultado_entero]
+    MOV BL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_BL
+    ADD AX, BX
     
-@RESTA_SUMA_DEC2_OK:
+@RVAS_DEC2_OK:
     MOV [resultado_decimal], AX
     
-    MOV AX, CX
-    SUB AX, BX              ; entero2 - entero1
-    MOV [resultado_entero], AX
-    JMP @RESTA_SUMA_FIN
-    
-@RESTA_SUMA_PRIMERO_MAYOR:
-    ; |primero| > |segundo|: resultado = |primero| - |segundo|
-    ; El signo del resultado será el del primer número
-    MOV AL, [es_negativo1]
+    ; El signo del resultado es el signo del segundo número
+    MOV AL, [es_negativo2]
     MOV [resultado_negativo], AL
+    JMP @RVAS_FIN
     
-    ; Restar: primero - segundo
+@RVAS_PRIMERO_MAYOR:
+    ; |primero| >= |segundo|: resultado = |primero| - |segundo|
+    ; Signo del resultado = signo del primer número
+    
+    ; Restar: |primero| - |segundo|
+    MOV AX, BX              ; AX = |entero1|
+    SUB AX, CX              ; AX = |entero1| - |entero2|
+    MOV [resultado_entero], AX
+    
     MOV AX, [decimal1]
     SUB AX, [decimal2]
     
-    ; Si el resultado decimal es negativo, pedir prestado
+    ; Manejar préstamo si es necesario
     CMP AX, 0
-    JGE @RESTA_SUMA_DEC1_OK
+    JGE @RVAS_DEC1_OK
     
-    ; Pedir prestado de la parte entera
-    DEC BX
-    MOV DL, [resultado_digitos]
-    CALL CALCULAR_POTENCIA_10_DL
-    ADD AX, BX              ; BX contiene 10^digitos
+    DEC WORD PTR [resultado_entero]
+    MOV BL, [resultado_digitos]
+    CALL CALCULAR_POTENCIA_10_BL
+    ADD AX, BX
     
-@RESTA_SUMA_DEC1_OK:
+@RVAS_DEC1_OK:
     MOV [resultado_decimal], AX
     
-    MOV AX, BX
-    SUB AX, CX              ; entero1 - entero2
-    MOV [resultado_entero], AX
+    ; El signo del resultado es el signo del primer número
+    MOV AL, [es_negativo1]
+    MOV [resultado_negativo], AL
     
-@RESTA_SUMA_FIN:
+@RVAS_FIN:
     POP DX
     POP CX
     POP BX
