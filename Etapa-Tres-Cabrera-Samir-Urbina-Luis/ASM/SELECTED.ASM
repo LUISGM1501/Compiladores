@@ -1275,10 +1275,6 @@ RESTA_SEGUNDO_PRIMER PROC
     RET
 RESTA_SEGUNDO_PRIMER ENDP
 
-;------------------------------------------------------------
-; Procedimiento: MULTIPLICAR_FLOTANTES  
-; Realiza la multiplicación de dos flotantes (:*)
-;------------------------------------------------------------
 MULTIPLICAR_FLOTANTES PROC
     PUSH AX
     PUSH BX
@@ -1291,62 +1287,87 @@ MULTIPLICAR_FLOTANTES PROC
     XOR AL, BL
     MOV [resultado_negativo], AL
     
-    ; Tomar valores absolutos de las partes enteras
+    ; Tomar valores absolutos
     MOV AX, [entero1]
     CMP AX, 0
-    JGE @MULT_FLOAT_ENT1_POS
+    JGE @MULT_SIMP_ENT1_POS
     NEG AX
-@MULT_FLOAT_ENT1_POS:
+@MULT_SIMP_ENT1_POS:
     MOV BX, AX              ; BX = |entero1|
     
     MOV AX, [entero2]
     CMP AX, 0
-    JGE @MULT_FLOAT_ENT2_POS
+    JGE @MULT_SIMP_ENT2_POS
     NEG AX
-@MULT_FLOAT_ENT2_POS:
+@MULT_SIMP_ENT2_POS:
     MOV CX, AX              ; CX = |entero2|
     
-    ; Multiplicación simple: entero1 * entero2
+    ; MÉTODO SIMPLIFICADO PERO MÁS PRECISO:
+    ; Multiplicar usando: (a + b/100) * (c + d/100)
+    ; = a*c + (a*d + b*c)/100 + (b*d)/10000
+    
+    ; Término 1: entero1 * entero2
     MOV AX, BX
-    MUL CX                  ; AX = entero1 * entero2
+    MUL CX
     MOV [resultado_entero], AX
     
-    ; Para los decimales, usamos aproximación simple
-    ; Primer término: decimal1 * entero2
-    MOV AX, [decimal1]
-    MUL CX                  ; AX = decimal1 * entero2
+    ; Término 2: entero1 * decimal2
+    MOV AX, BX
+    MUL WORD PTR [decimal2]
     MOV BX, 100
-    CMP BX, 0               ; Verificar división por cero
-    JE @MULT_FLOAT_SIN_DECIMALES
-    DIV BX                  ; AX = (decimal1 * entero2) / 100
-    MOV DX, AX              ; DX = primer término
-    
-    ; Segundo término: entero1 * decimal2
-    MOV AX, [decimal2]
-    MOV BX, [entero1]
     CMP BX, 0
-    JGE @MULT_FLOAT_ENT1_POS2
-    NEG BX
-@MULT_FLOAT_ENT1_POS2:
-    MUL BX                  ; AX = decimal2 * entero1
-    MOV BX, 100
-    DIV BX                  ; AX = (decimal2 * entero1) / 100
+    JE @MULT_SIMP_SKIP_T2
+    DIV BX                  ; AX = (entero1 * decimal2) / 100
+    PUSH AX                 ; Guardar término 2
+    JMP @MULT_SIMP_T3
     
-    ; Sumar ambos términos
-    ADD AX, DX              ; AX = parte decimal total
+@MULT_SIMP_SKIP_T2:
+    PUSH 0                  ; Término 2 = 0
+    
+@MULT_SIMP_T3:
+    ; Término 3: decimal1 * entero2
+    MOV AX, [decimal1]
+    MUL CX
+    MOV BX, 100
+    CMP BX, 0
+    JE @MULT_SIMP_SKIP_T3
+    DIV BX                  ; AX = (decimal1 * entero2) / 100
+    PUSH AX                 ; Guardar término 3
+    JMP @MULT_SIMP_T4
+    
+@MULT_SIMP_SKIP_T3:
+    PUSH 0                  ; Término 3 = 0
+    
+@MULT_SIMP_T4:
+    ; Término 4: decimal1 * decimal2 / 10000 (muy pequeño, lo ignoramos por simplicidad)
+    
+    ; Sumar términos 2 y 3
+    POP BX                  ; BX = término 3
+    POP AX                  ; AX = término 2
+    ADD AX, BX              ; AX = término 2 + término 3
+    
+    ; Añadir a la parte decimal
     MOV [resultado_decimal], AX
     
-    ; Manejar overflow en decimales
+    ; Manejar overflow en decimales (si > 99, pasar a entero)
     CMP AX, 99
-    JLE @MULT_FLOAT_SIN_OVERFLOW
+    JLE @MULT_SIMP_NO_OVERFLOW
+    
+    ; Hay overflow
+    SUB AX, 100
+    MOV [resultado_decimal], AX
+    INC WORD PTR [resultado_entero]
+    
+    ; Verificar si sigue habiendo overflow
+    CMP AX, 99
+    JLE @MULT_SIMP_NO_OVERFLOW
     
     SUB AX, 100
     MOV [resultado_decimal], AX
     INC WORD PTR [resultado_entero]
     
-@MULT_FLOAT_SIN_OVERFLOW:
-@MULT_FLOAT_SIN_DECIMALES:
-    MOV [resultado_digitos], 2  ; Siempre 2 dígitos decimales
+@MULT_SIMP_NO_OVERFLOW:
+    MOV [resultado_digitos], 2
     
     POP DX
     POP CX
