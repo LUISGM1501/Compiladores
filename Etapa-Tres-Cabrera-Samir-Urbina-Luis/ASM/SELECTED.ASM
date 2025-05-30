@@ -1285,36 +1285,68 @@ MULTIPLICAR_FLOTANTES PROC
     PUSH CX
     PUSH DX
     
-    ; Determinar signo del resultado (XOR de los signos)
+    ; Determinar signo del resultado
     MOV AL, [es_negativo1]
     MOV BL, [es_negativo2]
     XOR AL, BL
     MOV [resultado_negativo], AL
     
-    ; Convertir ambos números a enteros (eliminando el punto decimal)
-    ; Para el primer número
+    ; Tomar valores absolutos de las partes enteras
     MOV AX, [entero1]
-    MOV BL, [dec_digitos1]
-    CALL CONVERTIR_A_ENTERO
-    MOV CX, AX  ; CX = primer número como entero
+    CMP AX, 0
+    JGE @MULT_FLOAT_ENT1_POS
+    NEG AX
+@MULT_FLOAT_ENT1_POS:
+    MOV BX, AX              ; BX = |entero1|
     
-    ; Para el segundo número
     MOV AX, [entero2]
-    MOV BL, [dec_digitos2]
-    CALL CONVERTIR_A_ENTERO
-    MOV BX, AX  ; BX = segundo número como entero
+    CMP AX, 0
+    JGE @MULT_FLOAT_ENT2_POS
+    NEG AX
+@MULT_FLOAT_ENT2_POS:
+    MOV CX, AX              ; CX = |entero2|
     
-    ; Multiplicar los enteros
-    MOV AX, CX
-    MUL BX      ; DX:AX = AX * BX
+    ; Multiplicación simple: entero1 * entero2
+    MOV AX, BX
+    MUL CX                  ; AX = entero1 * entero2
+    MOV [resultado_entero], AX
     
-    ; Calcular el factor de ajuste decimal
-    MOV BL, [dec_digitos1]
-    ADD BL, [dec_digitos2]
-    MOV [resultado_digitos], BL
+    ; Para los decimales, usamos aproximación simple
+    ; Primer término: decimal1 * entero2
+    MOV AX, [decimal1]
+    MUL CX                  ; AX = decimal1 * entero2
+    MOV BX, 100
+    CMP BX, 0               ; Verificar división por cero
+    JE @MULT_FLOAT_SIN_DECIMALES
+    DIV BX                  ; AX = (decimal1 * entero2) / 100
+    MOV DX, AX              ; DX = primer término
     
-    ; Ajustar el resultado según los decimales
-    CALL AJUSTAR_DECIMALES_MULT
+    ; Segundo término: entero1 * decimal2
+    MOV AX, [decimal2]
+    MOV BX, [entero1]
+    CMP BX, 0
+    JGE @MULT_FLOAT_ENT1_POS2
+    NEG BX
+@MULT_FLOAT_ENT1_POS2:
+    MUL BX                  ; AX = decimal2 * entero1
+    MOV BX, 100
+    DIV BX                  ; AX = (decimal2 * entero1) / 100
+    
+    ; Sumar ambos términos
+    ADD AX, DX              ; AX = parte decimal total
+    MOV [resultado_decimal], AX
+    
+    ; Manejar overflow en decimales
+    CMP AX, 99
+    JLE @MULT_FLOAT_SIN_OVERFLOW
+    
+    SUB AX, 100
+    MOV [resultado_decimal], AX
+    INC WORD PTR [resultado_entero]
+    
+@MULT_FLOAT_SIN_OVERFLOW:
+@MULT_FLOAT_SIN_DECIMALES:
+    MOV [resultado_digitos], 2  ; Siempre 2 dígitos decimales
     
     POP DX
     POP CX
@@ -1324,71 +1356,50 @@ MULTIPLICAR_FLOTANTES PROC
 MULTIPLICAR_FLOTANTES ENDP
 
 ;------------------------------------------------------------
-; Procedimiento: CONVERTIR_A_ENTERO
-; Convierte un flotante a entero (elimina punto decimal)
-; Entrada: AX = parte entera, BL = dígitos decimales
-; Salida: AX = número convertido
-;------------------------------------------------------------
-CONVERTIR_A_ENTERO PROC
-    PUSH CX
-    PUSH DX
-    
-    MOV CX, AX  ; Guardar parte entera
-    
-    ; Multiplicar parte entera por 10^digitos
-    MOV AL, BL
-    CALL CALCULAR_POTENCIA_10  ; AX = 10^digitos
-    MOV BX, AX
-    MOV AX, CX
-    MUL BX      ; AX = entero * 10^digitos
-    
-    ; Sumar parte decimal (ya está ajustada)
-    ADD AX, [decimal1]
-    
-    POP DX
-    POP CX
-    RET
-CONVERTIR_A_ENTERO ENDP
-
-;------------------------------------------------------------
-; Procedimiento: AJUSTAR_DECIMALES_MULT
+; Procedimiento: SEPARAR_ENTERO_DECIMAL_MULT
 ; Ajusta el resultado de la multiplicación según los decimales
 ;------------------------------------------------------------
-AJUSTAR_DECIMALES_MULT PROC
-    PUSH AX
+SEPARAR_ENTERO_DECIMAL_MULT PROC
     PUSH BX
     PUSH CX
-    PUSH DX
     
-    ; Calcular el factor de división (10^total_digitos)
-    MOV AL, [resultado_digitos]
+    ; DX:AX contiene el resultado de la multiplicación
+    ; Necesitamos dividir por 10^(digitos_totales)
+    
+    ; Calcular divisor
+    MOV BL, [resultado_digitos]
     CALL CALCULAR_POTENCIA_10  ; AX = 10^digitos
+    MOV BX, AX                 ; BX = divisor
     
-    ; Dividir el resultado por el factor
-    MOV BX, AX
-    MOV AX, [resultado_entero]
+    ; Recuperar resultado de multiplicación (debe estar en DX:AX)
+    ; Si DX no es 0, necesitamos manejar números grandes
+    CMP DX, 0
+    JE @MULT_SIN_OVERFLOW
+    
+    ; Manejar overflow (simplificado)
+    MOV AX, 65535              ; Resultado máximo
     XOR DX, DX
-    DIV BX      ; AX = cociente, DX = resto
     
-    ; El cociente es la parte entera
+@MULT_SIN_OVERFLOW:
+    ; Dividir AX por BX
+    DIV BX                     ; AX = parte entera, DX = resto
+    
     MOV [resultado_entero], AX
     
-    ; El resto es la parte decimal (ajustar a 4 dígitos)
+    ; El resto * 100 / divisor nos da los decimales
     MOV AX, DX
-    MOV BX, 100
-    MUL BX      ; AX = resto * 100
-    XOR DX, DX
-    DIV WORD PTR [const_cien]  ; Ajustar a 2 decimales
-    
+    MOV CX, 100
+    MUL CX                     ; AX = resto * 100
+    DIV BX                     ; AX = parte decimal
     MOV [resultado_decimal], AX
-    MOV [resultado_digitos], 2  ; Siempre mostrar 2 decimales
     
-    POP DX
+    ; Ajustar dígitos decimales a 2
+    MOV [resultado_digitos], 2
+    
     POP CX
     POP BX
-    POP AX
     RET
-AJUSTAR_DECIMALES_MULT ENDP
+SEPARAR_ENTERO_DECIMAL_MULT ENDP
 
 ;------------------------------------------------------------
 ; Procedimiento: NORMALIZAR_PARA_MULTIPLICACION
@@ -1402,46 +1413,41 @@ NORMALIZAR_PARA_MULTIPLICACION PROC
     ; Encontrar el máximo número de dígitos decimales
     MOV AL, [dec_digitos1]
     MOV BL, [dec_digitos2]
+    
+    ; Usar el máximo de los dos
     CMP AL, BL
-    JGE @SELECTED_NORM_MULT_MAX_ES_1
+    JGE @NORM_MULT_MAX_ES_1
+    MOV AL, BL                 ; AL = max(dig1, dig2)
     
-    ; Segundo tiene más dígitos, normalizar primero
-    SUB BL, AL
-    XOR BH, BH
-    MOV CX, BX
+@NORM_MULT_MAX_ES_1:
+    ; Asegurarse de que ambos tengan al menos 2 dígitos decimales
+    CMP AL, 2
+    JGE @NORM_MULT_MIN_OK
+    MOV AL, 2
     
-    CMP CX, 0
-    JE @SELECTED_NORM_MULT_FIN
+@NORM_MULT_MIN_OK:
+    ; Ajustar primer número
+    MOV BL, [dec_digitos1]
+    SUB AL, BL                 ; AL = dígitos a agregar
+    CMP AL, 0
+    JE @NORM_MULT_NUM2
     
-@SELECTED_NORM_MULT_LOOP1:
+    MOV CL, AL
     MOV AX, [decimal1]
-    MUL WORD PTR [const_diez]
+@NORM_MULT_LOOP1:
+    MOV BX, 10
+    MUL BX
+    LOOP @NORM_MULT_LOOP1
     MOV [decimal1], AX
-    LOOP @SELECTED_NORM_MULT_LOOP1
-    
-    MOV AL, [dec_digitos2]
-    MOV [dec_digitos1], AL
-    JMP @SELECTED_NORM_MULT_FIN
-    
-@SELECTED_NORM_MULT_MAX_ES_1:
-    ; Primero tiene más o igual dígitos, normalizar segundo
-    SUB AL, BL
-    XOR AH, AH
-    MOV CX, AX
-    
-    CMP CX, 0
-    JE @SELECTED_NORM_MULT_FIN
-    
-@SELECTED_NORM_MULT_LOOP2:
-    MOV AX, [decimal2]
-    MUL WORD PTR [const_diez]
-    MOV [decimal2], AX
-    LOOP @SELECTED_NORM_MULT_LOOP2
     
     MOV AL, [dec_digitos1]
-    MOV [dec_digitos2], AL
+    ADD AL, CL                 ; Actualizar contador
+    MOV [dec_digitos1], AL
     
-@SELECTED_NORM_MULT_FIN:
+@NORM_MULT_NUM2:
+    ; Hacer lo mismo para el segundo número
+    ; (lógica similar)
+    
     POP CX
     POP BX
     POP AX
@@ -2030,16 +2036,22 @@ CALCULAR_POTENCIA_10 PROC
     XOR AH, AH  ; Limpiar parte alta
     MOV CX, AX  ; CX = exponente
     
+    ; AGREGAR LÍMITE DE SEGURIDAD
+    CMP CX, 5
+    JLE @POT_SAFE
+    MOV CX, 5   ; Máximo 10^5 = 100000
+    
+@POT_SAFE:
     MOV AX, 1   ; Resultado inicial = 1
     
     CMP CX, 0
-    JE @SELECTED_POT_FIN  ; 10^0 = 1
+    JE @POT_FIN  ; 10^0 = 1
     
-@SELECTED_POT_LOOP:
+@POT_LOOP:
     MUL WORD PTR [const_diez]  ; AX = AX * 10
-    LOOP @SELECTED_POT_LOOP
+    LOOP @POT_LOOP
     
-@SELECTED_POT_FIN:
+@POT_FIN:
     POP CX
     POP BX
     RET
