@@ -1,0 +1,54 @@
+WorldName TestTiposMixto:
+
+Inventory
+    Stack entero = 100;
+    Ghast flotante = 25.75;
+    Spider cadena = "123";
+    Torch booleano = On;
+    Rune caracter = '5';
+
+CraftingTable
+    $$ Función que demuestra conversiones implícitas válidas
+    Spell convertirTipos() -> Ghast
+    PolloCrudo
+        Stack temp1 = entero + 50;        $$ VÁLIDO: STACK + STACK
+        Ghast temp2 = entero + flotante;  $$ VÁLIDO: conversión STACK->GHAST
+        Ghast temp3 = temp1 :+ temp2;     $$ VÁLIDO: STACK :+ GHAST->GHAST
+        
+        $$ ADVERTENCIA: operadores incorrectos pero funcionalmente válidos
+        Ghast temp4 = flotante + flotante; $$ ADVERTENCIA: usar :+ 
+        
+        respawn temp3;
+    PolloAsado;
+
+SpawnPoint
+    $$ Casos límite - algunos válidos, otros no
+    
+    $$ VÁLIDO: Conversiones numéricas implícitas
+    flotante = entero;                $$ STACK -> GHAST (válido)
+    flotante = 42 :+ flotante;        $$ STACK :+ GHAST -> GHAST
+    
+    $$ VÁLIDO: Comparaciones con conversión
+    booleano = entero > flotante;     $$ STACK > GHAST -> TORCH (válido)
+    booleano = flotante == entero;    $$ GHAST == STACK -> TORCH (válido)
+    
+    $$ PROBLEMÁTICO: Requieren conversión explícita
+    entero = flotante;                $$ GHAST -> STACK (pérdida precisión)
+    entero = booleano;                $$ TORCH -> STACK (debería ser explícito)
+    booleano = entero;                $$ STACK -> TORCH (debería ser explícito)
+    
+    $$ INVÁLIDO: Incompatibles fundamentalmente
+    entero = cadena;                  $$ ERROR: SPIDER -> STACK
+    cadena = entero + flotante;       $$ ERROR: resultado numérico -> SPIDER
+    caracter = entero + caracter;     $$ ERROR: operación aritmética con RUNE
+    
+    $$ Expresiones complejas mixtas
+    flotante = convertirTipos();      $$ VÁLIDO: función retorna GHAST
+    entero = entero + 10 * 2;         $$ VÁLIDO: todo STACK
+    flotante = entero :+ flotante :* 2.0; $$ VÁLIDO: conversiones apropiadas
+    
+    $$ Casos especiales de comparación
+    booleano = cadena is cadena;      $$ VÁLIDO: IS permite cualquier tipo
+    booleano = entero is_not flotante; $$ VÁLIDO: IS_NOT es permisivo
+
+WorldSave

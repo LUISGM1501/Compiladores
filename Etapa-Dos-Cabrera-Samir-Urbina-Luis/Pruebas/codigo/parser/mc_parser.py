@@ -9,6 +9,7 @@ Breve Descripcion: Encargado del manejo del parser.
 """
 
 import sys
+import os
 
 from .gramatica.Gramatica import Gramatica
 from .TokenMap import TokenMap
@@ -53,15 +54,36 @@ from .semantica.diccionarioSemantico.CheckPollo import (
     reset_pollo_checker,
     get_estado_actual_pollo
 )
+try:
+    from .semantica.diccionarioSemantico.CheckTipoOp import (
+        verificar_operacion_aritmetica,
+        verificar_expresion_completa,
+        sugerir_correccion_tipo,
+        es_operador_aritmetico,
+        inferir_tipo_operando
+    )
+except ModuleNotFoundError:
+    import sys, os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+    from semantica.diccionarioSemantico.CheckTipoOp import (
+        verificar_operacion_aritmetica,
+        verificar_expresion_completa,
+        sugerir_correccion_tipo,
+        es_operador_aritmetico,
+        inferir_tipo_operando
+    )
+
 
 # IMPORTACION DE CHEQUEOS SEMANTICOS
-from parser.semantica.TablaSimbolos import TablaSimbolos
-from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
+from .semantica.TablaSimbolos import TablaSimbolos
+from .semantica.HistorialSemantico import HistorialSemanticoSingleton
 
-from parser.semantica.diccionarioSemantico.CheckVarExiste import checkVarExiste
-from parser.semantica.diccionarioSemantico.CheckObsidian import checkObsidian
-from parser.semantica.diccionarioSemantico.CheckWorldName import checkWorldname
-from parser.semantica.diccionarioSemantico.CheckWorldSave import checkWorldSave
+from .semantica.diccionarioSemantico.CheckVarExiste import checkVarExiste
+from .semantica.diccionarioSemantico.CheckObsidian import checkObsidian
+from .semantica.diccionarioSemantico.CheckWorldName import checkWorldname
+from .semantica.diccionarioSemantico.CheckWorldSave import checkWorldSave
+
+from .semantica.HistorialSemantico import historialSemantico
 
 class Parser:
 
@@ -127,6 +149,10 @@ class Parser:
         # Historial de tokens para análisis de contexto
         self.token_history = []
         self.max_history_size = 5  # Mantener historial de los últimos 5 tokens
+
+        # NUEVO: Pila de tipos para análisis de expresiones
+        self.pila_tipos = []
+        self.operaciones_pendientes = []
 
         # Inicializar con el primer token (si existe)
         if self.tokens:
@@ -261,11 +287,83 @@ class Parser:
             return self.token_history[-pasos_atras]
         return None
 
+    def verificar_operacion_binaria(self, operador_token):
+        """
+        Verifica una operación binaria cuando se encuentra un operador aritmético
+        
+        Args:
+            operador_token: Token del operador encontrado
+        """
+        if len(self.pila_tipos) < 2:
+            print(f"ERROR: Faltan operandos para el operador {operador_token.lexema}")
+            return
+
+        # Obtener los dos tipos más recientes
+        tipo_der = self.pila_tipos.pop()
+        tipo_izq = self.pila_tipos.pop()
+
+        # Validación explícita de tipos
+        if tipo_izq == "ERROR" or tipo_der == "ERROR":
+            self.pila_tipos.append("ERROR")
+            return
+
+        # Verificar la operación
+        es_valida, tipo_resultado, error = verificar_operacion_aritmetica(
+            tipo_izq, 
+            operador_token.type, 
+            tipo_der, 
+            operador_token.linea
+        )
+        
+        if not es_valida:
+            print(f"ERROR TIPO OPERACIÓN: {error}")
+            # Sugerir corrección
+            sugerencia = sugerir_correccion_tipo(tipo_izq, operador_token.type, tipo_der)
+            print(f"SUGERENCIA: {sugerencia}")
+            
+            # Continuar con tipo de error
+            self.pila_tipos.append("ERROR")
+        else:
+            # Operación válida, apilar el tipo resultado
+            self.pila_tipos.append(tipo_resultado)
+            self.imprimir_debug(f"Operación {tipo_izq} {operador_token.lexema} {tipo_der} -> {tipo_resultado}", 2)
+
+    def procesar_operando(self, token):
+        """
+        Procesa un operando y lo agrega a la pila de tipos
+        
+        Args:
+            token: Token que representa un operando (literal o identificador)
+        """
+        if token.type == "IDENTIFICADOR":
+            # Buscar el tipo en la tabla de símbolos
+            tabla = TablaSimbolos.instancia()
+            simbolo = tabla.buscar(token.lexema)
+            
+            if simbolo:
+                tipo = simbolo.tipo
+                self.pila_tipos.append(tipo)
+                self.imprimir_debug(f"Operando {token.lexema} ({tipo}) agregado a pila de tipos", 3)
+            else:
+                # Variable no declarada
+                self.pila_tipos.append("UNKNOWN")
+                print(f"WARNING: Variable '{token.lexema}' no declarada, tipo desconocido")
+        else:
+            # Inferir tipo del literal
+            tipo = inferir_tipo_operando(token)
+            self.pila_tipos.append(tipo)
+            self.imprimir_debug(f"Literal {token.lexema} ({tipo}) agregado a pila de tipos", 3)
+
+    def limpiar_pila_tipos(self):
+        """Limpia la pila de tipos al final de una expresión"""
+        self.pila_tipos.clear()
+        self.operaciones_pendientes.clear()
 
     def avanzar(self):
         """
         Avanza al siguiente token en la secuencia, ignorando comentarios
         y manteniendo un historial de tokens procesados.
+        NUEVO: También detecta y verifica operaciones aritméticas.
         """
         # Guardar el token actual en el historial antes de avanzar
         if self.token_actual:
@@ -279,6 +377,9 @@ class Parser:
         if self.posicion_actual < len(self.tokens):
             self.token_actual = self.tokens[self.posicion_actual]
             self.imprimir_debug(f"Avanzando a token {self.posicion_actual}: {self.token_actual.type} ('{self.token_actual.lexema}')", 2)
+
+            # NUEVO: Detectar operaciones aritméticas en tiempo real
+            self.detectar_y_verificar_operaciones()
 
             # CORRECCIÓN CRÍTICA: Solo procesar IDENTIFICADORES
             if self.token_actual.type == "IDENTIFICADOR":
@@ -296,7 +397,6 @@ class Parser:
                         welcomeWorldname(self.token_history[-1], self.token_actual)
                         return
 
-                    print(f"\n\n\n\n\n PRUEBA ENTRANDO PRUEBA ENTRANDO")
                     # Casos Indirectos que requieren "mirar a futuro"
                     # Recolección temporal de tokens hasta PUNTO_Y_COMA o hasta estructura completa
                     tokens_temporales = []
@@ -526,6 +626,35 @@ class Parser:
                                     valor_token = tokens_temporales[1]
                                     print(f"  -> Asignando valor: {valor_token.lexema} a {simbolo_existente.nombre}")
                                     
+                                    # Revisar si contiene operador flotante (:+, :-, :*, :/, :%)
+                                    tipos_flotantes = {
+                                        "SUMA_FLOTANTE", "RESTA_FLOTANTE", "MULTIPLICACION_FLOTANTE",
+                                        "DIVISION_FLOTANTE", "MODULO_FLOTANTE"
+                                    }
+
+                                    # Buscar tokens de la expresión hasta PUNTO_Y_COMA
+                                    exp_tokens = []
+                                    j = pos_temp + 1
+                                    while j < len(self.tokens) and self.tokens[j].type != "PUNTO_Y_COMA":
+                                        exp_tokens.append(self.tokens[j])
+                                        j += 1
+
+                                    tipos_encontrados = set([t.type for t in exp_tokens])
+                                    if tipos_flotantes & tipos_encontrados:
+                                        from semantica.diccionarioSemantico.CheckTipoOp import evaluar_expresion_flotante
+                                        resultado = evaluar_expresion_flotante(exp_tokens)
+                                        if resultado is not None:
+                                            simbolo_existente.valor = round(resultado, 2)
+                                            self.token_history.append(f"REGLA SEMANTICA 013: Se evaluó operación flotante y se asignó '{simbolo_existente.nombre}' = {simbolo_existente.valor}")
+                                            print(f" [FLOTANTE] {simbolo_existente.nombre} = {simbolo_existente.valor}")
+                                            pos_temp = j + 1
+                                            
+                                        else:
+                                            print(f" Error en expresión flotante: {exp_tokens}")
+                                            self.token_history.append(f"REGLA SEMANTICA 014: Error en evaluación flotante para {simbolo_existente.nombre}")
+                                            pos_temp = j + 1
+                                            
+                                    
                             elif simbolo_existente.categoria in ["OBSIDIAN", "CONSTANTE"]:
                                 print(f"  ERROR SEMANTICO: No se puede reasignar la constante '{simbolo_existente.nombre}'")
                         
@@ -558,6 +687,73 @@ class Parser:
             self.token_actual = None
             self.imprimir_debug("Avanzando a EOF", 2)
 
+    def detectar_y_verificar_operaciones(self):
+        """
+        Detecta operaciones aritméticas analizando el contexto actual
+        """
+        if not self.token_actual:
+            return
+
+        # Detectar operadores aritméticos
+        if es_operador_aritmetico(self.token_actual):
+            self.imprimir_debug(f"Operador aritmético detectado: {self.token_actual.lexema}", 2)
+            
+            # Necesitamos contexto: ¿estamos en una expresión?
+            if self.en_contexto_expresion():
+                self.verificar_operacion_binaria(self.token_actual)
+            
+        # Detectar operandos (para construir la pila de tipos)
+        elif self.es_operando_en_expresion(self.token_actual):
+            self.procesar_operando(self.token_actual)
+
+    def en_contexto_expresion(self):
+        """
+        Determina si estamos procesando una expresión aritmética
+        """
+        # Buscar patrones que indiquen que estamos en una expresión
+        if len(self.token_history) >= 1:
+            token_anterior = self.token_history[-1]
+            
+            # Después de = estamos en expresión
+            if token_anterior.type == "IGUAL":
+                return True
+                
+            # Después de operadores aritméticos seguimos en expresión
+            if es_operador_aritmetico(token_anterior):
+                return True
+                
+            # Después de paréntesis de apertura
+            if token_anterior.type == "PARENTESIS_ABRE":
+                return True
+        
+        return False
+
+    def es_operando_en_expresion(self, token):
+        """
+        Verifica si un token es un operando dentro de una expresión
+        """
+        # Es operando si estamos en contexto de expresión y el token es un literal/identificador
+        if not self.en_contexto_expresion():
+            return False
+            
+        tipos_operando = {
+            "NUMERO_ENTERO", "NUMERO_DECIMAL", "CADENA", "CARACTER",
+            "ON", "OFF", "IDENTIFICADOR"
+        }
+        
+        return token.type in tipos_operando
+
+    def analizar_expresion_completa_cuando_sea_necesario(self):
+        """
+        Analiza una expresión completa cuando llegamos al final (punto y coma, etc.)
+        """
+        if self.pila_tipos and len(self.pila_tipos) > 1:
+            # Si hay múltiples tipos en la pila, algo está mal
+            print(f"WARNING: Pila de tipos inconsistente: {self.pila_tipos}")
+        
+        # Limpiar al final de la expresión
+        if self.token_actual and self.token_actual.type in ["PUNTO_Y_COMA", "PARENTESIS_CIERRA"]:
+            self.limpiar_pila_tipos()
 
     def detectar_contexto_asignacion(self):
         """
@@ -608,6 +804,18 @@ class Parser:
         
         token_code = TokenMap.get_token_code(token_type)
         
+        # MAQUILLAJE: Mapear operadores flotantes a sus equivalentes normales
+        if token_code in [122, 123, 124, 125, 126]:
+            flotante_a_normal = {
+                122: TokenMap.get_token_code("SUMA"),
+                123: TokenMap.get_token_code("RESTA"),
+                124: TokenMap.get_token_code("MULTIPLICACION"),
+                125: TokenMap.get_token_code("DIVISION"),
+                126: TokenMap.get_token_code("MODULO")
+            }
+            token_code = flotante_a_normal[token_code]
+            self.imprimir_debug(f"Maquillando operador flotante '{token_type}' como operador estándar '{token_code}'", 2)
+        
         self.imprimir_debug(f"Obteniendo tipo token: {token_type} -> {token_code}", 3)
         
         if token_code == -1:
@@ -627,6 +835,27 @@ class Parser:
             True si hay coincidencia y se avanza al siguiente token, False en caso contrario
         """
         tipo_token_actual = self.obtener_tipo_token()
+        
+        # NUEVO: Verificación específica para operadores aritméticos
+        operadores_aritmeticos_codes = {
+            98: "SUMA", 99: "RESTA", 100: "MULTIPLICACION", 
+            101: "DIVISION", 102: "MODULO",
+            122: "SUMA_FLOTANTE", 123: "RESTA_FLOTANTE", 
+            124: "MULTIPLICACION_FLOTANTE", 125: "DIVISION_FLOTANTE", 
+            126: "MODULO_FLOTANTE"
+        }
+        
+        if terminal_esperado in operadores_aritmeticos_codes:
+            operador_nombre = operadores_aritmeticos_codes[terminal_esperado]
+            
+            if tipo_token_actual == terminal_esperado:
+                # Verificar la operación antes de avanzar
+                self.verificar_operacion_si_corresponde(operador_nombre)
+                self.avanzar()
+                return True
+            else:
+                self.reportar_error(f"Se esperaba operador {operador_nombre}")
+                return False
         
         # NUEVO: Verificación de POLLOCRUDO
         if terminal_esperado == 22 and self.token_actual:  # 22 es POLLO_CRUDO
@@ -709,6 +938,10 @@ class Parser:
 
         # Caso normal: comprobar coincidencia exacta
         if tipo_token_actual == terminal_esperado:
+            # NUEVO: Limpiar pila de tipos en ciertos puntos
+            if terminal_esperado == 109:  # PUNTO_Y_COMA
+                self.finalizar_expresion_y_verificar()
+        
             self.avanzar()
             return True
         else:
@@ -717,7 +950,156 @@ class Parser:
             else:
                 self.reportar_error(f"Se esperaba '{nombre_esperado}' pero se llegó al final del archivo")
             return False
+
+    def verificar_operacion_si_corresponde(self, operador_nombre):
+        """
+        Verifica una operación aritmética si tenemos suficientes operandos en la pila
+        """
+        if len(self.pila_tipos) >= 2:
+            tipo_der = self.pila_tipos.pop()
+            tipo_izq = self.pila_tipos.pop()
+            
+            # Verificar la operación
+            es_valida, tipo_resultado, error = verificar_operacion_aritmetica(
+                tipo_izq, operador_nombre, tipo_der, 
+                self.token_actual.linea if self.token_actual else None
+            )
+            
+            if not es_valida:
+                print(f"ERROR TIPO OPERACIÓN: {error}")
+                sugerencia = sugerir_correccion_tipo(tipo_izq, operador_nombre, tipo_der)
+                print(f"SUGERENCIA: {sugerencia}")
+                self.pila_tipos.append("ERROR")
+            else:
+                self.pila_tipos.append(tipo_resultado)
+                self.imprimir_debug(f"Operación verificada: {tipo_izq} {operador_nombre} {tipo_der} -> {tipo_resultado}", 2)
+
+    def finalizar_expresion_y_verificar(self):
+        """
+        Finaliza el análisis de una expresión y verifica su consistencia
+        """
+        if len(self.pila_tipos) == 1:
+            tipo_final = self.pila_tipos[0]
+            self.imprimir_debug(f"Expresión finalizada con tipo: {tipo_final}", 2)
+        elif len(self.pila_tipos) > 1:
+            print(f"WARNING: Expresión mal formada, tipos restantes: {self.pila_tipos}")
         
+        # Limpiar para la siguiente expresión
+        self.limpiar_pila_tipos()
+
+    def analizar_expresion_avanzada(self, tokens_expresion):
+        """
+        Analiza una expresión compleja con múltiples operadores y operandos
+        
+        Args:
+            tokens_expresion: Lista de tokens que forman la expresión
+            
+        Returns:
+            tuple: (es_valida, tipo_resultado, errores)
+        """
+        if not tokens_expresion:
+            return True, "UNKNOWN", []
+        
+        # Usar la función de CheckTipoOp para análisis completo
+        linea = tokens_expresion[0].linea if tokens_expresion and hasattr(tokens_expresion[0], 'linea') else None
+        
+        es_valida, tipo_resultado, errores = verificar_expresion_completa(tokens_expresion, linea)
+        
+        if not es_valida:
+            print(f"ERRORES EN EXPRESIÓN:")
+            for error in errores:
+                print(f"  - {error}")
+        else:
+            self.imprimir_debug(f"Expresión válida, tipo resultado: {tipo_resultado}", 1)
+        
+        return es_valida, tipo_resultado, errores
+
+    def procesar_variable_con_verificacion_tipos(self, variable_token, valor_tokens):
+        """
+        Procesa una declaración/asignación de variable verificando tipos
+        
+        Args:
+            variable_token: Token de la variable
+            valor_tokens: Tokens que representan el valor asignado
+        """
+        # Obtener tipo esperado de la variable
+        tabla = TablaSimbolos.instancia()
+        simbolo = tabla.buscar(variable_token.lexema)
+        
+        if simbolo:
+            tipo_esperado = simbolo.tipo
+            
+            # Analizar la expresión del valor
+            if valor_tokens:
+                es_valida, tipo_obtenido, errores = self.analizar_expresion_avanzada(valor_tokens)
+                
+                # Verificar compatibilidad de tipos
+                if es_valida and tipo_obtenido != "ERROR":
+                    compatibilidad = self.verificar_compatibilidad_tipos(tipo_esperado, tipo_obtenido)
+                    
+                    if not compatibilidad["es_compatible"]:
+                        error = f"ERROR TIPO ASIGNACIÓN: No se puede asignar {tipo_obtenido} a variable {variable_token.lexema} de tipo {tipo_esperado}"
+                        print(error)
+                        if compatibilidad["sugerencia"]:
+                            print(f"SUGERENCIA: {compatibilidad['sugerencia']}")
+                    elif compatibilidad["requiere_conversion"]:
+                        print(f"INFO: Conversión implícita de {tipo_obtenido} a {tipo_esperado} en variable {variable_token.lexema}")
+
+    def verificar_compatibilidad_tipos(self, tipo_esperado, tipo_obtenido):
+        """
+        Verifica si dos tipos son compatibles para asignación
+        
+        Returns:
+            dict: {
+                'es_compatible': bool,
+                'requiere_conversion': bool, 
+                'sugerencia': str
+            }
+        """
+        # Tipos idénticos - siempre compatibles
+        if tipo_esperado == tipo_obtenido:
+            return {
+                'es_compatible': True,
+                'requiere_conversion': False,
+                'sugerencia': None
+            }
+        
+        # Conversiones numéricas permitidas
+        conversiones_numericas = {
+            ("STACK", "GHAST"): "Conversión de entero a flotante",
+            ("TORCH", "STACK"): "Conversión de booleano a entero", 
+            ("RUNE", "STACK"): "Conversión de carácter a código ASCII",
+        }
+        
+        clave_conversion = (tipo_obtenido, tipo_esperado)
+        if clave_conversion in conversiones_numericas:
+            return {
+                'es_compatible': True,
+                'requiere_conversion': True,
+                'sugerencia': conversiones_numericas[clave_conversion]
+            }
+        
+        # Conversiones problemáticas
+        conversiones_problematicas = {
+            ("GHAST", "STACK"): "Pérdida de precisión al convertir flotante a entero",
+            ("SPIDER", "STACK"): "Conversión de cadena a número puede fallar",
+            ("STACK", "SPIDER"): "Conversión de número a cadena puede ser inesperada"
+        }
+        
+        if clave_conversion in conversiones_problematicas:
+            return {
+                'es_compatible': False,
+                'requiere_conversion': True,
+                'sugerencia': f"Conversión explícita recomendada: {conversiones_problematicas[clave_conversion]}"
+            }
+        
+        # Tipos completamente incompatibles
+        return {
+            'es_compatible': False,
+            'requiere_conversion': False,
+            'sugerencia': f"Los tipos {tipo_obtenido} y {tipo_esperado} son incompatibles. Verifique la asignación."
+        }
+    
     def determinar_contexto_actual(self):
         """
         Determina el contexto actual basado en el historial de tokens
@@ -1249,6 +1631,47 @@ class Parser:
                         self.avanzar()
                     
                     self.procesar_llamada_procedimiento_en_statement(nombre_proc, tokens_llamada)
+                
+                # Análisis semántico para asignaciones con operadores flotantes
+                elif self.token_actual.type == "IGUAL":
+                    print("verificacion de asignacion:")
+                    print(self.tokens[self.index])  # IGUAL
+                    print(self.tokens[self.index+1])  # valor
+
+                    # ============================================================
+                    # EVALUACIÓN DE EXPRESIÓN FLOTANTE (:+ :- :* :/ :%) SI EXISTE
+                    # ============================================================
+                    tokens_derecha = []
+                    j = self.index
+                    while j < len(self.tokens) and self.tokens[j].type != "PUNTO_Y_COMA":
+                        tokens_derecha.append(self.tokens[j])
+                        j += 1
+
+                    tipos_flotantes = {
+                        "SUMA_FLOTANTE", "RESTA_FLOTANTE", "MULTIPLICACION_FLOTANTE",
+                        "DIVISION_FLOTANTE", "MODULO_FLOTANTE"
+                    }
+
+                    if any(t.type in tipos_flotantes for t in tokens_derecha):
+                        try:
+                            from semantica.diccionarioSemantico.CheckTipoOp import evaluar_expresion_flotante
+                        except ModuleNotFoundError:
+                            import sys, os
+                            sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+                            from semantica.diccionarioSemantico.CheckTipoOp import evaluar_expresion_flotante
+
+                        resultado = evaluar_expresion_flotante(tokens_derecha)
+                        if resultado is not None:
+                            simbolo.valor = round(resultado, 2)
+                            historialSemantico.agregar(f"REGLA SEMANTICA 013: Se evaluó operación flotante y se asignó '{simbolo.nombre}' = {simbolo.valor}")
+                            print(f" [FLOTANTE] {simbolo.nombre} = {simbolo.valor}")
+                            self.index = j + 1  # Saltar el ';'
+                            continue
+                        else:
+                            historialSemantico.agregar(f"REGLA SEMANTICA 014: Error en evaluación flotante para '{simbolo.nombre}'")
+                            print(f" [FLOTANTE] Error evaluando expresión para {simbolo.nombre}")
+                            self.index = j + 1
+                            continue
             
             # Al final del parsing, verificar balance final
             try:
@@ -1283,9 +1706,8 @@ class Parser:
                     tokens_restantes = self.tokens[self.posicion_actual:self.posicion_actual+10]
                 return len(self.errores) == 0
         except Exception as e:
-            self.reportar_error(f"Error fatal en el parser: {str(e)}")
-            import traceback
-            traceback.print_exc()  # Imprime el stack trace para depuración
+            print(f"ERROR CRÍTICO: {str(e)}")
+            print(f"Contexto: Token actual = {self.token_actual}, Pila = {self.stack}")
             return False
 
     def procesar_simbolo_semantico(self, simbolo):

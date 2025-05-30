@@ -21,6 +21,8 @@ from parser.gramatica.Gramatica import Gramatica
 from parser.semantica.TablaSimbolos import TablaSimbolos
 from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
 
+from token_cleaner import limpiar_tokens_para_parser, debug_tokens_para_parser
+
 # Verificar integridad
 Gramatica.verificarIntegridadRangos()
 
@@ -73,19 +75,27 @@ def ejecucion():
     for i, token in enumerate(tokens[:10]):
         print(f"{i}: {token}")
     
-    # Debug: mostrar primeros 100 tokens
-    print("\nPrimeros 100 tokens para el parser:")
-    for token in tokens[:100]:
-        print(token)
-
+    #################################################################
+    #################################################################
+    ##                 LIMPIEZA DE TOKENS                          ##
+    #################################################################
+    print("\n" + "="*60)
+    print("              APLICANDO LIMPIEZA DE TOKENS")
+    print("="*60)
+    
+    # *** NUEVA FUNCIONALIDAD: Limpiar tokens ***
+    tokens_limpios = limpiar_tokens_para_parser(tokens)
+    
+    # Debug de la limpieza (opcional, comentar si no quieres tanto detalle)
+    debug_tokens_para_parser(tokens, tokens_limpios)
     
     #################################################################
     #################################################################
     ##                    INICIO ANALISIS                          ##
     ##                  SINTACTICO Y SEMANTICO                     ##
     #################################################################
-    # Funcionamiento del parser 
-    iniciar_parser(tokens, debug=True)
+    # Funcionamiento del parser con tokens limpios
+    iniciar_parser(tokens_limpios, debug=True)  # *** CAMBIO: usar tokens_limpios ***
 
     tabla = TablaSimbolos.instancia()
     print(f" \n\n Ver informacion de la tablas semantica:")
