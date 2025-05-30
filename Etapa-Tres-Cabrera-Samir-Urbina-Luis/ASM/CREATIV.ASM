@@ -1084,42 +1084,86 @@ NORMALIZAR_DECIMALES_PARA_OPERACION PROC
     MOV AL, BL
     
 @CREATIV_NORM_MAX_ES_DIG1:
+    ; Para evitar overflow, limitar a máximo 3 dígitos
+    CMP AL, 3
+    JLE @CREATIV_NORM_MAX_OK
+    MOV AL, 3
+    
+@CREATIV_NORM_MAX_OK:
     MOV [resultado_digitos], AL
     
-    ; Normalizar primer número
+    ; Normalizar primer número si es necesario
     MOV CL, [dec_digitos1]
-    MOV CH, AL
-    SUB CH, CL
-    JZ @CREATIV_NORM_NUM2  ; Ya tiene los dígitos necesarios
+    CMP CL, AL
+    JE @CREATIV_NORM_NUM2      ; Ya tiene los dígitos correctos
+    JG @CREATIV_NORM_REDUCIR1  ; Tiene más dígitos, reducir
+    
+    ; Tiene menos dígitos, expandir
+    SUB AL, CL                 ; AL = dígitos a agregar
+    XOR AH, AH
+    MOV CX, AX
     
     MOV AX, [decimal1]
+@CREATIV_NORM_EXP1:
     MOV BX, 10
-@CREATIV_NORM_LOOP1:
     MUL BX
-    DEC CH
-    JNZ @CREATIV_NORM_LOOP1
+    LOOP @CREATIV_NORM_EXP1
     MOV [decimal1], AX
-    MOV AL, [resultado_digitos]
-    MOV [dec_digitos1], AL
+    JMP @CREATIV_NORM_NUM2
+    
+@CREATIV_NORM_REDUCIR1:
+    ; Tiene más dígitos, reducir
+    SUB CL, AL                 ; CL = dígitos a quitar
+    XOR CH, CH
+    
+    MOV AX, [decimal1]
+@CREATIV_NORM_RED1:
+    XOR DX, DX
+    MOV BX, 10
+    DIV BX
+    LOOP @CREATIV_NORM_RED1
+    MOV [decimal1], AX
     
 @CREATIV_NORM_NUM2:
     ; Normalizar segundo número
     MOV CL, [dec_digitos2]
-    MOV CH, [resultado_digitos]
-    SUB CH, CL
-    JZ @CREATIV_NORM_FIN
+    MOV AL, [resultado_digitos]
+    CMP CL, AL
+    JE @CREATIV_NORM_FIN       ; Ya tiene los dígitos correctos
+    JG @CREATIV_NORM_REDUCIR2  ; Tiene más dígitos, reducir
+    
+    ; Tiene menos dígitos, expandir
+    SUB AL, CL                 ; AL = dígitos a agregar
+    XOR AH, AH
+    MOV CX, AX
     
     MOV AX, [decimal2]
+@CREATIV_NORM_EXP2:
     MOV BX, 10
-@CREATIV_NORM_LOOP2:
     MUL BX
-    DEC CH
-    JNZ @CREATIV_NORM_LOOP2
+    LOOP @CREATIV_NORM_EXP2
     MOV [decimal2], AX
-    MOV AL, [resultado_digitos]
-    MOV [dec_digitos2], AL
+    JMP @CREATIV_NORM_FIN
+    
+@CREATIV_NORM_REDUCIR2:
+    ; Tiene más dígitos, reducir
+    SUB CL, AL                 ; CL = dígitos a quitar
+    XOR CH, CH
+    
+    MOV AX, [decimal2]
+@CREATIV_NORM_RED2:
+    XOR DX, DX
+    MOV BX, 10
+    DIV BX
+    LOOP @CREATIV_NORM_RED2
+    MOV [decimal2], AX
     
 @CREATIV_NORM_FIN:
+    ; Actualizar contadores de dígitos
+    MOV AL, [resultado_digitos]
+    MOV [dec_digitos1], AL
+    MOV [dec_digitos2], AL
+    
     POP DX
     POP CX
     POP BX
@@ -1139,23 +1183,38 @@ SUMAR_VALORES_ABSOLUTOS PROC
     
     ; Para probabilidades, siempre son positivas, así que sumamos directamente
     
-    ; Sumar partes decimales
+    ; Sumar partes decimales (ya normalizadas)
     MOV AX, [decimal1]
     ADD AX, [decimal2]
     
-    ; Calcular la base para verificar acarreo
-    MOV DL, [resultado_digitos]
-    CALL CALCULAR_POTENCIA_10_DL
-    ; BX contiene 10^digitos (base decimal)
+    ; Calcular la base para verificar acarreo usando resultado_digitos
+    MOV BL, [resultado_digitos]
+    XOR BH, BH
+    MOV CX, 1               ; CX = 1 (base inicial)
     
-    MOV DX, BX              ; DX = base decimal
+    ; Calcular 10^resultado_digitos
+    CMP BL, 0
+    JE @CREATIV_SUMA_BASE_LISTA
+    
+@CREATIV_SUMA_CALC_BASE:
+    MOV DX, 10
+    PUSH AX
+    MOV AX, CX
+    MUL DX
+    MOV CX, AX              ; CX = CX * 10
+    POP AX
+    DEC BL
+    JNZ @CREATIV_SUMA_CALC_BASE
+    
+@CREATIV_SUMA_BASE_LISTA:
+    ; CX contiene la base decimal (10^digitos)
     
     ; Verificar acarreo en decimales
     XOR DI, DI              ; DI = acarreo (0 inicialmente)
-    CMP AX, DX
+    CMP AX, CX
     JL @CREATIV_SUMA_SIN_ACARREO
     
-    SUB AX, DX              ; Ajustar decimal
+    SUB AX, CX              ; Ajustar decimal
     MOV DI, 1               ; Hay acarreo
     
 @CREATIV_SUMA_SIN_ACARREO:
