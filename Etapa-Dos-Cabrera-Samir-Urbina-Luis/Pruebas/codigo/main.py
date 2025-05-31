@@ -95,7 +95,7 @@ def ejecucion():
     ##                  SINTACTICO Y SEMANTICO                     ##
     #################################################################
     # Funcionamiento del parser con tokens limpios
-    iniciar_parser(tokens_limpios, debug=True)  # *** CAMBIO: usar tokens_limpios ***
+    iniciar_parser(tokens_limpios, debug=False, nivel_debug=1) 
 
     tabla = TablaSimbolos.instancia()
     print(f" \n\n Ver informacion de la tablas semantica:")

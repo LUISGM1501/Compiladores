@@ -90,6 +90,15 @@ from .semantica.diccionarioSemantico.CheckIgualdadOperadores import (
     es_operador_compuesto
 )
 
+# Agregar esta importación al inicio del archivo
+from .semantica.diccionarioSemantico.CheckTargetHitMiss import (
+    maquillar_target_hit_miss_en_parser,
+    validar_al_final_del_parsing,
+    obtener_estado_actual,
+    reset_tracker,
+    generar_sugerencias_correccion
+)
+
 class Parser:
 
     def imprimir_debug(self, mensaje, nivel=1):
@@ -158,6 +167,12 @@ class Parser:
         # NUEVO: Pila de tipos para análisis de expresiones
         self.pila_tipos = []
         self.operaciones_pendientes = []
+
+        # NUEVO: Reiniciar tracker de TARGET al inicializar parser
+        reset_tracker()
+        
+        # Agregar flag para tracking de TARGET/HIT/MISS
+        self.target_tracking_enabled = True
 
         # Inicializar con el primer token (si existe)
         if self.tokens:
@@ -377,16 +392,18 @@ class Parser:
             if len(self.token_history) > self.max_history_size:
                 self.token_history.pop(0)
         
-        # Avanzar al siguiente token
+        # NUEVO: Detectar y validar TARGET/HIT/MISS ANTES de avanzar
+        if self.target_tracking_enabled and self.token_actual:
+            self.maquillar_target_hit_miss()
+        
+        # Avanzar al siguiente token (código original)
         self.posicion_actual += 1
         if self.posicion_actual < len(self.tokens):
             self.token_actual = self.tokens[self.posicion_actual]
             self.imprimir_debug(f"Avanzando a token {self.posicion_actual}: {self.token_actual.type} ('{self.token_actual.lexema}')", 2)
 
-            # NUEVO: Detectar operadores compuestos en tiempo real
+            # Detectar operadores compuestos y operaciones (código existente)
             self.detectar_y_verificar_operadores_compuestos()
-
-            # Detectar operaciones aritméticas en tiempo real
             self.detectar_y_verificar_operaciones()
 
             # CORRECCIÓN CRÍTICA: Solo procesar IDENTIFICADORES
@@ -696,6 +713,38 @@ class Parser:
             self.imprimir_debug("Avanzando a EOF", 2)
 
 
+    def maquillar_target_hit_miss(self):
+        """
+        NUEVO: Aplica maquillaje para detectar y validar TARGET/HIT/MISS
+        sin modificar la gramática
+        """
+        if not self.token_actual:
+            return
+
+        try:
+            # Aplicar maquillaje semántico
+            errores, estructuras_procesadas = maquillar_target_hit_miss_en_parser(self)
+            
+            # Reportar errores encontrados
+            for error in errores:
+                print(f"ERROR SEMANTICO TARGET: {error}")
+                self.errores.append(error)
+            
+            # Debug información de estructuras procesadas
+            if estructuras_procesadas and self.debug:
+                for estructura in estructuras_procesadas:
+                    self.imprimir_debug(f"Estructura TARGET cerrada: ID {estructura['id']}, línea {estructura['linea']}", 2)
+            
+            # Mostrar estado actual si hay estructuras activas
+            if self.debug and self.token_actual.type in ["TARGET", "HIT", "MISS"]:
+                estado = obtener_estado_actual()
+                self.imprimir_debug(f"Estado TARGET: {estado['estructuras_abiertas']} abiertas, {estado['errores_detectados']} errores", 2)
+                
+        except Exception as e:
+            self.imprimir_debug(f"Error en maquillaje TARGET/HIT/MISS: {str(e)}", 1)
+
+    
+
     def detectar_y_verificar_operadores_compuestos(self):
         """
         Detecta y verifica operadores compuestos en tiempo real
@@ -1003,9 +1052,28 @@ class Parser:
     
     def match(self, terminal_esperado):
         """
-        MODIFICADO: Agrega manejo especial para operadores compuestos
+        MODIFICADO: Agrega detección específica para TARGET/HIT/MISS
         """
         tipo_token_actual = self.obtener_tipo_token()
+        
+        # NUEVO: Manejo especial para TARGET/HIT/MISS
+        target_tokens = {
+            26: "TARGET",  # Código del token TARGET según TokenMap
+            27: "HIT",     # Código del token HIT
+            28: "MISS"     # Código del token MISS
+        }
+        
+        if terminal_esperado in target_tokens:
+            token_nombre = target_tokens[terminal_esperado]
+            
+            if tipo_token_actual == terminal_esperado:
+                # El maquillaje ya se aplicó en avanzar(), aquí solo confirmamos
+                self.imprimir_debug(f"Match exitoso para {token_nombre}: maquillaje aplicado", 2)
+                self.avanzar()
+                return True
+            else:
+                self.reportar_error(f"Se esperaba {token_nombre} pero se encontró '{self.token_actual.lexema}' ({self.token_actual.type})")
+                return False
         
         # NUEVO: Verificación específica para operadores compuestos
         operadores_compuestos_codes = {
@@ -1337,27 +1405,20 @@ class Parser:
             return  # No reportar este error específico
         
         # Proceder con el comportamiento normal para todos los demás errores
-        if self.token_actual:
-            ubicacion = f"línea {self.token_actual.linea}, columna {self.token_actual.columna}"
-            token_info = f"'{self.token_actual.lexema}'"
-        else:
-            ubicacion = "final del archivo"
-            token_info = "EOF"
+        ubicacion = f"línea {self.token_actual.linea}, columna {self.token_actual.columna}" if self.token_actual else "final del archivo"
+        token_info = f"'{self.token_actual.lexema}'" if self.token_actual else "EOF"
         
         # Mensajes personalizados para errores comunes
+        error = f"Error sintáctico en {ubicacion}: {mensaje}"
         if "DOS_PUNTOS" in mensaje and ("::" in mensaje or "DOBLE_DOS_PUNTOS" in mensaje):
             error = f"Error en {ubicacion}: En la definición de parámetros, se requiere '::' para separar el tipo de los parámetros."
         elif "PolloCrudo" in mensaje or "POLLO_CRUDO" in mensaje:
             error = f"Error en {ubicacion}: Se esperaba la palabra clave 'PolloCrudo' para abrir un bloque de código."
         elif "PolloAsado" in mensaje or "POLLO_ASADO" in mensaje:
             error = f"Error en {ubicacion}: Se esperaba la palabra clave 'PolloAsado' para cerrar un bloque de código."
-        elif "Se esperaba 'WORLD_SAVE'" in mensaje or "worldSave" in mensaje:
-            # Este caso ya debería estar cubierto por errores_a_suprimir
-            return
         elif "Token inesperado" in mensaje and "id no identificado" in mensaje:
             error = f"Error en {ubicacion}: Identificador '{token_info}' no declarado."
         elif "no terminal" in mensaje and ("Stack" in mensaje or "Spider" in mensaje):
-            # Ayudar a identificar errores en declaraciones de variables
             error = f"Error en {ubicacion}: Error de sintaxis en declaración de variable o tipo."
         elif "literal" in mensaje.lower() or "NUMERO" in mensaje or "CADENA" in mensaje:
             error = f"Error en {ubicacion}: Error en la expresión o literal - {mensaje}"
@@ -1366,8 +1427,6 @@ class Parser:
         elif self.token_actual and hasattr(self, '_SpecialTokens_is_special_identifier') and self._SpecialTokens_is_special_identifier(self.token_actual):
             special_type = self._SpecialTokens_get_special_token_type(self.token_actual)
             error = f"Error en {ubicacion}: '{self.token_actual.lexema}' debería usarse como palabra clave {special_type}, no como identificador."
-        else:
-            error = f"Error sintáctico en {ubicacion}: {mensaje}"
         
         # Añadir sugerencia de corrección si está disponible
         if self.token_actual and hasattr(self, '_SpecialTokens_suggest_correction'):
@@ -1377,6 +1436,7 @@ class Parser:
         
         print(error)
         self.errores.append(error)
+        
     def sincronizar(self, simbolo_no_terminal):
         """
         Realiza la recuperación de errores avanzando hasta encontrar
@@ -1393,9 +1453,9 @@ class Parser:
         # Obtener los tokens en el conjunto Follow del no terminal
         follows = self.obtener_follows(simbolo_no_terminal)
         
-        # Puntos seguros ampliados con tokens específicos de Notch-Engine
+        # Puntos seguros ampliados con tokens específicos de TARGET/HIT/MISS
         puntos_seguros = [
-            # Tokens de estructura principal
+            # Tokens de estructura principal existentes
             9,    # WORLD_SAVE
             1,    # BEDROCK
             2,    # RESOURCE_PACK
@@ -1403,8 +1463,6 @@ class Parser:
             4,    # RECIPE
             5,    # CRAFTING_TABLE 
             6,    # SPAWN_POINT
-            
-            # Delimitadores de bloques y sentencias
             22,   # POLLO_CRUDO 
             23,   # POLLO_ASADO
             109,  # PUNTO_Y_COMA
@@ -1412,7 +1470,13 @@ class Parser:
             106,  # CORCHETE_CIERRA
             112,  # DOS_PUNTOS
             
-            # Palabras clave importantes
+            # NUEVO: Puntos seguros para estructuras condicionales TARGET/HIT/MISS
+            26,   # TARGET
+            27,   # HIT
+            28,   # MISS
+            25,   # CRAFT (usado en estructuras condicionales)
+            
+            # Otros tokens importantes
             42,   # SPELL
             43,   # RITUAL
             10,   # STACK
@@ -1422,9 +1486,7 @@ class Parser:
             14,   # CHEST
             16,   # GHAST
             87,   # NUMERO_ENTERO (para casos de inicialización)
-            91,   # IDENTIFICADOR (importante para nombres de variables)
-            
-            # Operadores significativos
+            91,   # IDENTIFICADOR
             115,  # FLECHA
             97,   # IGUAL
         ]
@@ -1432,25 +1494,17 @@ class Parser:
         # Añadir los follows a los puntos seguros
         puntos_seguros.extend(follows)
         
-        # Si estamos cerca del final, sincronizar con el EOF
-        if self.posicion_actual >= len(self.tokens) - 5:
-            puntos_seguros.append(Gramatica.MARCA_DERECHA)
-        
         try:
-            self.imprimir_debug(f"Buscando puntos seguros...", 2)
-            
-            # Obtener follows del no-terminal para mejor recuperación
-            follows = self.obtener_follows(simbolo_no_terminal)
-            if follows:
-                self.imprimir_debug(f"Follows para NT{simbolo_no_terminal - Gramatica.NO_TERMINAL_INICIAL}: {follows}", 3)
-                puntos_seguros.extend(follows)
-            
             # Avanzar en la entrada hasta encontrar un punto seguro
             tokens_saltados = 0
-            inicio_pos = self.posicion_actual
             
             while self.token_actual and self.obtener_tipo_token() not in puntos_seguros:
                 tokens_saltados += 1
+                
+                # NUEVO: Aplicar maquillaje TARGET/HIT/MISS durante sincronización
+                if self.target_tracking_enabled and self.token_actual.type in ["TARGET", "HIT", "MISS"]:
+                    self.maquillar_target_hit_miss()
+                
                 self.avanzar()
                 
                 # Límite de seguridad para evitar bucles infinitos
@@ -1470,31 +1524,7 @@ class Parser:
             else:
                 self.imprimir_debug("No se pudo sincronizar, fin de archivo", 1)
                 return False
-        except Exception as e:
-            self.imprimir_debug(f"Excepción en sincronizar: {str(e)}", 1)
-            return False
-            
-            while self.token_actual and self.obtener_tipo_token() not in puntos_seguros:
-                tokens_saltados += 1
-                self.avanzar()
                 
-                # Límite de seguridad para evitar bucles infinitos
-                if tokens_saltados > 100 or self.posicion_actual >= len(self.tokens):
-                    self.imprimir_debug(f"Alcanzado límite de recuperación, saltando al siguiente punto clave", 1)
-                    break
-            
-            if self.token_actual:
-                token_tipo = self.obtener_tipo_token()
-                try:
-                    token_nombre = Gramatica.getNombresTerminales(token_tipo) if token_tipo < Gramatica.MARCA_DERECHA else "EOF"
-                except:
-                    token_nombre = f"T{token_tipo}"
-                
-                self.imprimir_debug(f"Sincronización exitosa en {token_nombre} (saltados: {tokens_saltados})", 1)
-                return True
-            else:
-                self.imprimir_debug("No se pudo sincronizar, fin de archivo", 1)
-                return False
         except Exception as e:
             self.imprimir_debug(f"Excepción en sincronizar: {str(e)}", 1)
             return False
@@ -1865,6 +1895,10 @@ class Parser:
                             self.index = j + 1
                             continue
             
+            # NUEVO: Validación final de estructuras TARGET/HIT/MISS
+            if self.target_tracking_enabled:
+                self.validar_target_hit_miss_final()
+            
             # Al final del parsing, verificar balance final
             try:
                 estado_final = get_estado_actual_pollo()
@@ -1901,6 +1935,49 @@ class Parser:
             print(f"ERROR CRÍTICO: {str(e)}")
             print(f"Contexto: Token actual = {self.token_actual}, Pila = {self.stack}")
             return False
+
+    def validar_target_hit_miss_final(self):
+        """
+        NUEVO: Validación final de todas las estructuras TARGET/HIT/MISS
+        """
+        try:
+            es_valido, reporte = validar_al_final_del_parsing(self)
+            
+            if not es_valido:
+                print(f"\n❌ ERRORES EN ESTRUCTURAS TARGET/HIT/MISS:")
+                for error in reporte["errores"]:
+                    print(f"   • {error}")
+                
+                # Generar sugerencias de corrección
+                sugerencias = generar_sugerencias_correccion()
+                if sugerencias:
+                    print(f"\n💡 SUGERENCIAS DE CORRECCIÓN:")
+                    for sugerencia in sugerencias:
+                        print(f"   → {sugerencia}")
+                
+                # Agregar errores al parser
+                self.errores.extend(reporte["errores"])
+                
+            else:
+                self.imprimir_debug("✅ Todas las estructuras TARGET/HIT/MISS son válidas", 1)
+                
+            # Mostrar reporte detallado en modo debug
+            if self.debug:
+                print(f"\n📊 REPORTE TARGET/HIT/MISS:")
+                print(f"   📈 {reporte['resumen']}")
+                
+                if reporte["estadisticas"]["estructuras_detectadas"] > 0:
+                    stats = reporte["estadisticas"]
+                    print(f"   🔍 Estructuras detectadas: {stats['estructuras_detectadas']}")
+                    print(f"   ✅ Estructuras completadas: {stats['estructuras_completadas']}")
+                    print(f"   🌟 Con cláusula MISS: {stats['estructuras_con_miss']}")
+                    print(f"   ❌ Con errores: {stats['estructuras_con_errores']}")
+                    print(f"   📊 Anidación máxima: {stats['nivel_anidacion_max']}")
+                
+        except Exception as e:
+            self.imprimir_debug(f"Error en validación final TARGET/HIT/MISS: {str(e)}", 1)
+
+    
 
     def procesar_simbolo_semantico(self, simbolo):
         """
@@ -2221,3 +2298,11 @@ def iniciar_parser(tokens, debug=False, nivel_debug=1):
         return
 
     return len(errores_reales) == 0  # Retorna éxito solo si no hay errores reales
+
+def iniciar_parser_con_target_tracking(tokens, debug=False, nivel_debug=1):
+    """Función con tracking de TARGET/HIT/MISS"""
+    reset_tracker()
+    parser_instance = Parser(tokens, debug=debug)
+    parser_instance.target_tracking_enabled = True
+    resultado = parser_instance.parse()
+    return resultado
