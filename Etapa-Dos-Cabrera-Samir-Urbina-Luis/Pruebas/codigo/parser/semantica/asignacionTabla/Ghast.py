@@ -1,7 +1,7 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 from ..diccionarioSemantico.CheckOperacion import chequear_tipos_expresion
-from ..diccionarioSemantico.CheckOverflow import check_overflow_by_type
+from ..diccionarioSemantico.CheckVarInit import checkInicializacionVariable
 
 def welcomeGhast(actual, tipo, asignacion):
     print(f"verificacion de asignacion:")
@@ -96,6 +96,7 @@ def welcomeGhast(actual, tipo, asignacion):
     print(mi_simbolo.__str__())
     
     try:
+        checkInicializacionVariable(mi_simbolo)
         tabla.insertar(mi_simbolo)
         print(f" \n\n ver info tabla")
         tabla.imprimir_tabla()

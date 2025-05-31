@@ -3,6 +3,8 @@
 from ..Simbolo import Simbolo
 from ..TablaSimbolos import TablaSimbolos
 from ..ScopeManager import get_scope_manager
+from ..diccionarioSemantico.CheckVarInit import checkInicializacionVariable
+
 
 def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
     """
@@ -98,9 +100,11 @@ def welcomeRitual(actual, tokens_temporales, es_prototipo=False):
     try:
         if procedimiento_existente and procedimiento_existente.categoria == "PROTOTIPO_PROC" and categoria == "PROCEDIMIENTO":
             tabla.eliminar(actual.lexema)
+            checkInicializacionVariable(simbolo_procedimiento)
             tabla.insertar(simbolo_procedimiento)
             print(f"  RITUAL '{actual.lexema}' actualizado de prototipo a procedimiento implementado")
         else:
+            checkInicializacionVariable(simbolo_procedimiento)
             tabla.insertar(simbolo_procedimiento)
             print(f"  RITUAL '{actual.lexema}' insertado correctamente como {categoria}")
     except ValueError as e:

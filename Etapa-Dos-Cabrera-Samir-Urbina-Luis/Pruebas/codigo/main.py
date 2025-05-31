@@ -20,7 +20,7 @@ from parser.mc_parser import iniciar_parser
 from parser.gramatica.Gramatica import Gramatica
 from parser.semantica.TablaSimbolos import TablaSimbolos
 from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
-
+from parser.semantica.HistorialSemanticoNegativo import HistorialSemanticoNegativoSingleton
 from token_cleaner import limpiar_tokens_para_parser, debug_tokens_para_parser
 
 # Verificar integridad
@@ -97,13 +97,7 @@ def ejecucion():
     # Funcionamiento del parser con tokens limpios
     iniciar_parser(tokens_limpios, debug=False, nivel_debug=1) 
 
-    tabla = TablaSimbolos.instancia()
-    print(f" \n\n Ver informacion de la tablas semantica:")
-    tabla.imprimir_tabla()
-
-    historialSemantico = HistorialSemanticoSingleton()
-    print(f"\n\n Ver informacion del historial semantico:")
-    historialSemantico.imprimir_historial()
+    mostrar_menu()
     
     # NUEVO: Mostrar resultados de operadores compuestos
     mostrar_resultados_operadores_compuestos()
@@ -129,6 +123,37 @@ def mostrar_resultados_operadores_compuestos():
             print(f"{var_nombre}: No encontrado")
     
     print("="*50)
+
+def mostrar_menu():
+    print("\n\n\n\n\n\n\n\n--- MENÚ DE INFORMACIÓN SEMÁNTICA ---")
+    print("1. Ver información de la tabla de símbolos")
+    print("2. Ver historial semántico positivo")
+    print("3. Ver historial semántico negativo")
+    print("4. Salir")
+
+    opcion = input("Seleccione una opción: ")
+
+    if opcion == "1":
+        tabla = TablaSimbolos.instancia()
+        print("\n\nInformación de la tabla de símbolos:")
+        tabla.imprimir_tabla()
+        mostrar_menu()
+    elif opcion == "2":
+        historial = HistorialSemanticoSingleton()
+        print("\n\nHistorial semántico completo:")
+        historial.imprimir_historial()
+        mostrar_menu()
+    elif opcion == "3":
+        historial_neg = HistorialSemanticoNegativoSingleton()
+        print("\n\nHistorial semántico negativo:")
+        historial_neg.imprimir_historial()
+        mostrar_menu()
+    elif opcion == "4":
+        print("\nSaliendo del sistema...")
+        sys.exit()
+    else:
+        print("\nOpción inválida. Por favor intente de nuevo.")
+
 
 if __name__ == "__main__":
     ejecucion()

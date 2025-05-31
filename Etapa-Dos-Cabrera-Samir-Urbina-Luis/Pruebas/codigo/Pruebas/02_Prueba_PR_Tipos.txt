@@ -17,4 +17,11 @@ Inventory
     $$ Stack - Tipo de dato entero
     Stack entero = 42;
 
+
+SpawnPoint
+
+    PolloCrudo
+        dropperSpider("Prueba de tipos completada");
+    PolloAsado
+
 worldSave

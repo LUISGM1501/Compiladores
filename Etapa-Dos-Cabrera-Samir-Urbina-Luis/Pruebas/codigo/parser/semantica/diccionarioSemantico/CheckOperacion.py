@@ -1,4 +1,5 @@
 from ..HistorialSemantico import historialSemantico
+from ..HistorialSemanticoNegativo import historialSemanticoNegativo
 
 def chequear_tipos_expresion(tipo_esperado, valor):
     """Verifica que un valor o conjunto de valores sea compatible con el tipo esperado
@@ -42,6 +43,7 @@ def chequear_tipos_expresion(tipo_esperado, valor):
         tipo_info = tipos.get(tipo_esperado)
         if not tipo_info:
             mensaje = f"REGLA SEMANTICA 000: Tipo desconocido '{tipo_esperado}' para el valor '{item}'"
+            historialSemanticoNegativo.agregar(mensaje)
             historialSemantico.agregar(mensaje)
             return item  # Tipo no reconocido
 
