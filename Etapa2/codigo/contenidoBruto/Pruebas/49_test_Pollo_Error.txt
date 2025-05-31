@@ -1,0 +1,30 @@
+WorldName TestPolloError:
+
+Inventory
+    Stack numero = 42;
+
+CraftingTable
+    Spell funcionIncompleta() -> Stack
+    PolloCrudo
+        Stack resultado = numero + 10;
+        respawn resultado;
+    $$ ERROR: Falta PolloAsado aquí
+    
+    Ritual procedimientoMalFormado()
+    PolloCrudo
+        numero = numero * 2;
+        
+        target numero > 50 craft hit
+        PolloCrudo
+            numero = 100;
+        PolloAsado
+        miss 
+        PolloCrudo
+            numero = 0;
+        $$ ERROR: Falta PolloAsado aquí
+    PolloAsado;
+
+SpawnPoint
+    PolloAsado  $$ ERROR: PolloAsado sin PolloCrudo correspondiente
+
+WorldSave

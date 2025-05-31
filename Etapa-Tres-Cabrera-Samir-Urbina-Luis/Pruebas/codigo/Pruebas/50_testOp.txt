@@ -1,0 +1,42 @@
+WorldName TestTiposCorrector:
+
+Inventory
+    $$ Declaraciones de variables de diferentes tipos
+    Stack numero1 = 10;
+    Stack numero2 = 20;
+    Ghast decimal1 = 15.5;
+    Ghast decimal2 = 25.0;
+    Spider texto = "Hola";
+    Torch bandera = On;
+    Rune letra = 'A';
+
+SpawnPoint
+    $$ Operaciones aritméticas válidas entre enteros
+    numero1 = numero1 + numero2;  $$ STACK + STACK -> STACK
+    numero2 = numero1 - 5;        $$ STACK - STACK -> STACK  
+    numero1 = numero2 * 3;        $$ STACK * STACK -> STACK
+    numero2 = numero1 / 2;        $$ STACK / STACK -> STACK
+    numero1 = numero2 % 3;        $$ STACK % STACK -> STACK
+    
+    $$ Operaciones aritméticas válidas entre flotantes
+    decimal1 = decimal1 :+ decimal2;  $$ GHAST :+ GHAST -> GHAST
+    decimal2 = decimal1 :- 10.0;      $$ GHAST :- GHAST -> GHAST
+    decimal1 = decimal2 :* 2.5;       $$ GHAST :* GHAST -> GHAST
+    decimal2 = decimal1 :/ 4.0;       $$ GHAST :/ GHAST -> GHAST
+    decimal1 = decimal2 :% 3.0;       $$ GHAST :% GHAST -> GHAST
+    
+    $$ Conversiones implícitas válidas (entero a flotante)
+    decimal1 = numero1 + decimal2;    $$ STACK + GHAST -> GHAST
+    decimal2 = 100 :+ decimal1;       $$ STACK :+ GHAST -> GHAST
+    
+    $$ Operaciones de comparación válidas
+    bandera = numero1 > numero2;      $$ STACK > STACK -> TORCH
+    bandera = decimal1 < decimal2;    $$ GHAST < GHAST -> TORCH
+    bandera = numero1 == 50;          $$ STACK == STACK -> TORCH
+    bandera = decimal1 >= 20.0;       $$ GHAST >= GHAST -> TORCH
+    
+    $$ Comparaciones entre tipos numéricos compatibles
+    bandera = numero1 < decimal1;     $$ STACK < GHAST -> TORCH
+    bandera = decimal2 > numero2;     $$ GHAST > STACK -> TORCH
+
+WorldSave

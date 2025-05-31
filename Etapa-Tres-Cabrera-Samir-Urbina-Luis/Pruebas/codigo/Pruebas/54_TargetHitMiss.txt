@@ -1,0 +1,57 @@
+WorldName MundoTargetTest:
+
+Bedrock
+
+Inventory
+    Stack resultado = 0;
+    Stack x = 15;
+    Stack y = 5;
+    Torch condicion = On;
+
+Recipe
+
+CraftingTable
+
+SpawnPoint
+    $$ Caso 1: Estructura TARGET-HIT básica válida
+    Target x > 10 Craft Hit
+        resultado = 1;
+    
+    $$ Caso 2: Estructura TARGET-HIT-MISS completa válida
+    Target y < 10 Craft Hit
+        resultado = resultado + 1;
+    Miss
+        resultado = resultado - 1;
+    
+    $$ Caso 3: Estructuras TARGET anidadas válidas
+    Target condicion Craft Hit
+        Target x > y Craft Hit
+            resultado = x + y;
+        Miss
+            resultado = x - y;
+    Miss
+        resultado = 0;
+    
+    $$ Caso 4: Múltiples estructuras TARGET secuenciales
+    Target x == 15 Craft Hit
+        resultado = 100;
+    
+    Target y == 5 Craft Hit
+        resultado = resultado + 50;
+    Miss
+        resultado = resultado + 25;
+    
+    $$ Caso 5: TARGET con expresiones complejas
+    Target (x + y) > 15 Craft Hit
+        Target resultado < 100 Craft Hit
+            resultado = resultado * 2;
+        
+    $$ Caso 6: TARGET dentro de bloques
+    PolloCrudo
+        Target x isNot y Craft Hit
+            resultado = resultado + 10;
+        Miss
+            resultado = resultado - 5;
+    PolloAsado
+
+WorldSave
