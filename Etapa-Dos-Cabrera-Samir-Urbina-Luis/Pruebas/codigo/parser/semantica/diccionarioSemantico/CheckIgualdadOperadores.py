@@ -66,7 +66,7 @@ def verificar_operador_compuesto(identificador_token, operador_token, valor_toke
     
     # 1. Verificar que el identificador existe
     if not checkVarDeclared(identificador_token):
-        mensaje_error = f"REGLA SEMANTICA 050: ERROR - Identificador '{identificador_token.lexema}' no declarado{ubicacion}"
+        mensaje_error = f"Identificador '{identificador_token.lexema}' no declarado{ubicacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
@@ -75,7 +75,7 @@ def verificar_operador_compuesto(identificador_token, operador_token, valor_toke
     simbolo = tabla.buscar(identificador_token.lexema)
     
     if simbolo.categoria in OperadorCompuestoChecker.CATEGORIAS_NO_MODIFICABLES:
-        mensaje_error = f"REGLA SEMANTICA 050: ERROR - No se puede modificar '{identificador_token.lexema}' de categoría {simbolo.categoria}{ubicacion}"
+        mensaje_error = f"No se puede modificar '{identificador_token.lexema}' de categoría {simbolo.categoria}{ubicacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
@@ -87,7 +87,7 @@ def verificar_operador_compuesto(identificador_token, operador_token, valor_toke
         # Si el valor es un identificador, obtener su tipo real
         tipo_valor = getVarType(valor_token)
         if tipo_valor is None:
-            mensaje_error = f"REGLA SEMANTICA 050: ERROR - Variable '{valor_token.lexema}' no declarada{ubicacion}"
+            mensaje_error = f"Variable '{valor_token.lexema}' no declarada{ubicacion}"
             historialSemantico.agregar(mensaje_error)
             return False, "ERROR", mensaje_error
     
@@ -95,7 +95,7 @@ def verificar_operador_compuesto(identificador_token, operador_token, valor_toke
     operador_tipo = operador_token.type if hasattr(operador_token, 'type') else str(operador_token)
     
     if operador_tipo not in OperadorCompuestoChecker.OPERADORES_COMPUESTOS:
-        mensaje_error = f"REGLA SEMANTICA 050: ERROR - Operador '{operador_tipo}' no es un operador compuesto válido{ubicacion}"
+        mensaje_error = f"perador '{operador_tipo}' no es un operador compuesto válido{ubicacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
@@ -124,7 +124,7 @@ def verificar_operador_compuesto(identificador_token, operador_token, valor_toke
     )
     
     if not es_valida:
-        mensaje_error = f"REGLA SEMANTICA 050: ERROR - Operación {tipo_identificador} {operador_basico} {tipo_valor} inválida en asignación compuesta{ubicacion}: {error_operacion}"
+        mensaje_error = f"Operación {tipo_identificador} {operador_basico} {tipo_valor} inválida en asignación compuesta{ubicacion}: {error_operacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
@@ -136,7 +136,7 @@ def verificar_operador_compuesto(identificador_token, operador_token, valor_toke
     )
     
     if not compatibilidad["es_compatible"]:
-        mensaje_error = f"REGLA SEMANTICA 050: ERROR - Resultado de tipo {tipo_resultado} no compatible con variable {tipo_identificador}{ubicacion}: {compatibilidad['razon']}"
+        mensaje_error = f"Resultado de tipo {tipo_resultado} no compatible con variable {tipo_identificador}{ubicacion}: {compatibilidad['razon']}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
@@ -240,7 +240,7 @@ def procesar_secuencia_asignacion_compuesta(tokens_secuencia, linea=None):
     errores = []
     
     if len(tokens_secuencia) < 3:
-        error = f"REGLA SEMANTICA 051: ERROR - Secuencia de asignación compuesta incompleta en línea {linea}"
+        error = f"Secuencia de asignación compuesta incompleta en línea {linea}"
         errores.append(error)
         historialSemantico.agregar(error)
         return False, errores
@@ -253,7 +253,7 @@ def procesar_secuencia_asignacion_compuesta(tokens_secuencia, linea=None):
     
     # Verificar que el primer token es un identificador
     if not hasattr(identificador_token, 'type') or identificador_token.type != "IDENTIFICADOR":
-        error = f"REGLA SEMANTICA 051: ERROR - Se esperaba identificador al inicio de asignación compuesta en línea {linea}"
+        error = f"Se esperaba identificador al inicio de asignación compuesta en línea {linea}"
         errores.append(error)
         historialSemantico.agregar(error)
         return False, errores
@@ -275,7 +275,7 @@ def procesar_secuencia_asignacion_compuesta(tokens_secuencia, linea=None):
         
         return es_valida, errores
     else:
-        error = f"REGLA SEMANTICA 051: ERROR - Falta expresión después del operador compuesto en línea {linea}"
+        error = f"Falta expresión después del operador compuesto en línea {linea}"
         errores.append(error)
         historialSemantico.agregar(error)
         return False, errores

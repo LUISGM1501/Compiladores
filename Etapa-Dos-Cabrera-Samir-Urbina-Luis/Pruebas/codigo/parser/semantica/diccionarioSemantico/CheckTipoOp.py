@@ -149,7 +149,7 @@ def verificar_operacion_aritmetica(operando_izq, operador, operando_der, linea=N
     if op not in TipoOperacionChecker.OPERADORES_VALIDOS:
         # Verificar también en operadores de comparación
         if op not in TipoOperacionChecker.OPERADORES_COMPARACION:
-            mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operador '{operador}' no reconocido{ubicacion}"
+            mensaje_error = f"Operador '{operador}' no reconocido{ubicacion}"
             historialSemantico.agregar(mensaje_error)
             return False, "UNKNOWN", mensaje_error
     
@@ -166,7 +166,7 @@ def verificar_operacion_aritmetica(operando_izq, operador, operando_der, linea=N
         return verificar_operacion_comparacion(tipo_izq, op, tipo_der, linea)
     
     # Operador no reconocido
-    mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operador '{operador}' no reconocido{ubicacion}"
+    mensaje_error = f"Operador '{operador}' no reconocido{ubicacion}"
     historialSemantico.agregar(mensaje_error)
     return False, "UNKNOWN", mensaje_error
 
@@ -206,12 +206,12 @@ def verificar_operacion_entera(tipo_izq, operador, tipo_der, linea=None):
     # Caso 4: TIPOS INCOMPATIBLES - ERROR
     tipos_incompatibles = verificar_tipos_incompatibles(tipo_izq, tipo_der, operador)
     if tipos_incompatibles:
-        mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operación {tipo_izq} {op_simbolo} {tipo_der} inválida: {tipos_incompatibles}{ubicacion}"
+        mensaje_error = f"Operación {tipo_izq} {op_simbolo} {tipo_der} inválida: {tipos_incompatibles}{ubicacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
     # Caso 5: Otros tipos no soportados
-    mensaje_error = f"REGLA SEMANTICA 040: ERROR - Operación {tipo_izq} {op_simbolo} {tipo_der} no soportada{ubicacion}"
+    mensaje_error = f"Operación {tipo_izq} {op_simbolo} {tipo_der} no soportada{ubicacion}"
     historialSemantico.agregar(mensaje_error)
     return False, "ERROR", mensaje_error
 
@@ -243,12 +243,12 @@ def verificar_operacion_flotante(tipo_izq, operador, tipo_der, linea=None):
     # Caso 4: TIPOS INCOMPATIBLES
     tipos_incompatibles = verificar_tipos_incompatibles(tipo_izq, tipo_der, operador)
     if tipos_incompatibles:
-        mensaje_error = f"REGLA SEMANTICA 041: ERROR - Operación flotante {tipo_izq} {op_simbolo} {tipo_der} inválida: {tipos_incompatibles}{ubicacion}"
+        mensaje_error = f"Operación flotante {tipo_izq} {op_simbolo} {tipo_der} inválida: {tipos_incompatibles}{ubicacion}"
         historialSemantico.agregar(mensaje_error)
         return False, "ERROR", mensaje_error
     
     # Otros casos no soportados
-    mensaje_error = f"REGLA SEMANTICA 041: ERROR - Operación flotante {tipo_izq} {op_simbolo} {tipo_der} no soportada{ubicacion}"
+    mensaje_error = f"0peración flotante {tipo_izq} {op_simbolo} {tipo_der} no soportada{ubicacion}"
     historialSemantico.agregar(mensaje_error)
     return False, "ERROR", mensaje_error
 
@@ -279,7 +279,7 @@ def verificar_operacion_comparacion(tipo_izq, operador, tipo_der, linea=None):
         return True, "TORCH", None
     
     # Caso 4: TIPOS INCOMPATIBLES PARA COMPARACIÓN
-    mensaje_error = f"REGLA SEMANTICA 042: ERROR - Comparación {tipo_izq} {op_simbolo} {tipo_der} inválida: tipos incompatibles{ubicacion}"
+    mensaje_error = f"Comparación {tipo_izq} {op_simbolo} {tipo_der} inválida: tipos incompatibles{ubicacion}"
     historialSemantico.agregar(mensaje_error)
     return False, "ERROR", mensaje_error
 

@@ -127,7 +127,7 @@ def chequear_tipos_expresion(tipo_esperado, valor):
             pass  # Manejo de error abajo
 
         # Fallo de conversión
-        mensaje = (f"REGLA SEMANTICA 000: ERROR al convertir '{item}' al tipo '{tipo_esperado}', "
+        mensaje = (f"'{item}' al tipo '{tipo_esperado}', "
                    f"se asigna valor por defecto: {tipo_info['default']}")
         historialSemantico.agregar(mensaje)
         return tipo_info['default']

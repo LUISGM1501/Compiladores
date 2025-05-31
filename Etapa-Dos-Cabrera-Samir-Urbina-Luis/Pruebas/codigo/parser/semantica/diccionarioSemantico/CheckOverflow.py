@@ -65,7 +65,7 @@ def check_stack_overflow(valor, nombre_variable=None):
             
     except (ValueError, TypeError):
         nombre = f" para variable '{nombre_variable}'" if nombre_variable else ""
-        mensaje_error = f"REGLA SEMANTICA 010: ERROR - Valor '{valor}' no convertible a STACK{nombre}"
+        mensaje_error = f"'{valor}' no convertible a STACK{nombre}"
         historialSemantico.agregar(mensaje_error)
         return False, 0, mensaje_error
 
@@ -116,7 +116,7 @@ def check_ghast_overflow(valor_entero, valor_decimal=0, nombre_variable=None):
             
     except (ValueError, TypeError):
         nombre = f" para variable '{nombre_variable}'" if nombre_variable else ""
-        mensaje_error = f"REGLA SEMANTICA 011: ERROR - Valores no válidos para GHAST{nombre}"
+        mensaje_error = f"Valores no válidos para GHAST{nombre}"
         historialSemantico.agregar(mensaje_error)
         return False, (0, 0), mensaje_error
 
@@ -151,7 +151,7 @@ def check_spider_overflow(cadena, nombre_variable=None):
             
     except (AttributeError, TypeError):
         nombre = f" para variable '{nombre_variable}'" if nombre_variable else ""
-        mensaje_error = f"REGLA SEMANTICA 012: ERROR - Valor no es un string válido para SPIDER{nombre}"
+        mensaje_error = f"Valor no es un string válido para SPIDER{nombre}"
         historialSemantico.agregar(mensaje_error)
         return False, "", mensaje_error
 
@@ -198,7 +198,7 @@ def check_rune_overflow(valor, nombre_variable=None):
             
     except (ValueError, TypeError, OverflowError):
         nombre = f" para variable '{nombre_variable}'" if nombre_variable else ""
-        mensaje_error = f"REGLA SEMANTICA 013: ERROR - Valor '{valor}' no convertible a RUNE{nombre}"
+        mensaje_error = f"Valor '{valor}' no convertible a RUNE{nombre}"
         historialSemantico.agregar(mensaje_error)
         return False, '\0', mensaje_error
 
@@ -238,7 +238,7 @@ def check_torch_overflow(valor, nombre_variable=None):
         
     except (ValueError, TypeError):
         nombre = f" para variable '{nombre_variable}'" if nombre_variable else ""
-        mensaje_error = f"REGLA SEMANTICA 014: ERROR - Valor '{valor}' no convertible a TORCH{nombre}"
+        mensaje_error = f"Valor '{valor}' no convertible a TORCH{nombre}"
         historialSemantico.agregar(mensaje_error)
         return False, False, mensaje_error
 
@@ -273,7 +273,7 @@ def check_chest_overflow(elementos, nombre_variable=None):
             
     except (AttributeError, TypeError):
         nombre = f" para variable '{nombre_variable}'" if nombre_variable else ""
-        mensaje_error = f"REGLA SEMANTICA 015: ERROR - Valor no es un conjunto válido para CHEST{nombre}"
+        mensaje_error = f"Valor no es un conjunto válido para CHEST{nombre}"
         historialSemantico.agregar(mensaje_error)
         return False, [], mensaje_error
 
@@ -311,6 +311,6 @@ def check_overflow_by_type(tipo, valor, nombre_variable=None):
         else:
             return check_chest_overflow([valor], nombre_variable)
     else:
-        mensaje_error = f"REGLA SEMANTICA 016: ERROR - Tipo '{tipo}' no reconocido para verificación de overflow"
+        mensaje_error = f"Tipo '{tipo}' no reconocido para verificación de overflow"
         historialSemantico.agregar(mensaje_error)
         return False, valor, mensaje_error
