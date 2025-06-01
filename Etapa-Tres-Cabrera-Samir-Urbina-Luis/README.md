@@ -55,6 +55,8 @@ Al ejecutarlo, se generará automáticamente una carpeta llamada `resultados/`.
 
 SE DEBEN DE IGNORAR LOS LOGS PREVIOS A ESTO, YA QUE SON PARTE DEL DEBUG DEL PROGRAMA Y PUEDEN PRESENTAR ERRORES INCONSISTENTES QUE SE ARREGLAN GRACIAS A LA GRAMATICA Y AL MANEJO SEMANTICO.
 
+EN CASO DE TENER PROLEMAS DE SEGURIDAD EJECUTAR: chmod +x main
+
 **Comando para ejecutar el archivo:** ./main
 
 
