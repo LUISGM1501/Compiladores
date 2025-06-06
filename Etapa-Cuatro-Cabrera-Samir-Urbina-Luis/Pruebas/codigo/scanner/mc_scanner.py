@@ -98,7 +98,7 @@ def procesar_archivo(archivo_prueba):
     )
     
     # Mover archivo generado
-    resultados_dir = Path("resultados")
+    resultados_dir = Path("resultadosScanner")
     resultados_dir.mkdir(exist_ok=True)
     nombre_resultado = f"{archivo_prueba.stem}_Resultado.html"
     ruta_resultado = resultados_dir / nombre_resultado
