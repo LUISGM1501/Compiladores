@@ -1,0 +1,140 @@
+$* 
+  Prueba: 39_Prueba_Comb_Estructura
+  Descripción: Verificar estructura básica de un programa completo
+  Fecha: 28/04/2025
+*$
+
+WorldName PruebaEstructuraCompleta:
+
+$$ Sección de constantes
+Bedrock
+
+    Obsidian Stack MAX_NIVEL 100;
+    Obsidian Spider VERSION "1.0.0";
+    Obsidian Torch DEBUG_MODE Off;
+    Obsidian Ghast PI 3.14159;
+
+$$ Sección de tipos
+ResourcePack
+
+    Anvil Identi -> Stack;
+    Anvil Identi2 -> Spider;
+    
+    $$ Definición de un tipo personalizado
+    Entity Jugador
+    PolloCrudo
+        Spider nombre;
+        Stack nivel;
+        Ghast salud;
+        Torch activo;
+    PolloAsado;
+    
+$$ Sección de variables
+Inventory
+
+    $$ Variables básicas
+    Stack contador = 0;
+    Spider mensaje = "Bienvenido a Notch Engine";
+    Torch juego_activo = On;
+    Ghast temperatura = 21.5;
+    Chest letras = {: 'a', 'b', 'c' :};
+    
+    $$ Variables compuestas
+    Shelf[5] Stack inventario;
+    Entity Jugador steve;
+
+$$ Sección de prototipos
+Recipe
+
+    $$ Prototipo de función
+    Spell calcularDanio(Stack :: nivel, arma; Ghast ref multiplicador) -> Stack;
+    
+    $$ Prototipo de procedimiento
+    Ritual mostrarEstado(Spider :: nombre; Stack nivel, salud);
+
+$$ Sección de implementación de rutinas
+CraftingTable
+
+    $$ Implementación de función
+    Spell calcularDanio(Stack :: nivel, arma; Ghast ref multiplicador) -> Stack
+    PolloCrudo
+        Stack danio_base = nivel * 2;
+        
+        target arma is 1 hit
+        PolloCrudo
+            danio_base *= 2; $$ Arma mejorada
+        PolloAsado
+        
+        multiplicador = 1.5; $$ Modificar parámetro por referencia
+        respawn danio_base;
+    PolloAsado
+    
+    $$ Implementación de procedimiento
+    Ritual mostrarEstado(Spider :: nombre; Stack nivel, salud)
+    PolloCrudo
+        dropperSpider("===== Estado del Jugador =====");
+        dropperSpider("Nombre: " bind nombre);
+        dropperSpider("Nivel: " bind nivel);
+        dropperSpider("Salud: " bind salud);
+        dropperSpider("=============================");
+    PolloAsado
+
+$$ Punto de entrada del programa
+SpawnPoint
+
+    PolloCrudo
+        $$ Inicialización
+        steve@nombre = "Steve";
+        steve@nivel = 1;
+        steve@salud = 20.0;
+        steve@activo = On;
+        
+        $$ Entrada y salida
+        dropperSpider(mensaje);
+        dropperSpider("Ingrese su nombre:");
+        Spider nombre_jugador = hopperSpider();
+        
+        $$ Uso de estructuras de control
+        target #(nombre_jugador) > 0 hit
+        PolloCrudo
+            dropperSpider("Hola, " bind nombre_jugador bind "!");
+            
+            $$ Uso de funciones y procedimientos
+            Stack danio = calcularDanio(steve@nivel, 1, 1.0);
+            dropperSpider("Tu daño base es: " bind danio);
+            ender_pearl mostrarEstado(steve@nombre, steve@nivel, steve@salud);
+            
+            $$ Bucle
+            repeater juego_activo
+            PolloCrudo
+                dropperSpider("¿Continuar jugando? (On/Off)");
+                juego_activo = hopperTorch();
+                
+                target juego_activo hit
+                PolloCrudo
+                    soulsand steve@nivel;
+                    dropperSpider("Nivel aumentado a: " bind steve@nivel);
+                PolloAsado
+            PolloAsado
+        PolloAsado
+        miss
+        PolloCrudo
+            dropperSpider("Nombre no válido.");
+        PolloAsado
+        
+        $$ Otros tipos de bucles
+        Stack i = 0;
+        spawner
+        PolloCrudo
+            soulsand i;
+            inventario[i] = i * 10;
+        PolloAsado
+        exhausted i >= 5;
+        
+        walk j set 0 to 4
+        PolloCrudo
+            dropperSpider("Inventario[" bind j bind "]: " bind inventario[j]);
+        PolloAsado
+    PolloAsado
+
+worldSave

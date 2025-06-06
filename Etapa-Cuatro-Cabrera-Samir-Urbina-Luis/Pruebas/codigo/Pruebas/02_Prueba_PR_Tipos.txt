@@ -1,0 +1,27 @@
+$* 
+  Prueba_PR_Tipos.ne
+  Propósito: Verificar reconocimiento de tipos de datos en NotchEngine
+  Probar: Stack, Rune, Spider, Torch, Chest, Book, Ghast, Shelf, Entity
+  Fecha: 28/04/2025
+*$
+
+$$ Prueba de los tipos de datos en NotchEngine
+$$ Verificando: Stack, Rune, Spider, Torch, Chest, Book, Ghast, Shelf, Entity
+
+WorldName PruebaTipos:
+
+Inventory
+
+    $$ Declaraciones de variables de cada tipo
+
+    $$ Stack - Tipo de dato entero
+    Stack entero = 42;
+
+
+SpawnPoint
+
+    PolloCrudo
+        dropperSpider("Prueba de tipos completada");
+    PolloAsado
+
+worldSave

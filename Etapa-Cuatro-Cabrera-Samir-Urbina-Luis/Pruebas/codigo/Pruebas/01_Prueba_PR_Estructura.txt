@@ -1,0 +1,19 @@
+$* 
+  Prueba_PR_Estructura.ne
+  Propósito: Verificar el reconocimiento de palabras reservadas de estructura del programa
+  Probar: WorldName, Bedrock, ResourcePack, Inventory, Recipe, CraftingTable, SpawnPoint
+  Fecha: 28/04/2025
+*$
+
+$$ Prueba de la estructura básica del programa NotchEngine
+$$ Verificando las palabras reservadas: WorldName, Bedrock, ResourcePack, Inventory, Recipe, CraftingTable, SpawnPoint
+
+WorldName PruebaEstructura:
+
+Bedrock 
+    Obsidian Stack MAX_VALOR 100;
+    Obsidian Spider SALUDO "Prueba de estructura";
+    Obsidian Stack MAX_VALOR 100;
+    Obsidian Stack MAX_VALOR 100;
+
+worldSave

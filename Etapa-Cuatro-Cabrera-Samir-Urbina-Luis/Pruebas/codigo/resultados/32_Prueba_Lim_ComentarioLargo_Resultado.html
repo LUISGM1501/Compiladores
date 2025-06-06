@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Léxico - Resultados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .muro {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .ladrillo {
+            white-space: nowrap;  /* Evita que el texto se divida */
+            word-break: keep-all; /* Mantiene las palabras completas */
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stats-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats-list {
+            columns: 2;
+            list-style-type: none;
+            padding: 0;
+        }
+        @media (max-width: 768px) {
+            .stats-list {
+                columns: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Resultados del Análisis Léxico</h1>
+    
+    <h2>Muro de Ladrillos</h2>
+    <div class="muro">
+        <div class="ladrillo" style="background-color: #FF6B6B">WorldName</div><div class="ladrillo" style="background-color: #4ECDC4">PruebaComentarioLargo</div><div class="ladrillo" style="background-color: #45B7D1">:</div><div class="ladrillo" style="background-color: #FFBE0B">Inventory</div><div class="ladrillo" style="background-color: #FB5607">Stack</div><div class="ladrillo" style="background-color: #8338EC">contador</div><div class="ladrillo" style="background-color: #3A86FF">=</div><div class="ladrillo" style="background-color: #FF006E">0</div><div class="ladrillo" style="background-color: #A5DD9B">;</div><div class="ladrillo" style="background-color: #F9C74F">Stack</div><div class="ladrillo" style="background-color: #90BE6D">despues_comentario</div><div class="ladrillo" style="background-color: #43AA8B">=</div><div class="ladrillo" style="background-color: #577590">1</div><div class="ladrillo" style="background-color: #F94144">;</div><div class="ladrillo" style="background-color: #F3722C">Spider</div><div class="ladrillo" style="background-color: #FF6B6B">mensaje</div><div class="ladrillo" style="background-color: #4ECDC4">=</div><div class="ladrillo" style="background-color: #45B7D1">"Prueba de comentarios largos"</div><div class="ladrillo" style="background-color: #FFBE0B">;</div><div class="ladrillo" style="background-color: #FB5607">SpawnPoint</div><div class="ladrillo" style="background-color: #8338EC">PolloCrudo</div><div class="ladrillo" style="background-color: #3A86FF">Stack</div><div class="ladrillo" style="background-color: #FF006E">i</div><div class="ladrillo" style="background-color: #A5DD9B">=</div><div class="ladrillo" style="background-color: #F9C74F">0</div><div class="ladrillo" style="background-color: #90BE6D">;</div><div class="ladrillo" style="background-color: #43AA8B">repeater</div><div class="ladrillo" style="background-color: #577590">i</div><div class="ladrillo" style="background-color: #F94144">&lt;</div><div class="ladrillo" style="background-color: #F3722C">5</div><div class="ladrillo" style="background-color: #FF6B6B">craft</div><div class="ladrillo" style="background-color: #4ECDC4">PolloCrudo</div><div class="ladrillo" style="background-color: #45B7D1">soulsand</div><div class="ladrillo" style="background-color: #FFBE0B">i</div><div class="ladrillo" style="background-color: #FB5607">;</div><div class="ladrillo" style="background-color: #8338EC">dropperSpider</div><div class="ladrillo" style="background-color: #3A86FF">(</div><div class="ladrillo" style="background-color: #FF006E">mensaje</div><div class="ladrillo" style="background-color: #A5DD9B">bind</div><div class="ladrillo" style="background-color: #F9C74F">" - iteración "</div><div class="ladrillo" style="background-color: #90BE6D">bind</div><div class="ladrillo" style="background-color: #43AA8B">i</div><div class="ladrillo" style="background-color: #577590">)</div><div class="ladrillo" style="background-color: #F94144">;</div><div class="ladrillo" style="background-color: #F3722C">PolloAsado</div><div class="ladrillo" style="background-color: #FF6B6B">dropperSpider</div><div class="ladrillo" style="background-color: #4ECDC4">(</div><div class="ladrillo" style="background-color: #45B7D1">"Prueba de comentarios largos completada"</div><div class="ladrillo" style="background-color: #FFBE0B">)</div><div class="ladrillo" style="background-color: #FB5607">;</div><div class="ladrillo" style="background-color: #8338EC">PolloAsado</div><div class="ladrillo" style="background-color: #3A86FF">worldSave</div>
+    </div>
+    
+    <div class="stats-container">
+        <h2>Estadísticas de Tokens</h2>
+        <ul class="stats-list">
+            <li>Palabras reservadas: 15</li><li>Identificadores: 13</li><li>Literales numéricos: 4</li><li>Literales de texto: 3</li><li>Operadores: 17</li>
+        </ul>
+    </div>
+    
+    <div class="stats-container">
+        <h2>Otras Estadísticas</h2>
+        <ul class="stats-list">
+            <li>Número de líneas del programa: 49</li><li>Número de caracteres del archivo: 1291</li><li>Comentarios de línea: 6</li><li>Comentarios de bloque: 4</li>
+        </ul>
+    </div>
+</body>
+</html>
+    

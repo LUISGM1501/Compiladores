@@ -1,0 +1,100 @@
+$* 
+  Prueba_PR_Saltos.ne
+  Propósito: Verificar palabras para saltos y terminación (creeper, enderPearl, ragequit)
+  Fecha: 28/04/2025
+*$
+
+$$ Prueba de palabras reservadas para saltos y terminación en NotchEngine
+$$ Verificando: creeper, enderPearl, ragequit
+
+WorldName PruebaSaltos:
+
+Inventory
+
+    $$ Variables para las pruebas
+    Stack contador = 0;
+    Stack totalPares = 0;
+    Stack totalImpares = 0;
+    Torch errorCritico = Off;
+
+SpawnPoint
+
+    PolloCrudo
+        $$ 1. Prueba de creeper (break) para salir de un bucle
+        dropperSpider("Prueba de creeper (break):");
+        walk i set 1 to 10 craft
+        PolloCrudo
+            dropperSpider("Iteración: " bind i);
+            
+            $$ Salimos del bucle cuando i llega a 5
+            target i is 5 craft hit
+            PolloCrudo
+                dropperSpider("Encontrado 5, saliendo del bucle con creeper");
+                creeper;
+            PolloAsado
+        PolloAsado
+        
+        $$ 2. Prueba de enderPearl (continue) para saltar a la siguiente iteración
+        dropperSpider("Prueba de enderPearl (continue):");
+        walk i set 1 to 10 craft
+        PolloCrudo
+            $$ Saltamos los números pares
+            target i % 2 is 0 craft hit
+            PolloCrudo
+                dropperSpider("Número par " bind i bind ", saltando con enderPearl");
+                enderPearl;
+            PolloAsado
+            
+            $$ Esta parte solo se ejecuta para números impares
+            dropperSpider("Procesando número impar: " bind i);
+            totalImpares += i;
+        PolloAsado
+        
+        dropperSpider("Total de números impares: " bind totalImpares);
+        
+        $$ 3. Prueba de creeper y enderPearl en bucles anidados
+        dropperSpider("Prueba de control de flujo en bucles anidados:");
+        walk i set 1 to 5 craft
+        PolloCrudo
+            walk j set 1 to 5 craft
+            PolloCrudo
+                $$ Saltar la iteración cuando j es 3
+                target j is 3 craft hit
+                PolloCrudo
+                    dropperSpider("Saltando j=3 con enderPearl");
+                    enderPearl;
+                PolloAsado
+                
+                $$ Salir del bucle interno cuando j es 4
+                target j is 4 craft hit
+                PolloCrudo
+                    dropperSpider("Saliendo del bucle interno con creeper en j=4");
+                    creeper;
+                PolloAsado
+                
+                dropperSpider("i=" bind i bind ", j=" bind j);
+            PolloAsado
+        PolloAsado
+        
+        $$ 4. Prueba de ragequit (halt) para terminar el programa
+        $$ Nota: Esta parte debe estar comentada en pruebas reales
+        $$ o al final del programa, ya que detiene la ejecución
+        
+        dropperSpider("Prueba de ragequit (halt):");
+        target errorCritico craft hit
+        PolloCrudo
+            dropperSpider("Error crítico detectado, terminando programa con ragequit");
+            $$ ragequit;  $$ Comentado para evitar terminar la prueba
+        PolloAsado
+        
+        dropperSpider("Esta línea se mostrará si errorCritico es Off");
+        
+        $$ Ejemplo descomentado pero que nunca se ejecutará
+        target Off craft hit
+        PolloCrudo
+            dropperSpider("Esta condición nunca se cumple");
+            ragequit;
+        PolloAsado
+    PolloAsado
+
+worldSave

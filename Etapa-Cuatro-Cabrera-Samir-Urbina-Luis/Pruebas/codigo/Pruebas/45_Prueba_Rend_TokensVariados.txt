@@ -1,0 +1,304 @@
+$* 
+   Prueba: 45_Prueba_Rend_TokensVariados
+   Descripción: Verificar rendimiento con variedad de tokens mezclados
+   Fecha: 28/04/2025
+*$
+
+WorldName PruebaTokensVariados:
+
+$$ Sección de constantes para controlar el tamaño de la prueba
+Bedrock
+    Obsidian Stack ITERATIONS 100;
+    Obsidian Stack MAX_VALUE 1000;
+    Obsidian Stack ARRAY_SIZE 50;
+    Obsidian Spider TEST_NAME "Prueba de rendimiento con tokens variados";
+    Obsidian Spider VERSION "1.0";
+    Obsidian Ghast PI 3.14159;
+    Obsidian Torch DEBUG_MODE On;
+
+$$ Definiciones de tipos variados para generar diversidad de tokens
+ResourcePack
+    Entity Posicion
+    PolloCrudo
+        Stack x;
+        Stack y;
+        Stack z;
+    PolloAsado;
+
+    Entity Item
+    PolloCrudo
+        Spider nombre;
+        Stack cantidad;
+        Stack durabilidad;
+        Ghast peso;
+        Torch consumible;
+    PolloAsado;
+
+    Entity Jugador
+    PolloCrudo
+        Spider nombre;
+        Stack nivel;
+        Ghast salud;
+        Entity Posicion posicion;
+        Shelf[10] Entity Item inventario;
+    PolloAsado;
+
+    Anvil Identi -> Stack;
+    Anvil Identi2 -> Spider;
+    Anvil Identi3 -> Stack truncate;
+    Anvil Identi4 -> Stack safe;
+
+Inventory
+    Stack contador = 0;
+    Stack suma = 0;
+    Stack producto = 1;
+
+    Ghast pi = 3.14159;
+    Ghast e = 2.71828;
+    Ghast resultado_flotante = 0.0;
+
+    Spider texto = "Prueba de rendimiento";
+    Spider resultado_texto = "";
+
+    Rune caracter = 'A';
+    Torch condicion = On;
+
+    Shelf[ARRAY_SIZE] Stack numeros;
+    Shelf[ARRAY_SIZE] Ghast valores_reales;
+    Shelf[10] Spider textos = ["uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez"];
+
+    Chest conjunto_numeros = {: 1, 2, 3, 4, 5 :};
+    Chest conjunto_caracteres = {: 'a', 'b', 'c', 'd', 'e' :};
+
+    Book archivo_log = {/ "log.txt", 'E' /};
+    Book archivo_datos = {/ "datos.dat", 'L' /};
+
+    Entity Posicion origen
+    PolloCrudo
+        x: 0;
+        y: 0;
+        z: 0;
+    PolloAsado;
+
+    Entity Item espada
+    PolloCrudo
+        nombre: "Espada de diamante";
+        cantidad: 1;
+        durabilidad: 1000;
+        peso: 5.0;
+        consumible: Off;
+    PolloAsado;
+
+    Entity Jugador jugador_principal;
+    Entity Jugador jugadores[5];
+
+Recipe
+    Spell calcularDanio(Stack :: nivel; Ghast :: multiplicador) -> Stack;
+    Spell distanciaEntre(Entity Posicion :: pos1, pos2) -> Ghast;
+    Spell crearItem(Spider :: nombre; Stack cantidad, durabilidad; Ghast peso; Torch consumible) -> Entity Item;
+
+    Ritual inicializarJugador(Entity Jugador ref jugador; Spider :: nombre; Stack nivel; Ghast salud);
+    Ritual mostrarEstadisticas(Entity Jugador :: jugador);
+    Ritual procesarInventario(Shelf[10] Entity Item :: inventario);
+
+CraftingTable
+    Spell calcularDanio(Stack :: nivel; Ghast :: multiplicador) -> Stack
+    PolloCrudo
+        Stack danio_base = nivel * 2 + 5;
+        Stack danio_final = danio_base;
+
+        target nivel > 10 craft hit
+        PolloCrudo
+            danio_final += (nivel - 10) * 3;
+        PolloAsado
+
+        Ghast temp = danio_final >> Ghast;
+        temp = temp :* multiplicador;
+        danio_final = temp >> Stack;
+
+        respawn danio_final;
+    PolloAsado
+
+    Spell distanciaEntre(Entity Posicion :: pos1, pos2) -> Ghast
+    PolloCrudo
+        Stack dx = pos1@x - pos2@x;
+        Stack dy = pos1@y - pos2@y;
+        Stack dz = pos1@z - pos2@z;
+
+        Ghast dx_float = dx >> Ghast;
+        Ghast dy_float = dy >> Ghast;
+        Ghast dz_float = dz >> Ghast;
+
+        Ghast suma_cuadrados = (dx_float :* dx_float) :+ (dy_float :* dy_float) :+ (dz_float :* dz_float);
+        Ghast result = suma_cuadrados :// 2.0;
+        respawn result;
+    PolloAsado
+
+    Spell crearItem(Spider :: nombre; Stack cantidad, durabilidad; Ghast peso; Torch consumible) -> Entity Item
+    PolloCrudo
+        Entity Item nuevo_item
+        PolloCrudo
+            nombre: nombre;
+            cantidad: cantidad;
+            durabilidad: durabilidad;
+            peso: peso;
+            consumible: consumible;
+        PolloAsado;
+        respawn nuevo_item;
+    PolloAsado
+
+    Ritual inicializarJugador(Entity Jugador ref jugador; Spider :: nombre; Stack nivel; Ghast salud)
+    PolloCrudo
+        jugador@nombre = nombre;
+        jugador@nivel = nivel;
+        jugador@salud = salud;
+        jugador@posicion@x = 0;
+        jugador@posicion@y = 0;
+        jugador@posicion@z = 0;
+
+        walk i set 0 to 9 craft
+        PolloCrudo
+            jugador@inventario[i] = crearItem("Item_" bind i, i + 1, 100 * (i + 1), i :* 0.5, i % 2 is 0);
+        PolloAsado
+    PolloAsado
+
+    Ritual mostrarEstadisticas(Entity Jugador :: jugador)
+    PolloCrudo
+        dropperSpider("=== Estadísticas del Jugador ===");
+        dropperSpider("Nombre: " bind jugador@nombre);
+        dropperSpider("Nivel: " bind jugador@nivel);
+        dropperSpider("Salud: " bind jugador@salud);
+        dropperSpider("Posición: (" bind jugador@posicion@x bind ", " bind jugador@posicion@y bind ", " bind jugador@posicion@z bind ")");
+        dropperSpider("Inventario: " bind #(jugador@inventario) bind " items");
+    PolloAsado
+
+    Ritual procesarInventario(Shelf[10] Entity Item :: inventario)
+    PolloCrudo
+        Stack total_items = 0;
+        Ghast peso_total = 0.0;
+        Spider lista_items = "";
+
+        walk i set 0 to 9 craft
+        PolloCrudo
+            total_items += inventario[i]@cantidad;
+            peso_total = peso_total :+ (inventario[i]@peso :* inventario[i]@cantidad >> Ghast);
+
+            target i < 9 craft hit
+            PolloCrudo
+                lista_items = lista_items bind inventario[i]@nombre bind ", ";
+            PolloAsado
+            miss
+            PolloCrudo
+                lista_items = lista_items bind inventario[i]@nombre;
+            PolloAsado
+        PolloAsado
+
+        dropperSpider("Total items: " bind total_items);
+        dropperSpider("Peso total: " bind peso_total);
+        dropperSpider("Lista: " bind lista_items);
+    PolloAsado
+
+SpawnPoint
+    dropperSpider(TEST_NAME bind " v" bind VERSION);
+
+    walk i set 0 to ARRAY_SIZE - 1 craft
+    PolloCrudo
+        numeros[i] = (i * i + i) % MAX_VALUE;
+        valores_reales[i] = i :* PI :// 10.0;
+
+        target i < 20 craft hit
+        PolloCrudo
+            add(conjunto_numeros, i * 10);
+        PolloAsado
+    PolloAsado
+
+    jugador_principal@nombre = "Aventurero";
+    jugador_principal@nivel = 25;
+    jugador_principal@salud = 95.5;
+    jugador_principal@posicion@x = 100;
+    jugador_principal@posicion@y = 64;
+    jugador_principal@posicion@z = -50;
+
+    walk i set 0 to 4 craft
+    PolloCrudo
+        Spider nombre_jugador = "Jugador_" bind i;
+        Stack nivel_inicial = 1 + i * 5;
+        Ghast salud_inicial = 20.0 :+ (i :* 5.0);
+        ender_pearl inicializarJugador(jugadores[i], nombre_jugador, nivel_inicial, salud_inicial);
+    PolloAsado
+
+    dropperSpider("Realizando operaciones mezcladas...");
+
+    contador = 0;
+    suma = 0;
+    producto = 1;
+    resultado_texto = "";
+
+    walk iteracion set 0 to ITERATIONS - 1 craft
+    PolloCrudo
+        Stack indice = iteracion % ARRAY_SIZE;
+        suma += numeros[indice];
+        target producto < 1000000 craft hit
+        PolloCrudo
+            producto *= (indice + 1);
+        PolloAsado
+
+        Ghast valor_real = valores_reales[indice];
+        resultado_flotante = resultado_flotante :+ valor_real;
+        target resultado_flotante :> 1000.0 craft hit
+        PolloCrudo
+            resultado_flotante = resultado_flotante :% 1000.0;
+        PolloAsado
+
+        Spider texto_iteracion = textos[iteracion % 10];
+        target iteracion % 5 is 0 craft hit
+        PolloCrudo
+            resultado_texto = resultado_texto bind texto_iteracion;
+        PolloAsado
+
+        target iteracion % 2 is 0 craft hit
+        PolloCrudo
+            caracter = etchUp(caracter);
+        PolloAsado
+        miss
+        PolloCrudo
+            caracter = etchDown(caracter);
+        PolloAsado
+
+        condicion = condicion xor (iteracion % 3 is 0);
+        target indice % 2 is 0 and condicion craft hit
+        PolloCrudo
+            soulsand contador;
+        PolloAsado
+
+        target iteracion % 10 is 0 craft hit
+        PolloCrudo
+            Stack danio = calcularDanio(jugador_principal@nivel, 1.5);
+            Ghast distancia = distanciaEntre(jugador_principal@posicion, origen);
+
+            dropperSpider("Iteración " bind iteracion bind ": Daño=" bind danio bind ", Distancia=" bind distancia);
+        PolloAsado
+
+        Stack jugador_indice = iteracion % 5;
+        soulsand jugadores[jugador_indice]@nivel;
+
+        target iteracion % 20 is 0 craft hit
+        PolloCrudo
+            ender_pearl mostrarEstadisticas(jugadores[jugador_indice]);
+        PolloAsado
+    PolloAsado
+
+    dropperSpider("Prueba completada. Resultados:");
+    dropperSpider("Suma total: " bind suma);
+    dropperSpider("Producto acumulado: " bind producto);
+    dropperSpider("Resultado flotante: " bind resultado_flotante);
+    dropperSpider("Texto resultante: " bind resultado_texto);
+    dropperSpider("Caracter final: " bind caracter);
+    dropperSpider("Contador incrementado: " bind contador);
+    dropperSpider("Estado de condición final: " bind condicion);
+
+    ender_pearl procesarInventario(jugador_principal@inventario);
+
+    dropperSpider("Prueba de rendimiento con tokens variados finalizada");
+
+worldSave

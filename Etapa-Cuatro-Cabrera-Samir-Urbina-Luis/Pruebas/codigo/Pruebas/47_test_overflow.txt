@@ -1,0 +1,9 @@
+WorldName TestOverflow:
+
+Inventory
+    Stack numero1 = 40000;
+    Stack numero2 = -40000;
+    Spider texto = "Esta es una cadena muy larga que tiene mas de ochenta caracteres y deberia ser truncada automaticamente por el sistema de overflow";
+    Ghast decimal1 = 50000.99;
+
+WorldSave

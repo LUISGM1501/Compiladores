@@ -1,0 +1,168 @@
+$* 
+  Prueba: 40_Prueba_Comb_Declaraciones
+  Descripción: Verificar combinaciones de declaraciones de variables y constantes
+  Fecha: 28/04/2025
+*$
+
+WorldName PruebaCombinacionDeclaraciones:
+
+$$ Sección de constantes con diferentes tipos y complejidades
+Bedrock
+
+    $$ Constantes simples de tipos básicos
+    Obsidian Stack MAX_PLAYERS 8;
+    Obsidian Stack MIN_LEVEL 1;
+    Obsidian Torch DEBUG_MODE On;
+    Obsidian Spider GAME_TITLE "Notch Engine";
+    Obsidian Rune SEPARATOR '_';
+    Obsidian Ghast GRAVITY 9.8;
+    
+    $$ Constantes con expresiones
+    Obsidian Stack MAX_INVENTORY_SIZE 5 * 9;
+    Obsidian Stack TOTAL_SLOTS MAX_PLAYERS * MAX_INVENTORY_SIZE;
+    Obsidian Spider FULL_TITLE GAME_TITLE bind " v1.0";
+    Obsidian Ghast TERMINAL_VELOCITY GRAVITY :* 3.0;
+    
+    $$ Constantes con expresiones más complejas
+    Obsidian Stack DAYS_IN_YEAR 365;
+    Obsidian Stack DAYS_IN_4_YEARS DAYS_IN_YEAR * 4 + 1;
+    Obsidian Torch IS_LEAP_YEAR (DAYS_IN_4_YEARS - (DAYS_IN_YEAR * 4)) is 1;
+
+$$ Declaraciones de tipos con diferentes formas
+ResourcePack
+
+    $$ Conversiones de tipos básicas
+    Anvil Ghast -> Stack;
+    Anvil Ghast -> Stack truncate;
+    Anvil Stack -> Spider;
+    Anvil Rune -> Stack safe;
+    
+    $$ Declaraciones de entidades (registros)
+    Entity Item
+    PolloCrudo
+        Spider nombre;
+        Stack cantidad;
+        Stack durabilidad;
+        Torch stackeable;
+    PolloAsado;
+    
+    Entity Jugador
+    PolloCrudo
+        Spider nombre;
+        Stack nivel;
+        Stack experiencia;
+        Ghast salud;
+        Ghast hambre;
+        Torch en_linea;
+        Entity Item item_principal;
+    PolloAsado;
+    
+    Entity Posicion
+    PolloCrudo
+        Stack x;
+        Stack y;
+        Stack z;
+    PolloAsado;
+    
+    $$ Tipos anidados
+    Entity Mundo
+    PolloCrudo
+        Spider nombre;
+        Stack seed;
+        Shelf[10] Entity Jugador jugadores;
+        Entity Posicion spawn;
+    PolloAsado;
+
+$$ Sección de variables con diferentes formas de declaración e inicialización
+Inventory
+
+    $$ Declaraciones simples sin inicialización
+    Stack contador;
+    Spider mensaje;
+    Torch estado;
+    Rune inicial;
+    Ghast temperatura;
+    
+    $$ Declaraciones con inicialización
+    Stack nivel = 1;
+    Spider nombre = "Steve";
+    Torch activo = On;
+    Rune tecla = 'A';
+    Ghast pi = 3.14159;
+    
+    $$ Declaraciones múltiples del mismo tipo
+    Stack x = 0, y = 0, z = 0;
+    Torch jugando = On, pausa = Off, sonido = On;
+    Ghast distancia = 0.0, velocidad = 5.0, aceleracion = 1.5;
+    
+    $$ Declaraciones con resultados de expresiones
+    Stack suma = 5 + 10;
+    Stack producto = 4 * 25;
+    Spider saludo = "Hola " bind nombre;
+    Torch condicion = nivel > 5;
+    Ghast promedio = (10.5 :+ 20.7 :+ 15.3) :// 3.0;
+    
+    $$ Declaraciones de tipos compuestos
+    Shelf[5] Stack inventario;
+    Shelf[3] Spider mensajes = ["Hola", "Mundo", "!"];
+    Shelf[2] Shelf[2] Stack matriz;
+    Chest numeros = {: 1, 2, 3, 4, 5 :};
+    Book archivo = {/ "datos.txt", 'E' /};
+    
+    $$ Instancias de entidades (registros)
+    Entity Item espada;
+    Entity Jugador jugador1
+    PolloCrudo
+        nombre: "Alex";
+        nivel: 5;
+        experiencia: 150;
+        salud: 18.5;
+        hambre: 16.0;
+        en_linea: On;
+        item_principal:
+        PolloCrudo
+            nombre: "Espada de diamante";
+            cantidad: 1;
+            durabilidad: 1500;
+            stackeable: Off;
+        PolloAsado;
+    PolloAsado;
+    Entity Mundo mundo_principal;
+
+SpawnPoint
+
+    PolloCrudo
+        $$ Inicialización de variables declaradas sin valor inicial
+        contador = 0;
+        mensaje = "Variable inicializada en el punto de entrada";
+        estado = Off;
+        inicial = 'Z';
+        temperatura = 22.5;
+        
+        $$ Inicialización de variables compuestas
+        espada@nombre = "Espada de hierro";
+        espada@cantidad = 1;
+        espada@durabilidad = 250;
+        espada@stackeable = Off;
+        
+        matriz[0][0] = 1;
+        matriz[0][1] = 2;
+        matriz[1][0] = 3;
+        matriz[1][1] = 4;
+        
+        mundo_principal@nombre = "Mundo de prueba";
+        mundo_principal@seed = 12345;
+        mundo_principal@spawn@x = 0;
+        mundo_principal@spawn@y = 64;
+        mundo_principal@spawn@z = 0;
+        
+        $$ Uso de constantes en asignaciones
+        Stack max_jugadores = MAX_PLAYERS;
+        dropperSpider(FULL_TITLE);
+        
+        $$ Uso de referencias a variables en asignaciones
+        Stack total = nivel + jugador1@nivel;
+        dropperSpider("Nivel total: " bind total);
+    PolloAsado
+
+worldSave

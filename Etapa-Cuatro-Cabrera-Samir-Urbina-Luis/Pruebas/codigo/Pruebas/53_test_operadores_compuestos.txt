@@ -1,0 +1,31 @@
+worldname MiMundo:
+
+INVENTORY
+    Stack numero1 = 10;
+    Stack numero2 = 5;
+    Ghast flotante1 = 3.14;
+    Ghast flotante2 = 2.5;
+    Spider cadena1 = "Hola";
+    Spider cadena2 = " Mundo";
+
+SpawnPoint
+    PolloCrudo
+        numero1 += 5;          $$ 10 + 5 = 15
+        numero1 -= 3;          $$ 15 - 3 = 12
+        numero1 *= 2;          $$ 12 * 2 = 24
+        numero1 /= 4;          $$ 24 / 4 = 6
+        numero1 %= 4;          $$ 6 % 4 = 2
+        
+        flotante1 :+= 1.5;     $$ 3.14 + 1.5 = 4.64
+        flotante1 :-= 0.64;    $$ 4.64 - 0.64 = 4.0
+        flotante1 :*= 2.5;     $$ 4.0 * 2.5 = 10.0
+        flotante1 :/= 2.0;     $$ 10.0 / 2.0 = 5.0
+        
+        cadena1 += cadena2;    $$ "Hola" + " Mundo" = "Hola Mundo"
+        
+        $$ Casos de error
+        numero2 /= 0;          $$ Error: división por cero
+        cadena1 *= 3;          $$ Error: operador no válido para strings
+    PolloAsado
+
+worldsave

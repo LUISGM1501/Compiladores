@@ -1,0 +1,36 @@
+WorldName TestTiposError:
+
+Inventory
+    Stack numero = 42;
+    Ghast decimal = 3.14;
+    Spider texto = "Hola mundo";
+    Torch bandera = On;
+    Rune letra = 'X';
+
+SpawnPoint
+    $$ ERROR: Operaciones inválidas entre números y cadenas
+    numero = numero + texto;      $$ ERROR: STACK + SPIDER inválido
+    texto = texto * numero;       $$ ERROR: SPIDER * STACK inválido
+    decimal = texto / 2.0;        $$ ERROR: SPIDER / GHAST inválido
+    
+    $$ ERROR: Operaciones inválidas entre números y booleanos
+    numero = numero + bandera;    $$ ERROR: STACK + TORCH requiere conversión
+    bandera = decimal - bandera;  $$ ERROR: GHAST - TORCH inválido
+    
+    $$ ERROR: Uso incorrecto de operadores flotantes con enteros
+    numero = numero :+ 10;        $$ ADVERTENCIA: debería usar + no :+
+    
+    $$ ERROR: Operaciones con caracteres
+    letra = letra + numero;       $$ ERROR: RUNE + STACK inválido
+    numero = letra * letra;       $$ ERROR: RUNE * RUNE inválido
+    
+    $$ ERROR: Mezcla incorrecta de tipos en expresiones complejas
+    numero = numero + texto - decimal;  $$ ERROR: tipos incompatibles
+    decimal = bandera :* letra :/ texto; $$ ERROR: múltiples incompatibilidades
+    
+    $$ ERROR: Comparaciones entre tipos incompatibles
+    bandera = texto > numero;     $$ ERROR: SPIDER > STACK inválido
+    bandera = letra < bandera;    $$ ERROR: RUNE < TORCH inválido
+    bandera = texto == decimal;   $$ ERROR: SPIDER == GHAST inválido
+
+WorldSave

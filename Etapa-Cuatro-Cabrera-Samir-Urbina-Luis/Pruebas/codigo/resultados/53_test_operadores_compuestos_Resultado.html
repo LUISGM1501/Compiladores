@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Léxico - Resultados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .muro {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .ladrillo {
+            white-space: nowrap;  /* Evita que el texto se divida */
+            word-break: keep-all; /* Mantiene las palabras completas */
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stats-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats-list {
+            columns: 2;
+            list-style-type: none;
+            padding: 0;
+        }
+        @media (max-width: 768px) {
+            .stats-list {
+                columns: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Resultados del Análisis Léxico</h1>
+    
+    <h2>Muro de Ladrillos</h2>
+    <div class="muro">
+        <div class="ladrillo" style="background-color: #FF6B6B">WORLD_NAME</div><div class="ladrillo" style="background-color: #4ECDC4">MiMundo</div><div class="ladrillo" style="background-color: #45B7D1">:</div><div class="ladrillo" style="background-color: #FFBE0B">INVENTORY</div><div class="ladrillo" style="background-color: #FB5607">Stack</div><div class="ladrillo" style="background-color: #8338EC">numero1</div><div class="ladrillo" style="background-color: #3A86FF">=</div><div class="ladrillo" style="background-color: #FF006E">10</div><div class="ladrillo" style="background-color: #A5DD9B">;</div><div class="ladrillo" style="background-color: #F9C74F">Stack</div><div class="ladrillo" style="background-color: #90BE6D">numero2</div><div class="ladrillo" style="background-color: #43AA8B">=</div><div class="ladrillo" style="background-color: #577590">5</div><div class="ladrillo" style="background-color: #F94144">;</div><div class="ladrillo" style="background-color: #F3722C">Ghast</div><div class="ladrillo" style="background-color: #FF6B6B">flotante1</div><div class="ladrillo" style="background-color: #4ECDC4">=</div><div class="ladrillo" style="background-color: #45B7D1">3.14</div><div class="ladrillo" style="background-color: #FFBE0B">;</div><div class="ladrillo" style="background-color: #FB5607">Ghast</div><div class="ladrillo" style="background-color: #8338EC">flotante2</div><div class="ladrillo" style="background-color: #3A86FF">=</div><div class="ladrillo" style="background-color: #FF006E">2.5</div><div class="ladrillo" style="background-color: #A5DD9B">;</div><div class="ladrillo" style="background-color: #F9C74F">Spider</div><div class="ladrillo" style="background-color: #90BE6D">cadena1</div><div class="ladrillo" style="background-color: #43AA8B">=</div><div class="ladrillo" style="background-color: #577590">"Hola"</div><div class="ladrillo" style="background-color: #F94144">;</div><div class="ladrillo" style="background-color: #F3722C">Spider</div><div class="ladrillo" style="background-color: #FF6B6B">cadena2</div><div class="ladrillo" style="background-color: #4ECDC4">=</div><div class="ladrillo" style="background-color: #45B7D1">" Mundo"</div><div class="ladrillo" style="background-color: #FFBE0B">;</div><div class="ladrillo" style="background-color: #FB5607">SPAWN_POINT</div><div class="ladrillo" style="background-color: #8338EC">numero1</div><div class="ladrillo" style="background-color: #3A86FF">+</div><div class="ladrillo" style="background-color: #FF006E">=</div><div class="ladrillo" style="background-color: #A5DD9B">5</div><div class="ladrillo" style="background-color: #F9C74F">;</div><div class="ladrillo" style="background-color: #90BE6D">/</div><div class="ladrillo" style="background-color: #43AA8B">/</div><div class="ladrillo" style="background-color: #577590">10</div><div class="ladrillo" style="background-color: #F94144">+</div><div class="ladrillo" style="background-color: #F3722C">5</div><div class="ladrillo" style="background-color: #FF6B6B">=</div><div class="ladrillo" style="background-color: #4ECDC4">15</div><div class="ladrillo" style="background-color: #45B7D1">numero1</div><div class="ladrillo" style="background-color: #FFBE0B">-</div><div class="ladrillo" style="background-color: #FB5607">=</div><div class="ladrillo" style="background-color: #8338EC">3</div><div class="ladrillo" style="background-color: #3A86FF">;</div><div class="ladrillo" style="background-color: #FF006E">/</div><div class="ladrillo" style="background-color: #A5DD9B">/</div><div class="ladrillo" style="background-color: #F9C74F">15</div><div class="ladrillo" style="background-color: #90BE6D">-</div><div class="ladrillo" style="background-color: #43AA8B">3</div><div class="ladrillo" style="background-color: #577590">=</div><div class="ladrillo" style="background-color: #F94144">12</div><div class="ladrillo" style="background-color: #F3722C">numero1</div><div class="ladrillo" style="background-color: #FF6B6B">*</div><div class="ladrillo" style="background-color: #4ECDC4">=</div><div class="ladrillo" style="background-color: #45B7D1">2</div><div class="ladrillo" style="background-color: #FFBE0B">;</div><div class="ladrillo" style="background-color: #FB5607">/</div><div class="ladrillo" style="background-color: #8338EC">/</div><div class="ladrillo" style="background-color: #3A86FF">12</div><div class="ladrillo" style="background-color: #FF006E">*</div><div class="ladrillo" style="background-color: #A5DD9B">2</div><div class="ladrillo" style="background-color: #F9C74F">=</div><div class="ladrillo" style="background-color: #90BE6D">24</div><div class="ladrillo" style="background-color: #43AA8B">numero1</div><div class="ladrillo" style="background-color: #577590">/</div><div class="ladrillo" style="background-color: #F94144">=</div><div class="ladrillo" style="background-color: #F3722C">4</div><div class="ladrillo" style="background-color: #FF6B6B">;</div><div class="ladrillo" style="background-color: #4ECDC4">/</div><div class="ladrillo" style="background-color: #45B7D1">/</div><div class="ladrillo" style="background-color: #FFBE0B">24</div><div class="ladrillo" style="background-color: #FB5607">/</div><div class="ladrillo" style="background-color: #8338EC">4</div><div class="ladrillo" style="background-color: #3A86FF">=</div><div class="ladrillo" style="background-color: #FF006E">6</div><div class="ladrillo" style="background-color: #A5DD9B">numero1</div><div class="ladrillo" style="background-color: #F9C74F">%</div><div class="ladrillo" style="background-color: #90BE6D">=</div><div class="ladrillo" style="background-color: #43AA8B">4</div><div class="ladrillo" style="background-color: #577590">;</div><div class="ladrillo" style="background-color: #F94144">/</div><div class="ladrillo" style="background-color: #F3722C">/</div><div class="ladrillo" style="background-color: #FF6B6B">6</div><div class="ladrillo" style="background-color: #4ECDC4">%</div><div class="ladrillo" style="background-color: #45B7D1">4</div><div class="ladrillo" style="background-color: #FFBE0B">=</div><div class="ladrillo" style="background-color: #FB5607">2</div><div class="ladrillo" style="background-color: #8338EC">flotante1</div><div class="ladrillo" style="background-color: #3A86FF">:</div><div class="ladrillo" style="background-color: #FF006E">+</div><div class="ladrillo" style="background-color: #A5DD9B">=</div><div class="ladrillo" style="background-color: #F9C74F">1.5</div><div class="ladrillo" style="background-color: #90BE6D">;</div><div class="ladrillo" style="background-color: #43AA8B">/</div><div class="ladrillo" style="background-color: #577590">/</div><div class="ladrillo" style="background-color: #F94144">3.14</div><div class="ladrillo" style="background-color: #F3722C">+</div><div class="ladrillo" style="background-color: #FF6B6B">1.5</div><div class="ladrillo" style="background-color: #4ECDC4">=</div><div class="ladrillo" style="background-color: #45B7D1">4.64</div><div class="ladrillo" style="background-color: #FFBE0B">flotante1</div><div class="ladrillo" style="background-color: #FB5607">:</div><div class="ladrillo" style="background-color: #8338EC">-</div><div class="ladrillo" style="background-color: #3A86FF">=</div><div class="ladrillo" style="background-color: #FF006E">0.64</div><div class="ladrillo" style="background-color: #A5DD9B">;</div><div class="ladrillo" style="background-color: #F9C74F">/</div><div class="ladrillo" style="background-color: #90BE6D">/</div><div class="ladrillo" style="background-color: #43AA8B">4.64</div><div class="ladrillo" style="background-color: #577590">-</div><div class="ladrillo" style="background-color: #F94144">0.64</div><div class="ladrillo" style="background-color: #F3722C">=</div><div class="ladrillo" style="background-color: #FF6B6B">4.0</div><div class="ladrillo" style="background-color: #4ECDC4">flotante1</div><div class="ladrillo" style="background-color: #45B7D1">:</div><div class="ladrillo" style="background-color: #FFBE0B">*</div><div class="ladrillo" style="background-color: #FB5607">=</div><div class="ladrillo" style="background-color: #8338EC">2.5</div><div class="ladrillo" style="background-color: #3A86FF">;</div><div class="ladrillo" style="background-color: #FF006E">/</div><div class="ladrillo" style="background-color: #A5DD9B">/</div><div class="ladrillo" style="background-color: #F9C74F">4.0</div><div class="ladrillo" style="background-color: #90BE6D">*</div><div class="ladrillo" style="background-color: #43AA8B">2.5</div><div class="ladrillo" style="background-color: #577590">=</div><div class="ladrillo" style="background-color: #F94144">10.0</div><div class="ladrillo" style="background-color: #F3722C">flotante1</div><div class="ladrillo" style="background-color: #FF6B6B">:</div><div class="ladrillo" style="background-color: #4ECDC4">/</div><div class="ladrillo" style="background-color: #45B7D1">=</div><div class="ladrillo" style="background-color: #FFBE0B">2.0</div><div class="ladrillo" style="background-color: #FB5607">;</div><div class="ladrillo" style="background-color: #8338EC">/</div><div class="ladrillo" style="background-color: #3A86FF">/</div><div class="ladrillo" style="background-color: #FF006E">10.0</div><div class="ladrillo" style="background-color: #A5DD9B">/</div><div class="ladrillo" style="background-color: #F9C74F">2.0</div><div class="ladrillo" style="background-color: #90BE6D">=</div><div class="ladrillo" style="background-color: #43AA8B">5.0</div><div class="ladrillo" style="background-color: #577590">cadena1</div><div class="ladrillo" style="background-color: #F94144">+</div><div class="ladrillo" style="background-color: #F3722C">=</div><div class="ladrillo" style="background-color: #FF6B6B">cadena2</div><div class="ladrillo" style="background-color: #4ECDC4">;</div><div class="ladrillo" style="background-color: #45B7D1">/</div><div class="ladrillo" style="background-color: #FFBE0B">/</div><div class="ladrillo" style="background-color: #FB5607">"Hola"</div><div class="ladrillo" style="background-color: #8338EC">+</div><div class="ladrillo" style="background-color: #3A86FF">" Mundo"</div><div class="ladrillo" style="background-color: #FF006E">=</div><div class="ladrillo" style="background-color: #A5DD9B">"Hola Mundo"</div><div class="ladrillo" style="background-color: #F9C74F">/</div><div class="ladrillo" style="background-color: #90BE6D">/</div><div class="ladrillo" style="background-color: #43AA8B">Casos</div><div class="ladrillo" style="background-color: #577590">de</div><div class="ladrillo" style="background-color: #F94144">error</div><div class="ladrillo" style="background-color: #F3722C">numero2</div><div class="ladrillo" style="background-color: #FF6B6B">/</div><div class="ladrillo" style="background-color: #4ECDC4">=</div><div class="ladrillo" style="background-color: #45B7D1">0</div><div class="ladrillo" style="background-color: #FFBE0B">;</div><div class="ladrillo" style="background-color: #FB5607">/</div><div class="ladrillo" style="background-color: #8338EC">/</div><div class="ladrillo" style="background-color: #3A86FF">Error</div><div class="ladrillo" style="background-color: #FF006E">:</div><div class="ladrillo" style="background-color: #A5DD9B">división</div><div class="ladrillo" style="background-color: #F9C74F">por</div><div class="ladrillo" style="background-color: #90BE6D">cero</div><div class="ladrillo" style="background-color: #43AA8B">cadena1</div><div class="ladrillo" style="background-color: #577590">*</div><div class="ladrillo" style="background-color: #F94144">=</div><div class="ladrillo" style="background-color: #F3722C">3</div><div class="ladrillo" style="background-color: #FF6B6B">;</div><div class="ladrillo" style="background-color: #4ECDC4">/</div><div class="ladrillo" style="background-color: #45B7D1">/</div><div class="ladrillo" style="background-color: #FFBE0B">Error</div><div class="ladrillo" style="background-color: #FB5607">:</div><div class="ladrillo" style="background-color: #8338EC">operador</div><div class="ladrillo" style="background-color: #3A86FF">no</div><div class="ladrillo" style="background-color: #FF006E">válido</div><div class="ladrillo" style="background-color: #A5DD9B">para</div><div class="ladrillo" style="background-color: #F9C74F">strings</div><div class="ladrillo" style="background-color: #90BE6D">WORLD_SAVE</div>
+    </div>
+    
+    <div class="stats-container">
+        <h2>Estadísticas de Tokens</h2>
+        <ul class="stats-list">
+            <li>Palabras reservadas: 7</li><li>Identificadores: 36</li><li>Literales numéricos: 42</li><li>Literales de texto: 5</li><li>Operadores: 101</li>
+        </ul>
+    </div>
+    
+    <div class="stats-container">
+        <h2>Otras Estadísticas</h2>
+        <ul class="stats-list">
+            <li>Número de líneas del programa: 29</li><li>Número de caracteres del archivo: 838</li>
+        </ul>
+    </div>
+</body>
+</html>
+    
