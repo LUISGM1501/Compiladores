@@ -1,5 +1,12 @@
-# test_mc_generacion.py
-# PRUEBA DIRECTA del archivo mc_generacion.py
+"""
+Compilador Notch Engine
+
+Estudiantes: Cabrera Samir y Urbina Luis
+
+Archivo: test_generador.py
+
+Breve Descripcion: PRUEBA DIRECTA del archivo mc_generacion.py
+"""
 
 def test_mc_generacion_directo():
     """Prueba DIRECTA de mc_generacion.py"""
