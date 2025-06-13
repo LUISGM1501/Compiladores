@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c9787a69-26fa-433c-b405-298f491d96a7" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../ASM/hola.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Documentacion/hola.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Gramatica/hola.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codigo.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main.OMITIDO" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/.idea/contenidoBruto.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/00_PruebaEntity_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/00_PruebaSimple_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/00_Prueba_Dos_Puntos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/00_Prueba_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/01_Prueba_PR_Estructura_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/02_Prueba_PR_Tipos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/03_Prueba_PR_Booleanos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/04_Prueba_PR_Bloques_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/05_Prueba_PR_Control_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/06_Prueba_PR_Saltos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/07_Prueba_PR_Funciones_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/08_Prueba_PR_Operadores_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/09_Prueba_Lit_Enteros_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/10_Prueba_Lit_Flotantes_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/11_Prueba_Lit_Caracteres_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/12_Prueba_Lit_Strings_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/13_Prueba_Lit_Arreglos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/14_Prueba_Lit_Registros_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/15_Prueba_Lit_Conjuntos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/16_Prueba_Lit_Archivos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/17_Prueba_Op_Aritmeticos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/18_Prueba_Op_Flotantes_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/19_Prueba_Op_Comparacion_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/20_Prueba_Op_Asignacion_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/21_Prueba_Op_Acceso_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/22_Prueba_Op_Especiales_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/23_Prueba_Com_Linea_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/24_Prueba_Com_Bloque_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/25_Prueba_Com_Anidados_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/26_Prueba_ID_Simples_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/27_Prueba_ID_Complejos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/28_Prueba_ID_Similares_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/29_Prueba_Lim_StringLargo_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/30_Prueba_Lim_NumeroGrande_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/31_Prueba_Lim_PrecisionFlotante_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/32_Prueba_Lim_ComentarioLargo_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/33_Prueba_Lim_TokensConsecutivos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/34_Prueba_Err_CaracterInvalido_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/35_Prueba_Err_StringNoTerminado_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/45_Prueba_Rend_TokensVariados_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/46_Prueba_Gordita_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/47_test_overflow_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/48_test_Pollo_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/49_test_Pollo_Error_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/50_testOp_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/51_testOp_Error_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/52_testOp_Mixto_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/53_test_operadores_compuestos_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/resultados/54_TargetHitMiss_Resultado.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/scanner/mc_scanner.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Etapa2/codigo/contenidoBruto/scanner/mc_scanner.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 8
+}]]></component>
+  <component name="ProjectId" id="2yRHyXdlsUcUqduoTNeQQwY6rkq" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.main.executor": "Run",
+    "Python.mc_generacion.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/samir-cabrera/projects/universidad/compi/Compiladores/Etapa-Cuatro-Cabrera-Samir-Urbina-Luis/Pruebas/codigo",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-PY-251.26094.141" />
+        <option value="bundled-python-sdk-9f8e2b94138c-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26094.141" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c9787a69-26fa-433c-b405-298f491d96a7" name="Changes" comment="" />
+      <created>1749790720753</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1749790720753</updated>
+      <workItem from="1749790721983" duration="912000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

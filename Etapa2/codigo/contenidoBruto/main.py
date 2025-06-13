@@ -22,6 +22,7 @@ from parser.semantica.TablaSimbolos import TablaSimbolos
 from parser.semantica.HistorialSemantico import HistorialSemanticoSingleton
 from parser.semantica.HistorialSemanticoNegativo import HistorialSemanticoNegativoSingleton
 from token_cleaner import limpiar_tokens_para_parser, debug_tokens_para_parser
+from generacionCodigo.mc_generacion import generar_codigo_asm
 
 # Verificar integridad
 Gramatica.verificarIntegridadRangos()
@@ -97,7 +98,7 @@ def ejecucion():
     # Funcionamiento del parser con tokens limpios
     iniciar_parser(tokens_limpios, debug=False, nivel_debug=1) 
 
-    mostrar_menu()
+    mostrar_menu(archivo_prueba)
     
     # NUEVO: Mostrar resultados de operadores compuestos
     mostrar_resultados_operadores_compuestos()
@@ -124,7 +125,7 @@ def mostrar_resultados_operadores_compuestos():
     
     print("="*50)
 
-def mostrar_menu():
+def mostrar_menu(archivo_prueba):
     print("\n\n\n\n\n\n\n\n--- MENÚ DE INFORMACIÓN SEMÁNTICA ---")
     print("1. Ver información de la tabla de símbolos")
     print("2. Ver historial semántico positivo")
@@ -150,6 +151,17 @@ def mostrar_menu():
         mostrar_menu()
     elif opcion == "4":
         print("\nSaliendo del sistema...")
+        #################################################################
+        #################################################################
+        ##                 LLAMADA A GENERACION DE CODIGO             ##
+        ################################################################
+        ################################################################
+        print("\n" + "=" * 60)
+        print("              GENERANDO CÓDIGO ASM")
+        print("=" * 60)
+
+        # Generar código ASM
+        generar_codigo_asm(archivo_prueba)
         sys.exit()
     else:
         print("\nOpción inválida. Por favor intente de nuevo.")
