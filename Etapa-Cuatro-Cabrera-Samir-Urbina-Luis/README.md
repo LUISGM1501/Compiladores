@@ -46,7 +46,11 @@ Al ejecutarlo, se generará automáticamente una carpeta llamada `resultados/`.
 
 7. **Visualización de resultados Parser:** Para visualizar los resultados del parser se dejo activada la version de debug en el ejecutable, por lo que solo debe de hacer una lectura de los logs. 
 
-8. **Visualización de resultados Analisis Contextual:** Para visualizar los resultados del analisis contextual se debe seleccionar el archivo a ejecutar, y seguidamente se debe de esperar a que termine la ejecucion del programa. Una vez hecho esto se debe de seleccionar la opcion de menu que se quiera. 
+8. **Visualización de resultados Analisis Contextual:** 
+
+Primeramente se debe de ejecutar el ejecutable main y seguidamente se desplegara un menu, en este menu se debe de seleccionar la opcion numero 1 para abrir la ejecucion semantica comun. 
+
+Para visualizar los resultados del analisis contextual se debe seleccionar el archivo a ejecutar, y seguidamente se debe de esperar a que termine la ejecucion del programa. Una vez hecho esto se debe de seleccionar la opcion de menu que se quiera. 
 
     1. Ver la Tabla de Simbolos
     2. Ver el Historial Semantico Completo
@@ -57,6 +61,18 @@ SE DEBEN DE IGNORAR LOS LOGS PREVIOS A ESTO, YA QUE SON PARTE DEL DEBUG DEL PROG
 
 9. **Ejecucion de Ensamblador**
 
+Para la ejecucion de ensamblador se debe de prestar atencion, al abrir el menu de ejecucion se tienen las siguientes opciones de menu:
+
+1. Ejecutar análisis completo de archivo (Modo Original)
+2. Ejecutar pruebas de generación de código (Pruebas por default para la generacion de Codigo)
+3. Procesar todos los archivos de prueba (Procesamiento de todos los archivos disponibles en el stack de pruebas)
+4. Generar Runtime Library independiente (Generacion del Runtime Library)
+5. Análisis individual con generación completa ( Generacion de codigo segun archivo seleccionado)
+0. Salir
+
+Cabe aclarar que el algoritmo esta descrito de manera correcta en la documentacion, actualmente se esta implementado una parte del codigo que ejecuta cierta funcionalidad, no la totalidad esperada, por lo que se debe de tener en cuenta.
+
+---
 
 EN CASO DE TENER PROLEMAS DE SEGURIDAD EJECUTAR: chmod +x main
 

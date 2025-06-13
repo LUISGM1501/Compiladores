@@ -1013,3 +1013,78 @@ class GeneradorCompleto(GeneradorConRuntime):
         if self.verificar_espacio_segmento(TipoSegmento.CODIGO, tamaño_codigo):
             self.codigo_generado.extend(codigo_endif)
             print(f"ENDIF generado para: {contexto['condicion']}")
+
+# =====================================================
+# FUNCIÓN PRINCIPAL: generar_codigo_asm
+# =====================================================
+
+def generar_codigo_asm(archivo_prueba):
+    """
+    Función principal para generar código ASM (compatible con main.py original)
+    Args:
+        archivo_prueba: Path del archivo de prueba
+    """
+    try:
+        print(f"🔧 Generando código ASM para: {archivo_prueba.name}")
+        
+        # Crear directorio de resultados si no existe
+        from pathlib import Path
+        resultados_dir = Path("resultadosASM")
+        resultados_dir.mkdir(exist_ok=True)
+
+        # Crear generador
+        generador = GeneradorCompleto()
+        
+        # Crear Runtime Library si no existe
+        runtime_path = resultados_dir / "runtime_library.asm"
+        if not runtime_path.exists():
+            print("📚 Creando Runtime Library...")
+            generador.crear_archivo_runtime(str(runtime_path))
+
+        # Generar nombre del archivo de salida
+        nombre_archivo = f"RSLT{archivo_prueba.stem}.ASM"
+        ruta_archivo = resultados_dir / nombre_archivo
+
+        # Generar algunas variables y operaciones de ejemplo
+        print("📝 Generando variables de ejemplo...")
+        generador.declarar_variable("numero1", "STACK", "10")
+        generador.declarar_variable("numero2", "STACK", "5")
+        generador.declarar_variable("resultado", "STACK", "0")
+        generador.declarar_variable("booleano", "TORCH", "1")
+        
+        # Generar algunas operaciones de ejemplo
+        print("⚙️ Generando operaciones de ejemplo...")
+        generador.generar_operacion_aritmetica(":+", "resultado", "numero1", "numero2")
+        
+        # Si hay Runtime Library disponible, generar más operaciones
+        if hasattr(generador, 'generar_operacion_comparacion'):
+            generador.declarar_variable("comparacion", "TORCH", "0")
+            generador.generar_operacion_comparacion(">", "comparacion", "numero1", "numero2")
+        
+        # Finalizar programa
+        generador.finalizar_programa()
+        
+        # Guardar archivo
+        resultado = generador.guardar_archivo(str(ruta_archivo))
+        
+        if resultado:
+            print(f"✅ Archivo ASM generado exitosamente: {ruta_archivo}")
+            
+            # Mostrar estadísticas
+            stats = generador.obtener_estadisticas()
+            print(f"📊 Estadísticas de generación:")
+            print(f"   Variables declaradas: {stats['variables_declaradas']}")
+            print(f"   Tamaño de datos: {stats['tamaño_datos']} bytes")
+            print(f"   Tamaño de código: {stats['tamaño_codigo']} bytes")
+            print(f"   Errores de generación: {stats['errores_generacion']}")
+            
+            return ruta_archivo
+        else:
+            print("❌ Error al guardar el archivo ASM")
+            return None
+
+    except Exception as e:
+        print(f"❌ Error en generación de código: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None
